@@ -1,0 +1,11 @@
+# compiled binary
+doom
+
+# object files
+*.o
+
+# editor junk
+.vscode/
+.idea/
+*.swp
+*.swo
