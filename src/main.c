@@ -16,44 +16,50 @@ static void init_colors(void)
     start_color();
     use_default_colors();
 
-    // ── 3D view ───────────────────────────────────────────────────────────
-    init_pair(CP_WALL1,    94,  -1);
-    init_pair(CP_WALL2,    51,  -1);   // bright cyan 
-    init_pair(CP_WALL3,    46,  -1);   // bright green
-    init_pair(CP_WALL4,    226, -1);   // bright yellow 
-    init_pair(CP_XWALL,    58,  -1);   // olive — darkerface
-    init_pair(CP_FLOOR,    240, -1);
-    init_pair(CP_CEIL,     17,  -1);   // dark navy
-    init_pair(CP_HUD,      COLOR_BLACK, COLOR_WHITE);
+    // { pair id, fg, bg }  — use -1 for terminal default bg
+    static const short PAL[][3] = {
+        // ── 3D view ───────────────────────────────────────────────────────
+        { CP_WALL1,    94,           -1  },
+        { CP_WALL2,    51,           -1  },  // bright cyan
+        { CP_WALL3,    46,           -1  },  // bright green
+        { CP_WALL4,    226,          -1  },  // bright yellow
+        { CP_XWALL,    58,           -1  },  // olive — dark side face
+        { CP_FLOOR,    240,          -1  },
+        { CP_CEIL,     17,           -1  },  // dark navy
+        { CP_HUD,      COLOR_BLACK,  COLOR_WHITE },
 
-    // ── minimap — radar theme ─────────────────────────────────────────────
-    init_pair(CP_MAP_BDR,   64,  22);  // bright green on near-black  — border
-    // init_pair(CP_MAP_BDR,   46,  232);  // bright green on near-black  — border
-    init_pair(CP_MAP_P,    124,  232);  // yellow-green on near-black  — player
-    init_pair(CP_MAP_EMPTY, 232,   232);  // dark green on dark green    — solid empty
-    init_pair(CP_WALL1_M,   28,   28);  // mid green on mid green      — solid wall
-    init_pair(CP_WALL2_M,   34,   34);  // green on green
-    init_pair(CP_WALL3_M,   40,   40);  // bright green on bright green
-    init_pair(CP_WALL4_M,   82,   82);  // lime on lime
+        // ── minimap radar ─────────────────────────────────────────────────
+        { CP_MAP_BDR,   64,          22  },  // olive fg, dark green bg
+        { CP_MAP_P,     124,         232 },  // red on near-black
+        { CP_MAP_EMPTY, 232,         232 },  // near-black solid floor
+        { CP_WALL1_M,   28,          28  },  // mid green solid
+        { CP_WALL2_M,   34,          34  },  // green solid
+        { CP_WALL3_M,   40,          40  },  // bright green solid
+        { CP_WALL4_M,   82,          82  },  // lime solid
 
-    // ── gun ───────────────────────────────────────────────────────────────
-    init_pair(CP_GUN,      238, -1);
-    init_pair(CP_FLASH,    226, -1);
-    init_pair(HAND_CLR,    124, -1);
-    init_pair(HAND_CLR_S,  131, -1);
-    init_pair(GUN_BDR,     255, -1);
-    init_pair(MUZ_1,       230, -1);
-    init_pair(MUZ_2,       217, -1);
-    init_pair(MUZ_3,       88,  -1);
-    init_pair(GUN_BODY,    64,  -1);
-    init_pair(GUN_TRIM,    22,  -1);
-    init_pair(GUN_DIRT,    58,  -1);
-  
-    init_pair(TITLE1, 93, -1);
-    init_pair(TITLE2, 90, -1);
-    init_pair(TITLE3, 202, -1);
-    init_pair(TITLE4, 208, -1);
-    init_pair(TITLEBG, 0, -1);
+        // ── gun ───────────────────────────────────────────────────────────
+        { CP_GUN,      238,          -1  },
+        { CP_FLASH,    226,          -1  },
+        { HAND_CLR,    124,          -1  },
+        { HAND_CLR_S,  131,          -1  },
+        { GUN_BDR,     255,          -1  },
+        { MUZ_1,       230,          -1  },
+        { MUZ_2,       217,          -1  },
+        { MUZ_3,       88,           -1  },
+        { GUN_BODY,    64,           -1  },  // olive green  — barrel
+        { GUN_TRIM,    22,           -1  },  // dark green   — frame
+        { GUN_DIRT,    58,           -1  },  // khaki        — worn detail
+
+        // ── title ─────────────────────────────────────────────────────────
+        { TITLE1,      93,           -1  },
+        { TITLE2,      90,           -1  },
+        { TITLE3,      202,          -1  },
+        { TITLE4,      208,          -1  },
+        { TITLEBG,     0,            -1  },
+    };
+
+    for (int i = 0; i < (int)(sizeof PAL / sizeof PAL[0]); i++)
+        init_pair(PAL[i][0], PAL[i][1], PAL[i][2]);
 }
 
 int main(void)
