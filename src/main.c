@@ -9,6 +9,7 @@
 #include "player.h"
 #include "gun.h"
 #include "render.h"
+#include "title.h"
 
 static void init_colors(void)
 {
@@ -47,6 +48,12 @@ static void init_colors(void)
     init_pair(GUN_BODY,    64,  -1);
     init_pair(GUN_TRIM,    22,  -1);
     init_pair(GUN_DIRT,    58,  -1);
+  
+    init_pair(TITLE1, 93, -1);
+    init_pair(TITLE2, 90, -1);
+    init_pair(TITLE3, 202, -1);
+    init_pair(TITLE4, 208, -1);
+    init_pair(TITLEBG, 0, -1);
 }
 
 int main(void)
@@ -62,6 +69,10 @@ int main(void)
 
     Player p = { 8.0, 8.0, 0.0 };
     map_find_spawn(&p.x, &p.y);
+
+    show_title_screen();
+    flushinp(); 
+
     int show_map = 1;
 
     struct timespec ts = { 0, 16000000L };  // ~60 fps
@@ -99,6 +110,15 @@ int main(void)
         if (gun_timer > 0) {
             gun_timer--;
             if (gun_timer == 0) gun_frame = 0;
+        }
+        // double guns
+        if (ch == 'e' || ch == 'E'){
+            if (gun_status == 0){
+                gun_status = 1;
+            }
+            else{
+                gun_status = 0;
+            }
         }
 
         double margin = 0.2;

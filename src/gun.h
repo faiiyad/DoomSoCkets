@@ -3,8 +3,9 @@
 
 
 extern int gun_frame;
-
-
+extern int gun_status;
+extern float gun_offset;
+extern float gun_offset2;
 extern int gun_timer;
 
 

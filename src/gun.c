@@ -6,68 +6,61 @@
 
 int gun_frame = 0;
 int gun_timer = 0;
+int gun_status = 0;
+float gun_offset  = 20.0f;
+float gun_offset2 = 20.0f;
 
 // ── gun art ────────────────────────────────────────────────────────────────
-// Each string is one row of the gun drawn left to right.
-// Spaces are skipped (transparent), everything else is drawn.
 static const char *gun_art[] = {
-    "    ___",                        // r+0
-    "   [ X ]",                       // r+1
-    "    {T}",                         // r+2
-    "  _/#0#\\_",                     // r+3
-    " [\@\\=---\\_",                  // r+4
-    " [\$@\\=----\\",                 // r+5
-    " [\\$@\\==---\\",                // r+6
-    " \\[\\$@\\==---\\_",             // r+7
-    "  \\[\\$@\\==----\\_",           // r+8
-    "   \\[\\$@\\==----\\",           // r+9
-    "    \\[\\$@]\\[HHHHH]__",        // r+10
-    "      |$@[\\=|[@A@@@A@]|__",     // r+11
-    "      //=[\\=_[########]/",      // r+12
-    "     |[*****[\\_|====| |/",      // r+13
-    "      \\******/|@**___Y__",      // r+14
-    "       \\_***/|@**[#######]",    // r+15
-    "         \\/@@@________V",       // r+16
-    "         /_/$$||==__V",          // r+17
-    "        /Y$$||==___/",           // r+18
-    "       /Y$$|==____/",            // r+19
+    "   ___",
+    "  [ X ]",
+    "   {T}",
+    " _/#0#\\_",
+    "[@\\=---\\\\",
+    "[$@\\=----\\\\",
+    "[\\$@\\==---\\\\",
+    "\\[\\$@\\==---\\\\_",
+    " \\[\\$@\\==----\\\\",
+    "  \\[\\$@\\===---\\\\",
+    "   \\[\\$@\\_=====\\\\__",
+    "    \\[\\$@]\\[\\HHHHH\\]__",
+    "      Y$@[/==|[@A@@@A@]__",
+    "     /[]\\=\\==[\\[########]/",
+    "     \\****[\\==|========|/",
+    "      \\****[\\_|@||====|Y\\_",
+    "       \\_**_/|@|[########]",
+    "        \\@@@@@||==__|V^",
+    "        /_/Y$||==__V^",
+    "       /_/Y$||==__/",
+    "      /_/Y$||==__/",
 };
 
 // ── colour map ─────────────────────────────────────────────────────────────
-// Parallel to gun_art — must be the same length per row as gun_art.
-// Color code letters:
-//   F = GUN_TRIM   (dark green   — frame / outline)
-//   B = GUN_BODY   (olive green  — barrel body / inner edges)
-//   E = CP_WALL2   (cyan         — energy cells $ @)
-//   S = MUZ_1      (yellow       — scope X)
-//   D = GUN_DIRT   (tan/khaki    — worn decal *)
-//   H = HAND_CLR_S (muted red    — grip highlight H)
-//   G = HAND_CLR   (dark red     — grip fill)
-//   Space = must match spaces in gun_art (transparent)
 static const char *gun_clr[] = {
-    "    FFF",                         // r+0   ___
-    "   F G F",                        // r+1   [ X ]
-    "    FDF",                         // r+2   {T}
-    "  FFBEBFF",                       // r+3   _/#0#\_
-    " FFEBBBBFB",                      // r+4   [\@\=--\_
-    " FFEEBBBBBBF",                    // r+5   [\$@\=---
-    " FFFEEBBBBBBF",                   // r+6   [\$@\==---
-    " FFFFEEBBBBBBFB",                 // r+7   \[\$@\==---\_
-    "  FFFFFEEBBBBBBFB",               // r+8   \[\$@\==----\_
-    "   FFFFFFEEBBBBBBBF",             // r+9   \[\$@\==----
-    "    FFEEFFFHHHHHHHF",             // r+10  \[\$@]\[HHHHH]__
-    "      FEEFBBEEEEFEFFF",           // r+11  |$@[\=|[@A@@@A@]|__
-    "      BBBFBBBFBBBBBBBBFF",        // r+12  //=[\=_[########]/
-    "     FFDDDDDFBBBBBBFFFFB",        // r+13  |[*****[\_|====| |/
-    "      FDDDDDDFFEBBBBFFF",         // r+14  \ **** / @  ___Y__
-    "       FFDDDFFEDDDBBBBBBBF",      // r+15  \_**_/|@**[#######]
-    "         FFEEEFFFFFFFFFBF",       // r+16  \@@@@________V
-    "         FFFGGGGBBBBF",           // r+17  /_/$$||==__V
-    "        FFGGGGBBBBBBF",           // r+18  /Y$$||==___/
-    "       FFGGGBBBBBBBBBF",          // r+19  /Y$$|==____/
+    "   BBB",
+    "  F G F",
+    "   FFF",
+    " BFBFBB",
+    "FEFBBBBF",
+    "FBEFBBBF",
+    "FFBEFBBBBBF",
+    "FFFBEFBBBBBFFF",
+    " FFFBEFBBBBBBFF",
+    "  FFFBEFBBBBBBFF",
+    "   FFFBEFFBBBBBFFF",
+    "    FFFBEFFHHHHHHHHHFF",
+    "      FBEFFBBFHEGEEEGEHFFF",
+    "     FFFFFFBBFFHHHHHHHHHHF",
+    "     FDDDDFFBBFFFFFFFFFFF",
+    "      FDDDDFFFFEBBBBBBBFFF",
+    "       FFDDFFFEBHHHHHHHHHH",
+    "        FEEEEEBBBBBBBFF",
+    "        FDFFBBBBBBBFF",
+    "       FDFFBBBBBBBF",
+    "      FDFFBBBBBFFF",
 };
 
-static int get_color(char c) {
+static int resolve_color(char c) {
     switch (c) {
         case 'F': return GUN_TRIM;
         case 'B': return GUN_BODY;
@@ -82,27 +75,35 @@ static int get_color(char c) {
 
 void draw_gun(int rows, int cols)
 {
-    int kick = (gun_frame == 1) ? 1 : 0;
-    int base = rows + kick;
-    int cx   = cols - 65;
-    int r    = base - 20;
+    /* ── slide animation ─────────────────────────────────────── */
+    float target2 = (gun_status == 1) ? 0.0f : 20.0f;
+    gun_offset  += (0.0f    - gun_offset)  * 0.18f;
+    gun_offset2 += (target2 - gun_offset2) * 0.18f;
 
-    // ── muzzle flash ──────────────────────────────────────────────────────
+    int kick      = (gun_frame == 1) ? 1 : 0;
+    int base      = rows + kick;
+    int cx        = cols - 55;
+    int mirror_cx = 55;
+    int r         = base - 20 + (int)gun_offset;
+    int r2        = base - 20 + (int)gun_offset2;
+    int num_rows  = (int)(sizeof(gun_art) / sizeof(gun_art[0]));
+
+    /* ── muzzle flash — right gun ────────────────────────────── */
     if (gun_frame == 1) {
-        int cy  = r - 1;
+        int cy  = r + 2;
         int cx0 = cx + 4;
         for (int dy = -4; dy <= 4; dy++) {
             for (int dx = -7; dx <= 7; dx++) {
-                float dist = sqrtf((dx * 0.55f) * (dx * 0.55f) + (float)(dy * dy));
+                float dist = sqrtf((dx*0.55f)*(dx*0.55f) + (float)(dy*dy));
                 char ch; int pair;
-                if      (dist < 2.0f)                        continue;
+                if      (dist < 2.0f)                          continue;
                 else if (dist < 3.0f) { ch = 'O'; pair = MUZ_1; }
                 else if (dist < 3.8f) { ch = 'o'; pair = MUZ_1; }
                 else if (dist < 4.3f) { ch = '*'; pair = MUZ_2; }
-                else if (dist < 4.8f && (rand() % 3 != 0))
+                else if (dist < 4.8f && (rand()%3 != 0))
                                       { ch = '.'; pair = MUZ_3; }
                 else continue;
-                if (rand() % 3 == 0) ch = ' ';
+                if (rand()%3 == 0) ch = ' ';
                 attron(COLOR_PAIR(pair) | A_BOLD);
                 mvaddch(cy + dy, cx0 + dx, ch);
                 attroff(COLOR_PAIR(pair) | A_BOLD);
@@ -110,24 +111,61 @@ void draw_gun(int rows, int cols)
         }
     }
 
-    // ── draw gun from arrays ──────────────────────────────────────────────
-    // Walk gun_art and gun_clr in lockstep.
-    // art[col] gives the character to draw.
-    // clr[col] gives the color code for that character.
-    // Spaces in art are transparent — skip them.
-    int num_rows = sizeof(gun_art) / sizeof(gun_art[0]);
+    /* ── muzzle flash — left gun ─────────────────────────────── */
+    if (gun_status == 1 && gun_frame == 1) {
+        int cy  = r2 + 2;
+        int cx0 = mirror_cx - 4;
+        for (int dy = -4; dy <= 4; dy++) {
+            for (int dx = -7; dx <= 7; dx++) {
+                float dist = sqrtf((dx*0.55f)*(dx*0.55f) + (float)(dy*dy));
+                char ch; int pair;
+                if      (dist < 2.0f)                          continue;
+                else if (dist < 3.0f) { ch = 'O'; pair = MUZ_1; }
+                else if (dist < 3.8f) { ch = 'o'; pair = MUZ_1; }
+                else if (dist < 4.3f) { ch = '*'; pair = MUZ_2; }
+                else if (dist < 4.8f && (rand()%3 != 0))
+                                      { ch = '.'; pair = MUZ_3; }
+                else continue;
+                if (rand()%3 == 0) ch = ' ';
+                attron(COLOR_PAIR(pair) | A_BOLD);
+                mvaddch(cy + dy, cx0 + dx, ch);
+                attroff(COLOR_PAIR(pair) | A_BOLD);
+            }
+        }
+    }
+
+    /* ── right gun ───────────────────────────────────────────── */
     for (int row = 0; row < num_rows; row++) {
         const char *art = gun_art[row];
         const char *clr = gun_clr[row];
-
-        for (int col = 0; art[col] != '\0' && clr[col] != '\0'; col++) {
-            char ac = art[col];
-            if (ac == ' ') continue;
-
-            int pair = get_color(clr[col]);
+        int ci = 0;
+        for (int col = 0; art[col] != '\0'; col++) {
+            if (art[col] == ' ') { ci++; continue; }
+            int pair = resolve_color(clr[ci]);
             attron(COLOR_PAIR(pair) | A_BOLD);
-            mvaddch(r + row, cx + col, ac);
+            mvaddch(r + row, cx + col, art[col]);
             attroff(COLOR_PAIR(pair) | A_BOLD);
+            ci++;
+        }
+    }
+
+    /* ── left (mirrored) gun ─────────────────────────────────── */
+    if (gun_offset2 < 19.5f) {
+        for (int row = 0; row < num_rows; row++) {
+            const char *art = gun_art[row];
+            const char *clr = gun_clr[row];
+            int art_len = 0;
+            while (art[art_len] != '\0') art_len++;
+            int ci = 0;
+            for (int col = 0; col < art_len; col++) {
+                if (art[col] == ' ') { ci++; continue; }
+                int pair = resolve_color(clr[ci]);
+                int draw_col = mirror_cx - col;
+                attron(COLOR_PAIR(pair) | A_BOLD);
+                mvaddch(r2 + row, draw_col, art[col]);
+                attroff(COLOR_PAIR(pair) | A_BOLD);
+                ci++;
+            }
         }
     }
 }

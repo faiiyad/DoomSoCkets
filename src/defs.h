@@ -47,4 +47,10 @@ static const char *SHADES = " .:-=+*#%@";
 #define CP_MAP_W    CP_MAP_BDR
 #define CP_MAP2     CP_WALL2_M
 
+#define TITLE1 23
+#define TITLE2 24
+#define TITLE3 25
+#define TITLE4 26
+#define TITLEBG 27
+
 #endif
