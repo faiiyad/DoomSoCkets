@@ -308,7 +308,7 @@ void show_title_screen(void)
         int drag_x = cols - DRAGON_WIDTH+15;
 
         // Only draw if there's enough room on screen
-        if (drag_y > 0 && drag_x > 0) {
+        {
             for (int i = 0; i < DRAGON_LINES; i++) {
                 const char *art = DRAGON_ART[i];
                 const char *clr = DRAGON_CLR[i];
