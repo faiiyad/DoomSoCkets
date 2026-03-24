@@ -1,5 +1,5 @@
 #define _XOPEN_SOURCE_EXTENDED
-#include <ncursesw/ncurses.h>
+#include <ncurses.h>
 #include <stdlib.h>
 #include <time.h>
 #include <locale.h>
