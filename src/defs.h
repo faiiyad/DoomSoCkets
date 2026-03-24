@@ -34,4 +34,8 @@ static const char *SHADES = " .:-=+*#%@";
 #define MUZ_2     17
 #define MUZ_3     18
 
+#define GUN_BODY 20
+#define GUN_TRIM 21
+#define GUN_DIRT 22
+
 #endif

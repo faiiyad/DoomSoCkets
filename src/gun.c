@@ -7,52 +7,101 @@
 int gun_frame = 0;
 int gun_timer = 0;
 
+// ── gun art ────────────────────────────────────────────────────────────────
+// Each string is one row of the gun drawn left to right.
+// Spaces are skipped (transparent), everything else is drawn.
+static const char *gun_art[] = {
+    "    ___",                        // r+0
+    "   [ X ]",                       // r+1
+    "    {T}",                         // r+2
+    "  _/#0#\\_",                     // r+3
+    " [\@\\=---\\_",                  // r+4
+    " [\$@\\=----\\",                 // r+5
+    " [\\$@\\==---\\",                // r+6
+    " \\[\\$@\\==---\\_",             // r+7
+    "  \\[\\$@\\==----\\_",           // r+8
+    "   \\[\\$@\\==----\\",           // r+9
+    "    \\[\\$@]\\[HHHHH]__",        // r+10
+    "      |$@[\\=|[@A@@@A@]|__",     // r+11
+    "      //=[\\=_[########]/",      // r+12
+    "     |[*****[\\_|====| |/",      // r+13
+    "      \\******/|@**___Y__",      // r+14
+    "       \\_***/|@**[#######]",    // r+15
+    "         \\/@@@________V",       // r+16
+    "         /_/$$||==__V",          // r+17
+    "        /Y$$||==___/",           // r+18
+    "       /Y$$|==____/",            // r+19
+};
+
+// ── colour map ─────────────────────────────────────────────────────────────
+// Parallel to gun_art — must be the same length per row as gun_art.
+// Color code letters:
+//   F = GUN_TRIM   (dark green   — frame / outline)
+//   B = GUN_BODY   (olive green  — barrel body / inner edges)
+//   E = CP_WALL2   (cyan         — energy cells $ @)
+//   S = MUZ_1      (yellow       — scope X)
+//   D = GUN_DIRT   (tan/khaki    — worn decal *)
+//   H = HAND_CLR_S (muted red    — grip highlight H)
+//   G = HAND_CLR   (dark red     — grip fill)
+//   Space = must match spaces in gun_art (transparent)
+static const char *gun_clr[] = {
+    "    FFF",                         // r+0   ___
+    "   F G F",                        // r+1   [ X ]
+    "    FDF",                         // r+2   {T}
+    "  FFBEBFF",                       // r+3   _/#0#\_
+    " FFEBBBBFB",                      // r+4   [\@\=--\_
+    " FFEEBBBBBBF",                    // r+5   [\$@\=---
+    " FFFEEBBBBBBF",                   // r+6   [\$@\==---
+    " FFFFEEBBBBBBFB",                 // r+7   \[\$@\==---\_
+    "  FFFFFEEBBBBBBFB",               // r+8   \[\$@\==----\_
+    "   FFFFFFEEBBBBBBBF",             // r+9   \[\$@\==----
+    "    FFEEFFFHHHHHHHF",             // r+10  \[\$@]\[HHHHH]__
+    "      FEEFBBEEEEFEFFF",           // r+11  |$@[\=|[@A@@@A@]|__
+    "      BBBFBBBFBBBBBBBBFF",        // r+12  //=[\=_[########]/
+    "     FFDDDDDFBBBBBBFFFFB",        // r+13  |[*****[\_|====| |/
+    "      FDDDDDDFFEBBBBFFF",         // r+14  \ **** / @  ___Y__
+    "       FFDDDFFEDDDBBBBBBBF",      // r+15  \_**_/|@**[#######]
+    "         FFEEEFFFFFFFFFBF",       // r+16  \@@@@________V
+    "         FFFGGGGBBBBF",           // r+17  /_/$$||==__V
+    "        FFGGGGBBBBBBF",           // r+18  /Y$$||==___/
+    "       FFGGGBBBBBBBBBF",          // r+19  /Y$$|==____/
+};
+
+static int get_color(char c) {
+    switch (c) {
+        case 'F': return GUN_TRIM;
+        case 'B': return GUN_BODY;
+        case 'E': return CP_WALL2;
+        case 'S': return MUZ_1;
+        case 'D': return GUN_DIRT;
+        case 'H': return HAND_CLR_S;
+        case 'G': return HAND_CLR;
+        default:  return GUN_TRIM;
+    }
+}
+
 void draw_gun(int rows, int cols)
 {
-    int kick = (gun_frame == 1) ? -1 : 0;
-    int base = rows  + kick;
-    int cx   = cols / 2 - 5;
+    int kick = (gun_frame == 1) ? 1 : 0;
+    int base = rows + kick;
+    int cx   = cols - 65;
     int r    = base - 20;
 
-    #define BDR   attron(COLOR_PAIR(CP_GUN) | A_BOLD)
-    #define BDR_  attroff(COLOR_PAIR(CP_GUN) | A_BOLD)
-    #define GRY   attron(COLOR_PAIR(CP_MAP_P) | A_BOLD)
-    #define GRY_  attroff(COLOR_PAIR(CP_MAP_P) | A_BOLD)
-    #define SCP   attron(COLOR_PAIR(CP_WALL2) | A_BOLD)
-    #define SCP_  attroff(COLOR_PAIR(CP_WALL2) | A_BOLD)
-    #define DOT   attron(COLOR_PAIR(CP_FLASH) | A_BOLD)
-    #define DOT_  attroff(COLOR_PAIR(CP_FLASH) | A_BOLD)
-    #define INT1  attron(COLOR_PAIR(HAND_CLR) | A_BOLD)
-    #define INT1_ attroff(COLOR_PAIR(HAND_CLR) | A_BOLD)
-    #define INT2  attron(COLOR_PAIR(HAND_CLR_S) | A_BOLD)
-    #define INT2_ attroff(COLOR_PAIR(HAND_CLR_S) | A_BOLD)
-    #define GUNO  attron(COLOR_PAIR(GUN_BDR) | A_BOLD)
-    #define GUNO_ attroff(COLOR_PAIR(GUN_BDR) | A_BOLD)
-
+    // ── muzzle flash ──────────────────────────────────────────────────────
     if (gun_frame == 1) {
-        int cy  = r;
-        int cx0 = cx + 5;
-
-        for (int dy = -5; dy <= 5; dy++) {
-            for (int dx = -8; dx <= 8; dx++) {
+        int cy  = r - 1;
+        int cx0 = cx + 4;
+        for (int dy = -4; dy <= 4; dy++) {
+            for (int dx = -7; dx <= 7; dx++) {
                 float dist = sqrtf((dx * 0.55f) * (dx * 0.55f) + (float)(dy * dy));
-
-                if (dist < 2.0f) continue;
-
-                char ch;
-                int  pair;
-                if (dist < 2.0f) {
-                    ch = 'O'; pair = MUZ_1;
-                } else if (dist < 3.50f) {
-                    ch = 'o'; pair = MUZ_1;
-                } else if (dist < 4.0f) {
-                    ch = '*'; pair = MUZ_2;
-                } else if (dist < 4.5f && (rand() % 3 != 0)) {
-                    ch = '.'; pair = MUZ_3;
-                } else {
-                    continue;
-                }
-
+                char ch; int pair;
+                if      (dist < 2.0f)                        continue;
+                else if (dist < 3.0f) { ch = 'O'; pair = MUZ_1; }
+                else if (dist < 3.8f) { ch = 'o'; pair = MUZ_1; }
+                else if (dist < 4.3f) { ch = '*'; pair = MUZ_2; }
+                else if (dist < 4.8f && (rand() % 3 != 0))
+                                      { ch = '.'; pair = MUZ_3; }
+                else continue;
                 if (rand() % 3 == 0) ch = ' ';
                 attron(COLOR_PAIR(pair) | A_BOLD);
                 mvaddch(cy + dy, cx0 + dx, ch);
@@ -61,114 +110,24 @@ void draw_gun(int rows, int cols)
         }
     }
 
-    /* sight */
-    GUNO; mvaddch (r-1, cx+3,  '_'); GUNO_;
-    GUNO; mvaddch (r-1, cx+4,  ACS_BLOCK);        GUNO_;
-    INT1; mvaddch (r-1, cx+5,   '-'); INT1_;
-    GUNO; mvaddch (r-1, cx+6,  ACS_BLOCK);        GUNO_;
-    GUNO; mvaddch (r-1, cx+7,  '_'); GUNO_;
+    // ── draw gun from arrays ──────────────────────────────────────────────
+    // Walk gun_art and gun_clr in lockstep.
+    // art[col] gives the character to draw.
+    // clr[col] gives the color code for that character.
+    // Spaces in art are transparent — skip them.
+    int num_rows = sizeof(gun_art) / sizeof(gun_art[0]);
+    for (int row = 0; row < num_rows; row++) {
+        const char *art = gun_art[row];
+        const char *clr = gun_clr[row];
 
-    /* top taper — corners rounded */
-    GUNO; mvaddch (r,   cx+2,  '/');         GUNO_;
-    BDR;  mvprintw(r,   cx+3,  "==");        BDR_;
-    BDR;  mvaddch (r,   cx+5,  ACS_BLOCK);  BDR_;
-    BDR;  mvprintw(r,   cx+6,  "==");        BDR_;
-    GUNO; mvaddch (r,   cx+8,  '\\');        GUNO_;
+        for (int col = 0; art[col] != '\0' && clr[col] != '\0'; col++) {
+            char ac = art[col];
+            if (ac == ' ') continue;
 
-    GUNO; mvaddch (r+1, cx+1,  '/');         GUNO_;
-    BDR;  mvprintw(r+1, cx+2,  "A##");       BDR_;
-    BDR;  mvaddch (r+1, cx+5,  ACS_BLOCK);  BDR_;
-    BDR;  mvprintw(r+1, cx+6,  "##A");       BDR_;
-    GUNO; mvaddch (r+1, cx+9,  '\\');        GUNO_;
-
-    GUNO; mvaddch (r+2, cx,    '/');         GUNO_;
-    BDR;  mvprintw(r+2, cx+1,  "A###");      BDR_;
-    BDR;  mvaddch (r+2, cx+5,  ACS_BLOCK);  BDR_;
-    BDR;  mvprintw(r+2, cx+6,  "###A");      BDR_;
-    GUNO; mvaddch (r+2, cx+10, '\\');        GUNO_;
-
-    GUNO; mvaddch (r+3, cx-1,  '|');         GUNO_;
-    BDR;  mvprintw(r+3, cx,    "A####");     BDR_;
-    BDR;  mvaddch (r+3, cx+5,  ACS_BLOCK);  BDR_;
-    BDR;  mvprintw(r+3, cx+6,  "####A");     BDR_;
-    GUNO; mvaddch (r+3, cx+11, '|');         GUNO_;
-
-    /* main body */
-    GUNO; mvprintw(r+4, cx-1,         "[###########]");   GUNO_;
-
-    GUNO; mvaddch (r+5, cx-1,  '|');        GUNO_;
-    BDR;  mvaddch (r+5, cx,    '[');        BDR_;
-    INT1; mvaddch (r+5, cx+1,  ACS_BLOCK); INT1_;
-    BDR;  mvaddch (r+5, cx+2,  ']');        BDR_;
-    BDR;  mvaddch (r+5, cx+3,  '[');        BDR_;
-    INT1; mvaddch (r+5, cx+4,  ACS_BLOCK); INT1_;
-    INT1; mvaddch (r+5, cx+5,  ACS_BLOCK); INT1_;
-    INT1; mvaddch (r+5, cx+6,  ACS_BLOCK); INT1_;
-    BDR;  mvaddch (r+5, cx+7,  ']');        BDR_;
-    BDR;  mvaddch (r+5, cx+8,  '[');        BDR_;
-    INT1; mvaddch (r+5, cx+9,  ACS_BLOCK); INT1_;
-    BDR;  mvaddch (r+5, cx+10, ']');        BDR_;
-    GUNO; mvaddch (r+5, cx+11, '|');        GUNO_;
-
-    GUNO; mvaddch (r+6, cx-1,  '|');                       GUNO_;
-    BDR; mvprintw(r+6, cx,    "###########");              BDR_;
-    GUNO; mvaddch (r+6, cx+11, '|');                       GUNO_;
-
-    GUNO; mvaddch (r+7, cx-1,  '|');                       GUNO_;
-    BDR;  mvprintw(r+7, cx,    "###########");              BDR_;
-    GUNO; mvaddch (r+7, cx+11, '|');                       GUNO_;
-
-    GUNO; mvprintw(r+8, cx,    "\\@@@@@@@@@/");            GUNO_;
-
-    /* grip — sides straight, base same */
-    /* grip (5 wide: cx+2 to cx+6) */
-        /* grip (5 wide: cx+2 to cx+6) */
-    GUNO; mvaddch (r+9,  cx+2, '|');        GUNO_;
-    BDR;  mvaddch (r+9,  cx+3, 'H');        BDR_;
-    INT1; mvaddch (r+9,  cx+4, '[');        INT1_;
-    INT2; mvaddch (r+9,  cx+5, ACS_BLOCK); INT2_;
-    INT1; mvaddch (r+9,  cx+6, ']');        INT1_;
-    BDR;  mvaddch (r+9,  cx+7, 'H');        BDR_;
-    GUNO; mvaddch (r+9,  cx+8, '|');        GUNO_;
- 
-    GUNO; mvaddch (r+10, cx+2, '|');        GUNO_;
-    BDR;  mvaddch (r+10, cx+3, 'H');        BDR_;
-    INT1; mvaddch (r+10, cx+4, '[');        INT1_;
-    INT2; mvaddch (r+10, cx+5, ACS_BLOCK); INT2_;
-    INT1; mvaddch (r+10, cx+6, ']');        INT1_;
-    BDR;  mvaddch (r+10, cx+7, 'H');        BDR_;
-    GUNO; mvaddch (r+10, cx+8, '|');        GUNO_;
- 
-    GUNO; mvaddch (r+11, cx+2, '|');        GUNO_;
-    BDR;  mvaddch (r+11, cx+3, 'H');        BDR_;
-    INT1; mvaddch (r+11, cx+4, '[');        INT1_;
-    INT2; mvaddch (r+11, cx+5, ACS_BLOCK); INT2_;
-    INT1; mvaddch (r+11, cx+6, ']');        INT1_;
-    BDR;  mvaddch (r+11, cx+7, 'H');        BDR_;
-    GUNO; mvaddch (r+11, cx+8, '|');        GUNO_;
- 
-    GUNO; mvaddch (r+12, cx+2, '|');        GUNO_;
-    BDR;  mvaddch (r+12, cx+3, 'H');        BDR_;
-    INT1; mvaddch (r+12, cx+4, '[');        INT1_;
-    INT2; mvaddch (r+12, cx+5, ACS_BLOCK); INT2_;
-    INT1; mvaddch (r+12, cx+6, ']');        INT1_;
-    BDR;  mvaddch (r+12, cx+7, 'H');        BDR_;
-    GUNO; mvaddch (r+12, cx+8, '|');        GUNO_;
-
-    GUNO; mvprintw(r+13, cx+3,        "\\###/");           GUNO_;
-
-    #undef BDR
-    #undef BDR_
-    #undef GRY
-    #undef GRY_
-    #undef SCP
-    #undef SCP_
-    #undef DOT
-    #undef DOT_
-    #undef HND
-    #undef HND_
-    #undef HNDS
-    #undef HNDS_
-    #undef GUNO
-    #undef GUNO_
+            int pair = get_color(clr[col]);
+            attron(COLOR_PAIR(pair) | A_BOLD);
+            mvaddch(r + row, cx + col, ac);
+            attroff(COLOR_PAIR(pair) | A_BOLD);
+        }
+    }
 }

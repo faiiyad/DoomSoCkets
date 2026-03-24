@@ -15,16 +15,16 @@ static void init_colors(void)
     start_color();
     use_default_colors();
 
-    init_pair(CP_WALL1,    COLOR_WHITE,  -1);
+    init_pair(CP_WALL1,    94,  -1);
     init_pair(CP_WALL2,    COLOR_CYAN,   -1);
     init_pair(CP_WALL3,    COLOR_GREEN,  -1);
     init_pair(CP_WALL4,    COLOR_YELLOW, -1);
-    init_pair(CP_FLOOR,    COLOR_BLACK,  -1);
+    init_pair(CP_FLOOR,    240,  -1);
     init_pair(CP_CEIL,     COLOR_BLUE,   -1);
     init_pair(CP_HUD,      COLOR_BLACK,  COLOR_WHITE);
     init_pair(CP_MAP_W,    COLOR_WHITE,  COLOR_WHITE);
     init_pair(CP_MAP_P,    COLOR_RED,    -1);
-    init_pair(CP_XWALL,    COLOR_BLACK,  -1);
+    init_pair(CP_XWALL,    3,  -1);
     init_pair(CP_GUN,      238,  -1);
     init_pair(CP_FLASH,    COLOR_YELLOW, -1);
     init_pair(HAND_CLR,    124,          -1);
@@ -33,6 +33,10 @@ static void init_colors(void)
     init_pair(MUZ_1,       230,          -1);
     init_pair(MUZ_2,       217,          -1);
     init_pair(MUZ_3,       88,           -1);
+    
+    init_pair(GUN_BODY, 64,  -1);   // olive green     — barrel
+    init_pair(GUN_TRIM, 22,  -1);   // dark green       — frame
+    init_pair(GUN_DIRT, 58,  -1);   // dark tan/khaki   — worn detail
 }
 
 int main(void)
