@@ -85,13 +85,13 @@ static void draw_crosshair(int rows, int cols)
 {
     int half = rows / 2;
     attron(A_BOLD | COLOR_PAIR(CP_MAP_P));
-    mvaddch(half,     cols / 2,     '|');
-    mvaddch(half - 1, cols / 2,     '|');
-    mvaddch(half + 1, cols / 2,     '|');
-    mvaddch(half,     cols / 2 - 2, '-');
-    mvaddch(half,     cols / 2 - 1, '-');
-    mvaddch(half,     cols / 2 + 1, '-');
-    mvaddch(half,     cols / 2 + 2, '-');
+    
+    mvaddch(half, cols / 2,     'x');
+    // mvaddch(half + 1, cols / 2,     '|');
+    mvaddch(half,     cols / 2 - 2, '[');
+    // mvaddch(half,     cols / 2 - 1, ' ');
+    // mvaddch(half,     cols / 2 + 1, ' ');
+    mvaddch(half,     cols / 2 + 2, ']');
     attroff(A_BOLD | COLOR_PAIR(CP_MAP_P));
 }
 
