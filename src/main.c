@@ -60,9 +60,9 @@ static void init_colors(void)
 
         // sprite
         { CP_SPRITE_R, 160,         160  },  // red
-        { CP_SPRITE_D, 88,          -1  },  // dark red/brown shadow
-        { CP_SPRITE_O, 202,         -1  },  // orange highlight
-        { CP_SPRITE_W, 255,         -1  },  // white eye
+        { CP_SPRITE_D, 88,          88  },  // dark red/brown shadow
+        { CP_SPRITE_O, 124,         124  },  // orange highlight
+        { CP_SPRITE_W, 255,         255  },  // white eye
     };
 
     for (int i = 0; i < (int)(sizeof PAL / sizeof PAL[0]); i++)
@@ -97,9 +97,15 @@ int main(void)
         int ch = getch();
         if (ch == 'q' || ch == 'Q') break;
         if (ch == 'm' || ch == 'M') show_map = !show_map;
-
-        if (ch == 'k' || ch == 'K') p.angle -= ROT_SPD;
-        if (ch == 'l' || ch == 'L') p.angle += ROT_SPD;
+        
+        if (ch == 'k' || ch == 'K') {
+            p.angle -= ROT_SPD;
+            if (p.angle < 0)        p.angle += 2*M_PI;
+        }
+        if (ch == 'l' || ch == 'L') {
+            p.angle += ROT_SPD;
+            if (p.angle >= 2*M_PI)  p.angle -= 2*M_PI;
+        }
 
         double nx = p.x, ny = p.y;
         if (ch == KEY_UP   || ch == 'w' || ch == 'W') {
