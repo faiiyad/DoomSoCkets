@@ -54,6 +54,11 @@ typedef enum {
     TITLE4,
     TITLEBG,
 
+    CP_SPRITE_R,
+    CP_SPRITE_D,
+    CP_SPRITE_O,
+    CP_SPRITE_W,
+    
     CP_COUNT   // total — used to size the table
 } ColorPair;
 

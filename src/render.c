@@ -1,14 +1,29 @@
 #define _XOPEN_SOURCE_EXTENDED
-#include <ncurses.h>
+#include <ncursesw/ncurses.h>
 #include <wchar.h>
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "render.h"
 #include "defs.h"
 #include "map.h"
 #include "ray.h"
 #include "gun.h"
+#include "sprite.h"
+
+// z_buffer — one depth value per screen column, filled by draw_walls
+static double *z_buf = NULL;
+static int     z_buf_cols = 0;
+
+static void ensure_zbuf(int cols)
+{
+    if (cols != z_buf_cols) {
+        free(z_buf);
+        z_buf = malloc(sizeof(double) * cols);
+        z_buf_cols = cols;
+    }
+}
 
 /* ── ceiling and floor ──────────────────────────────────────────────────── */
 static void draw_ceiling_floor(int rows, int cols)
@@ -27,9 +42,10 @@ static void draw_ceiling_floor(int rows, int cols)
     }
 }
 
-/* ── wall columns ───────────────────────────────────────────────────────── */
+/* ── wall columns — also fills z_buf ───────────────────────────────────── */
 static void draw_walls(Player *p, int rows, int cols)
 {
+    ensure_zbuf(cols);
     int half = rows / 2;
     for (int x = 0; x < cols; x++) {
         double ray_angle = (p->angle - FOV / 2.0)
@@ -39,6 +55,8 @@ static void draw_walls(Player *p, int rows, int cols)
 
         dist *= cos(ray_angle - p->angle);
         if (dist < 0.001) dist = 0.001;
+
+        z_buf[x] = dist;   // ← store for sprite occlusion
 
         int wall_h = (int)(rows / dist);
         if (wall_h > rows) wall_h = rows;
@@ -70,7 +88,7 @@ static void draw_walls(Player *p, int rows, int cols)
     }
 }
 
-/* ── HUD bar ────────────────────────────────────────────────────────────── */
+/* ── HUD ────────────────────────────────────────────────────────────────── */
 static void draw_hud(Player *p, int rows)
 {
     attron(COLOR_PAIR(CP_HUD) | A_BOLD);
@@ -106,18 +124,16 @@ static void draw_map_border(int ox, int oy, Player *p)
     int left  = ox - 1;
     int right = ox + border_w - 2;
 
-    // ── dropdown coords ───────────────────────────
     char coords[32];
     snprintf(coords, sizeof(coords), " x:%.1f y:%.1f ", p->x, p->y);
-    int clen      = (int)strlen(coords);
-    int leg_w     = clen + 2;
+    int clen     = (int)strlen(coords);
+    int leg_w    = clen + 2;
     if (leg_w < 14) leg_w = 14;
-    int leg_left  = right - leg_w;
-    int leg_bot   = bot + 2;   // bot=separator row, bot+1=coords, bot+2=close
+    int leg_left = right - leg_w;
+    int leg_bot  = bot + 2;
 
     attron(COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
 
-    // ── title  ╔══[ RADAR ]══╗ ────────────────────────────────────────────
     mvaddwstr(top - 1, left,  L"╔");
     mvaddwstr(top - 1, right, L"╗");
     const char *title = " RADAR ";
@@ -135,7 +151,6 @@ static void draw_map_border(int ox, int oy, Player *p)
         else                              addwstr(L"═");
     }
 
-    // ── separator ╠═══╣ ──────────────────────────────────────────────────
     mvaddwstr(top, left,  L"╠");
     mvaddwstr(top, right, L"╣");
     for (int i = left + 1; i < right; i++)
@@ -143,39 +158,40 @@ static void draw_map_border(int ox, int oy, Player *p)
 
     attroff(COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
 
-    // ── side edges ║ ─────────────────────────────────────────────────────
     attron(COLOR_PAIR(CP_MAP_BDR));
     for (int i = 0; i < MAP_H; i++) {
         mvaddwstr(oy + i, left,  L"║");
         mvaddwstr(oy + i, right, L"║");
     }
 
-    // ── bottom ╚══╦══╣ ───────────────────────────────────────────────────
     mvaddwstr(bot, left,     L"╚");
     mvaddwstr(bot, leg_left, L"╦");
     mvaddwstr(bot, right,    L"╣");
     for (int i = left     + 1; i < leg_left; i++) mvaddwstr(bot, i, L"═");
     for (int i = leg_left + 1; i < right;    i++) mvaddwstr(bot, i, L"═");
 
-    // ── dropdown side edges ───────────────────────────────────────────────
     mvaddwstr(bot + 1, leg_left, L"║");
     mvaddwstr(bot + 1, right,    L"║");
 
-    // ── coords row — no blank rows ────────────────────────────────────────
-    attron(COLOR_PAIR(CP_MAP_BDR));
     move(bot + 1, leg_left + 1);
     for (int i = 0; i < clen; i++) addch(coords[i]);
-    // pad to right edge
     for (int i = leg_left + 1 + clen; i < right; i++) addch(' ');
-    attroff(COLOR_PAIR(CP_MAP_BDR));
 
-    // ── dropdown close ╚════╝ ─────────────────────────────────────────────
-    attron(COLOR_PAIR(CP_MAP_BDR));
     mvaddwstr(leg_bot, leg_left, L"╚");
     mvaddwstr(leg_bot, right,    L"╝");
     for (int i = leg_left + 1; i < right; i++)
         mvaddwstr(leg_bot, i, L"═");
+
     attroff(COLOR_PAIR(CP_MAP_BDR));
+
+    int vmid = oy + MAP_H / 2;
+    int hmid = left + border_w / 2;
+    attron(COLOR_PAIR(CP_MAP_P) | A_BOLD);
+    mvaddch(top - 1, hmid,      'N');
+    mvaddch(top,     hmid,      'S');
+    mvaddch(vmid,    left  + 1, 'W');
+    mvaddch(vmid,    right - 1, 'E');
+    attroff(COLOR_PAIR(CP_MAP_P) | A_BOLD);
 }
 
 /* ── minimap tiles ──────────────────────────────────────────────────────── */
@@ -191,10 +207,9 @@ static void draw_map_tiles(int ox, int oy, int rows, int cols)
                 int t = map_type(mx, my);
                 int cp = (t == 2) ? CP_WALL2_M
                        : (t == 3) ? CP_WALL3_M
-                       : (t == 4) ? CP_WALL4_M
-                                  : CP_WALL1_M;
+                       : (t == 4) ? CP_WALL4_M : CP_WALL1_M;
                 attron(COLOR_PAIR(cp) | A_BOLD);
-                mvaddstr(sy, sx, "  "); // wall
+                mvaddstr(sy, sx, "  ");
                 attroff(COLOR_PAIR(cp) | A_BOLD);
             } else {
                 attron(COLOR_PAIR(CP_MAP_EMPTY));
@@ -205,9 +220,22 @@ static void draw_map_tiles(int ox, int oy, int rows, int cols)
     }
 }
 
-/* ── minimap player arrow ───────────────────────────────────────────────── */
+/* ── minimap player + enemies ───────────────────────────────────────────── */
 static void draw_map_player(Player *p, int ox, int oy, int rows, int cols)
 {
+    // draw enemies on map first so player overdraw them
+    for (int i = 0; i < num_enemies; i++) {
+        Enemy *e = &enemies[i];
+        if (!e->active) continue;
+        int ey = oy + (int)e->y;
+        int ex = ox + (int)(e->x) * 2;
+        if (ey > 0 && ey < rows - 1 && ex >= 0 && ex < cols) {
+            attron(COLOR_PAIR(CP_SPRITE_R) | A_BOLD);
+            mvaddch(ey, ex, 'X');
+            attroff(COLOR_PAIR(CP_SPRITE_R) | A_BOLD);
+        }
+    }
+
     int py_m = oy + (int)p->y;
     int px_m = ox + (int)(p->x) * 2;
     if (py_m <= 0 || py_m >= rows - 1 || px_m < 0 || px_m >= cols) return;
@@ -249,6 +277,7 @@ void render(Player *p, int show_map)
 
     draw_ceiling_floor(rows, cols);
     draw_walls        (p, rows, cols);
+    sprites_draw      (p, z_buf, rows, cols);  // after walls, before HUD/gun
     draw_hud          (p, rows);
     draw_crosshair    (rows, cols);
     if (show_map)

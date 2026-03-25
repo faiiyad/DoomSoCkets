@@ -10,6 +10,7 @@
 #include "gun.h"
 #include "render.h"
 #include "title.h"
+#include "sprite.h"
 
 static void init_colors(void)
 {
@@ -56,6 +57,12 @@ static void init_colors(void)
         { TITLE3,      202,          -1  },
         { TITLE4,      208,          -1  },
         { TITLEBG,     0,            -1  },
+
+        // sprite
+        { CP_SPRITE_R, 160,         160  },  // red
+        { CP_SPRITE_D, 88,          -1  },  // dark red/brown shadow
+        { CP_SPRITE_O, 202,         -1  },  // orange highlight
+        { CP_SPRITE_W, 255,         -1  },  // white eye
     };
 
     for (int i = 0; i < (int)(sizeof PAL / sizeof PAL[0]); i++)
@@ -75,6 +82,9 @@ int main(void)
 
     Player p = { 8.0, 8.0, 0.0 };
     map_find_spawn(&p.x, &p.y);
+
+    sprites_init(p.x + 3.0, p.y);
+
 
     show_title_screen();
     flushinp(); 
@@ -126,6 +136,8 @@ int main(void)
                 gun_status = 0;
             }
         }
+
+        sprites_update(&p, ch);
 
         double margin = 0.2;
         if (!map_solid((int)(nx + margin), (int)(p.y)) &&
