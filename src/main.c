@@ -59,8 +59,9 @@ static void init_colors(void)
         { TITLEBG,     0,            -1  },
 
         // sprite
+        { CP_SPRITE_FAR, 160,       160  },  // red
         { CP_SPRITE_R, 160,         160  },  // red
-        { CP_SPRITE_D, 88,          88  },  // dark red/brown shadow
+        { CP_SPRITE_D, 88,          88 },  // dark red/brown shadow
         { CP_SPRITE_O, 124,         124  },  // orange highlight
         { CP_SPRITE_W, 255,         255  },  // white eye
     };
@@ -83,11 +84,11 @@ int main(void)
     Player p = { 8.0, 8.0, 0.0 };
     map_find_spawn(&p.x, &p.y);
 
-    sprites_init(p.x + 3.0, p.y);
+    sprites_init(p.x + 1.0, p.y);
 
 
-    show_title_screen();
-    flushinp(); 
+    // show_title_screen();
+    // flushinp(); 
 
     int show_map = 1;
 

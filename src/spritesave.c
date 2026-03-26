@@ -19,100 +19,193 @@ int   num_enemies = 0;
 //   1:1 detail at dist ~1.25, solid blob fallback below dist ~13
 
 // ── FRONT ─────────────────────────────────────────────────────────────────
-
 static const char *imp_front[SPR_H] = {
-    " DDRRRRRRRRDD ",
-    "DORWRRRRRRWROD",
-    "DORWRRRRRRWROD",
-    " DRRRRRRRRRRD ",
-    "    DRRRRD    ",
-    "  DORRRRRROD  ",
-    "DORRRRRRRRRROD",
-    "DODRRRRRRRRDOD",
-    "DRRRRRRRRRRRRD",
-    " DORRRRRRRROD ",
-    "  DOR    ROD  ",
-    " DORR    RROD ",
-    " DORR    RROD ",
-    "DORR      RROD",
-    "DORR      RROD",
-    "DRRR      RRRD",
+    " /HHHH\\ ",   // 0  head top
+    "/HOOOOH\\",   // 1  eyes
+    "|HHHHHH|",   // 2  face
+    " \\HHHH/ ",   // 3  chin
+    "  /HH\\  ",   // 4  neck
+    " /HHHH\\ ",   // 5  shoulders
+    "/HHHHHH\\",   // 6  chest top
+    "|H/HH\\H|",   // 7  chest detail
+    "|HHHHHH|",   // 8  chest bot
+    " \\HHHH/ ",   // 9  waist
+    " |H  H| ",   // 10 hips
+    " |H  H| ",   // 11 thigh
+    " /H  H\\ ",   // 12 knee
+    "/H    H\\",   // 13 shin
+    "|H    H|",   // 14 ankle
+    "\\H    H/",   // 15 feet
+};
+static const char *imp_front_clr[SPR_H] = {
+    " DRRRRD ",
+    "DROOOODR",
+    "DRRRRRRD",
+    " DRRRRD ",
+    "  DRRD  ",
+    " DRRRRD ",
+    "DRRRRRRD",
+    "DRDRRDRR",
+    "DRRRRRRD",
+    " DRRRRD ",
+    " DR  RD ",
+    " DR  RD ",
+    " DR  RD ",
+    "DR    RD",
+    "DR    RD",
+    "DR    RD",
 };
 
+// ── FRONT-SIDE ────────────────────────────────────────────────────────────
 static const char *imp_fside[SPR_H] = {
-    " DDOORRRRRRRD ",
-    "DDOORRWRRRRWRD",
-    "DDOORRWRRRRWRD",
-    " DDOORRRRRRRD ",
-    "    DDORRRD    ",
-    "  DDOORRRRRD  ",
-    "DDOORRRRRRRRRD",
-    "DDOORRRRRRRRRD",
-    "DDOORRRRRRRRRD",
-    "  DDOORRRRRD  ",
-    "  DOR     DRR  ",
-    "  DORR    DRRR ",
-    "  DORR    DRRR ",
-    " DORR    DRRD",
-    " DORR    DRRD",
-    " DORR    DRRD",
+    " /HHHH\\ ",
+    "/HOOHHH\\",   // one eye visible
+    "|HHHHHH|",
+    " \\HHHH/ ",
+    "  /HH\\  ",
+    " /HHHH\\ ",
+    "/HHHHHH\\",
+    "|H/HH\\H|",
+    "|HHHHHH|",
+    " \\HHHH/ ",
+    " |H  H| ",
+    " |H  H| ",
+    " /H  H\\ ",
+    "/H    H\\",
+    "|H    H|",
+    "\\H    H/",
+};
+static const char *imp_fside_clr[SPR_H] = {
+    " DDRRRD ",
+    "DDOODDRR",
+    "DDRRRRRD",
+    " DDRRRD ",
+    "  DDRD  ",
+    " DDRRRD ",
+    "DDRRRRRD",
+    "DDRDDDRR",
+    "DDRRRRRD",
+    " DDRRRD ",
+    " DD  RD ",
+    " DD  RD ",
+    " DD  RD ",
+    "DD    RD",
+    "DD    RD",
+    "DD    RD",
 };
 
+// ── SIDE ──────────────────────────────────────────────────────────────────
 static const char *imp_side[SPR_H] = {
-    " DDDDDDOORRRR ",
-    "DDDDDDOOWRRRRW",
-    "DDDDDDOOWRRRRW",
-    " DDDDDDOORRRR ",
-    "    DDDDOOR    ",
-    "  DDDDDDRRRR  ",
-    "DDDDDDDORRRRRR",
-    "DDDDDDORRRRRRR",
-    "DDDDDDDORRRRRR",
-    "  DDDDDDRRRR  ",
-    "  DDOR  DDOR  ",
-    "  DDDOR  DDOOR",
-    "  DDDOR  DDOOR",
-    " DDOOR  DDOOR ",
-    " DDOOR  DDOOR ",
-    " DDOOR  DDOOR ",
+    "  /HHH\\ ",
+    " /HOHNH\\",   // N = nose profile
+    " |HHHHH|",
+    "  \\HHH/ ",
+    "   /HH\\ ",
+    "  /HHH\\ ",
+    " /HHHH\\ ",
+    " |H/HH| ",
+    " |HHHH| ",
+    "  \\HHH/ ",
+    "  |H H| ",
+    "  |H H| ",
+    "  /H H\\ ",
+    " /H   H\\",
+    " |H   H|",
+    " \\H   H/",
+};
+static const char *imp_side_clr[SPR_H] = {
+    "  DDDRD ",
+    " DDODDD ",
+    " DDDDDD ",
+    "  DDDRD ",
+    "   DDDD ",
+    "  DDDRD ",
+    " DDDRD  ",
+    " DDDDD  ",
+    " DDDDD  ",
+    "  DDDRD ",
+    "  DD DD ",
+    "  DD DD ",
+    "  DD DD ",
+    " DD   DD",
+    " DD   DD",
+    " DD   DD",
 };
 
+// ── BACK-SIDE ─────────────────────────────────────────────────────────────
 static const char *imp_bside[SPR_H] = {
-    " DDDDDDDDOORR ",
-    "DDDDDDDDOORRWR",
-    "DDDDDDDDOORRWR",
-    " DDDDDDDDOORR ",
-    "    DDDDOOR   ",
-    "  DDDDDDOORR  ",
-    "DDDDDDDDDOORRR",
-    "DDDDDDDDDOORRR",
-    "DDDDDDDDDOORRR",
-    "  DDDDDDOORR  ",
-    "  DDO     DOR  ",
-    "  DDDO    DDDO ",
-    "  DDDO    DDDO ",
-    " DDDO    DDDO",
-    " DDDO    DDDO",
-    " DDDO    DDDO",
+    " /HHHH\\ ",
+    "/HHHOHH\\",
+    "|HHHHHH|",
+    " \\HHHH/ ",
+    "  /HH\\  ",
+    " /HHHH\\ ",
+    "/HHHHHH\\",
+    "|HHHHHH|",
+    "|HHHHHH|",
+    " \\HHHH/ ",
+    " |H  H| ",
+    " |H  H| ",
+    " /H  H\\ ",
+    "/H    H\\",
+    "|H    H|",
+    "\\H    H/",
+};
+static const char *imp_bside_clr[SPR_H] = {
+    " DDDDRD ",
+    "DDDDDODD",
+    "DDDDDDDD",
+    " DDDDRD ",
+    "  DDDD  ",
+    " DDDDRD ",
+    "DDDDDDDD",
+    "DDDDDDDD",
+    "DDDDDDDD",
+    " DDDDDD ",
+    " DD  DD ",
+    " DD  DD ",
+    " DD  DD ",
+    "DD    DD",
+    "DD    DD",
+    "DD    DD",
 };
 
+// ── BACK ──────────────────────────────────────────────────────────────────
 static const char *imp_back[SPR_H] = {
-    " DDDDDDDDDDDD ",
-    "DDDDDDDDDDDDDD",
-    "ODDDDDDDDDDDDO",
-    " ODDDDDDDDDDO ",
-    "    DDDDDD    ",
-    "  ODDDDDDDDO  ",
-    "ODDDDDDDDDDDDO",
-    "ODDDDDDDDDDDDO",
-    "ODDDDDDDDDDDDO",
-    " ODDDDDDDDDDO ",
-    "  ODD    DDO  ",
-    " ODDD    DDDO ",
-    " ODDD    DDDO ",
-    "ODDD      DDDO",
-    "ODDD      DDDO",
-    "ODDD      DDDO",
+    " /HHHH\\ ",
+    "/HHHHHH\\",
+    "|HHHHHH|",
+    " \\HHHH/ ",
+    "  /HH\\  ",
+    " /HHHH\\ ",
+    "/HHHHHH\\",
+    "|HHHHHH|",
+    "|HHHHHH|",
+    " \\HHHH/ ",
+    " |H  H| ",
+    " |H  H| ",
+    " /H  H\\ ",
+    "/H    H\\",
+    "|H    H|",
+    "\\H    H/",
+};
+static const char *imp_back_clr[SPR_H] = {
+    " DDDDDD ",
+    "DDDDDDDD",
+    "DDDDDDDD",
+    " DDDDDD ",
+    "  DDDD  ",
+    " DDDDDD ",
+    "DDDDDDDD",
+    "DDDDDDDD",
+    "DDDDDDDD",
+    " DDDDDD ",
+    " DD  DD ",
+    " DD  DD ",
+    " DD  DD ",
+    "DD    DD",
+    "DD    DD",
+    "DD    DD",
 };
 
 static int sprite_color(char c)
@@ -134,11 +227,11 @@ static const char **dir_art[5] = {
     (const char **)imp_back,
 };
 static const char **dir_clr[5] = {
-    (const char **)imp_front,
-    (const char **)imp_fside,
-    (const char **)imp_side,
-    (const char **)imp_bside,
-    (const char **)imp_back,
+    (const char **)imp_front_clr,
+    (const char **)imp_fside_clr,
+    (const char **)imp_side_clr,
+    (const char **)imp_bside_clr,
+    (const char **)imp_back_clr,
 };
 
 // ── scale constants ────────────────────────────────────────────────────────
@@ -168,7 +261,7 @@ void sprites_update(Player *p, int input)
         if (!e->active) continue;
 
         double spd = 0.08;
-        double rot = 0.52;
+        double rot = 0.12;
 
         if (input == 'f' || input == 'F') {
             e->angle -= rot;
@@ -284,7 +377,7 @@ void sprites_draw(Player *p, double *z_buf, int rows, int cols)
             case 7: art_idx=1; mirror=1; break;
         }
 
-        const char **art = dir_clr[art_idx];
+        const char **art = dir_art[art_idx];
         const char **clr = dir_clr[art_idx];
 
         for (int row = 0; row < sprite_h; row++) {

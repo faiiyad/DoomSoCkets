@@ -4,8 +4,8 @@
 #include "player.h"
 
 #define MAX_SPRITES  32
-#define SPR_W 6  
-#define SPR_H 9
+#define SPR_W  14
+#define SPR_H 16
 
 typedef enum {
     STATE_IDLE,
@@ -22,6 +22,7 @@ typedef struct {
     int        anim_frame;
     int        anim_timer;
     int        active;
+    double        smooth_h;
 } Enemy;
 
 extern Enemy enemies[MAX_SPRITES];

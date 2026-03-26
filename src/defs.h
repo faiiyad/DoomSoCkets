@@ -54,6 +54,7 @@ typedef enum {
     TITLE4,
     TITLEBG,
 
+    CP_SPRITE_FAR,
     CP_SPRITE_R,
     CP_SPRITE_D,
     CP_SPRITE_O,

@@ -279,7 +279,7 @@ void render(Player *p, int show_map)
     draw_walls        (p, rows, cols);
     sprites_draw      (p, z_buf, rows, cols);  // after walls, before HUD/gun
     draw_hud          (p, rows);
-    draw_crosshair    (rows, cols);
+    // draw_crosshair    (rows, cols);
     if (show_map)
         draw_minimap  (p, rows, cols);
     draw_gun          (rows, cols);
