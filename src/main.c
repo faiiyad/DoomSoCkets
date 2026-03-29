@@ -10,6 +10,7 @@
 #include "gun.h"
 #include "render.h"
 #include "title.h"
+#include "sprite.h"
 
 static void init_colors(void)
 {
@@ -56,6 +57,13 @@ static void init_colors(void)
         { TITLE3,      202,          -1  },
         { TITLE4,      208,          -1  },
         { TITLEBG,     0,            -1  },
+
+        // sprite
+        { CP_SPRITE_FAR, 160,       160  },  // red
+        { CP_SPRITE_R, 160,         160  },  // red
+        { CP_SPRITE_D, 88,          88 },  // dark red/brown shadow
+        { CP_SPRITE_O, 124,         124  },  // orange highlight
+        { CP_SPRITE_W, 255,         255  },  // white eye
     };
 
     for (int i = 0; i < (int)(sizeof PAL / sizeof PAL[0]); i++)
@@ -76,8 +84,11 @@ int main(void)
     Player p = { 8.0, 8.0, 0.0 };
     map_find_spawn(&p.x, &p.y);
 
-    show_title_screen();
-    flushinp(); 
+    sprites_init(p.x + 1.0, p.y);
+
+
+    // show_title_screen();
+    // flushinp(); 
 
     int show_map = 1;
 
@@ -87,9 +98,15 @@ int main(void)
         int ch = getch();
         if (ch == 'q' || ch == 'Q') break;
         if (ch == 'm' || ch == 'M') show_map = !show_map;
-
-        if (ch == 'k' || ch == 'K') p.angle -= ROT_SPD;
-        if (ch == 'l' || ch == 'L') p.angle += ROT_SPD;
+        
+        if (ch == 'k' || ch == 'K') {
+            p.angle -= ROT_SPD;
+            if (p.angle < 0)        p.angle += 2*M_PI;
+        }
+        if (ch == 'l' || ch == 'L') {
+            p.angle += ROT_SPD;
+            if (p.angle >= 2*M_PI)  p.angle -= 2*M_PI;
+        }
 
         double nx = p.x, ny = p.y;
         if (ch == KEY_UP   || ch == 'w' || ch == 'W') {
@@ -126,6 +143,8 @@ int main(void)
                 gun_status = 0;
             }
         }
+
+        sprites_update(&p, ch);
 
         double margin = 0.2;
         if (!map_solid((int)(nx + margin), (int)(p.y)) &&

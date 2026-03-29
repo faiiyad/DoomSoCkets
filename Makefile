@@ -1,11 +1,11 @@
 CC      = gcc
 CFLAGS  = -Wall -Wextra -O2 -Isrc
-LDFLAGS = -lncurses -lm
+LDFLAGS = -lncursesw -lm
 
 VPATH   = src
 TARGET  = raycaster
 
-SRCS    = main.c map.c ray.c gun.c render.c title.c
+SRCS    = main.c map.c ray.c gun.c render.c title.c sprite.c
 OBJS    = $(SRCS:.c=.o)
 
 .PHONY: all clean
