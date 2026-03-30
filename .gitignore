@@ -1,0 +1,5 @@
+*.o
+doom
+raycaster
+/chat_app/client
+/chat_app/server
