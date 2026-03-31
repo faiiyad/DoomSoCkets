@@ -3,3 +3,7 @@ doom
 raycaster
 /chat_app/client
 /chat_app/server
+
+/src/server
+/src/client
+/src/client_test.c
