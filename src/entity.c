@@ -3,12 +3,12 @@
 #include <string.h>
 #define _XOPEN_SOURCE_EXTENDED
 #include <ncursesw/ncurses.h>
-#include "sprite.h"
+#include "entity.h"
 #include "defs.h"
 #include "map.h"
 
-Enemy enemies[MAX_SPRITES];
-int   num_enemies = 0;
+Entity entities[MAX_ENTITIES];
+int   num_entities = 0;
 
 // ── imp art 10 wide x 16 tall ─────────────────────────────────────────────
 // Rows 0-3:  head (rounded silhouette)
@@ -115,14 +115,14 @@ static const char *imp_back[SPR_H] = {
     "ODDD      DDDO",
 };
 
-static int sprite_color(char c)
+static int entity_color(char c)
 {
     switch (c) {
-        case 'R': return CP_SPRITE_R;
-        case 'D': return CP_SPRITE_D;
-        case 'O': return CP_SPRITE_O;
-        case 'W': return CP_SPRITE_W;
-        default:  return CP_SPRITE_R;
+        case 'R': return CP_ENTITY_R;
+        case 'D': return CP_ENTITY_D;
+        case 'O': return CP_ENTITY_O;
+        case 'W': return CP_ENTITY_W;
+        default:  return CP_ENTITY_R;
     }
 }
 
@@ -143,28 +143,28 @@ static const char **dir_clr[5] = {
 
 // ── scale constants ────────────────────────────────────────────────────────
 // walls:   wall_h = rows * 0.50 / dist
-// sprites: spr_h  = rows * 0.50 / dist  (imp is roughly wall height)
+// entities: spr_h  = rows * 0.50 / dist  (imp is roughly wall height)
 // 1:1 detail at dist = rows * SPR_SCALE / SPR_H = 40 * 0.50 / 16 = 1.25
 #define SPR_SCALE    0.50
 #define CHAR_ASPECT  0.65  // terminal chars ~1.5x taller than wide
 
-void sprites_init(double spawn_x, double spawn_y)
+void entities_init(double spawn_x, double spawn_y)
 {
-    memset(enemies, 0, sizeof(enemies));
-    enemies[0].x      = spawn_x;
-    enemies[0].y      = spawn_y;
-    enemies[0].angle  = 0.0;
-    enemies[0].health = 100;
-    enemies[0].state  = STATE_IDLE;
-    enemies[0].active = 1;
-    num_enemies       = 1;
+    memset(entities, 0, sizeof(entities));
+    entities[0].x      = spawn_x;
+    entities[0].y      = spawn_y;
+    entities[0].angle  = 0.0;
+    entities[0].health = 100;
+    // entities[0].state  = STATE_IDLE; 
+    entities[0].active = 1;
+    num_entities       = 1;
 }
 
-void sprites_update(Player *p, int input)
+void entities_update(Player *p, int input)
 {
     (void)p;
-    for (int i = 0; i < num_enemies; i++) {
-        Enemy *e = &enemies[i];
+    for (int i = 0; i < num_entities; i++) {
+        Entity *e = &entities[i];
         if (!e->active) continue;
 
         double spd = 0.08;
@@ -207,22 +207,22 @@ void sprites_update(Player *p, int input)
 
 #define SOLID_FALLBACK_H 3
 
-void sprites_draw(Player *p, double *z_buf, int rows, int cols)
+void entities_draw(Player *p, double *z_buf, int rows, int cols)
 {
     // sort back to front
-    for (int i = 0; i < num_enemies; i++) {
-        double dx = enemies[i].x - p->x;
-        double dy = enemies[i].y - p->y;
-        enemies[i].dist = dx*dx + dy*dy;
+    for (int i = 0; i < num_entities; i++) {
+        double dx = entities[i].x - p->x;
+        double dy = entities[i].y - p->y;
+        entities[i].dist = dx*dx + dy*dy;
     }
-    for (int i = 1; i < num_enemies; i++) {
-        Enemy tmp = enemies[i];
+    for (int i = 1; i < num_entities; i++) {
+        Entity tmp = entities[i];
         int j = i - 1;
-        while (j >= 0 && enemies[j].dist < tmp.dist) {
-            enemies[j+1] = enemies[j];
+        while (j >= 0 && entities[j].dist < tmp.dist) {
+            entities[j+1] = entities[j];
             j--;
         }
-        enemies[j+1] = tmp;
+        entities[j+1] = tmp;
     }
 
     double dir_x   =  cos(p->angle);
@@ -230,8 +230,8 @@ void sprites_draw(Player *p, double *z_buf, int rows, int cols)
     double plane_x = -dir_y * tan(FOV / 2.0);
     double plane_y =  dir_x * tan(FOV / 2.0);
 
-    for (int i = 0; i < num_enemies; i++) {
-        Enemy *e = &enemies[i];
+    for (int i = 0; i < num_entities; i++) {
+        Entity *e = &entities[i];
         if (!e->active) continue;
 
         double sx  = e->x - p->x;
@@ -243,26 +243,26 @@ void sprites_draw(Player *p, double *z_buf, int rows, int cols)
         if (tz <= 0.1) continue;
 
         int screen_x = (int)((cols / 2) * (1.0 + tx / tz));
-        int sprite_h = (int)(rows * SPR_SCALE / tz);
-        int sprite_w = (int)(sprite_h * ((double)SPR_W / SPR_H) * CHAR_ASPECT);
+        int entity_h = (int)(rows * SPR_SCALE / tz);
+        int entity_w = (int)(entity_h * ((double)SPR_W / SPR_H) * CHAR_ASPECT);
 
-        if (sprite_h < 1) sprite_h = 1;
-        if (sprite_w < 1) sprite_w = 1;
+        if (entity_h < 1) entity_h = 1;
+        if (entity_w < 1) entity_w = 1;
 
-        int draw_top  = rows / 2 - sprite_h / 2;
-        int draw_left = screen_x - sprite_w / 2;
+        int draw_top  = rows / 2 - entity_h / 2;
+        int draw_left = screen_x - entity_w / 2;
 
-        if (sprite_h < SOLID_FALLBACK_H) {
-            for (int row = 0; row < sprite_h; row++) {
+        if (entity_h < SOLID_FALLBACK_H) {
+            for (int row = 0; row < entity_h; row++) {
                 int sy_s = draw_top + row;
                 if (sy_s < 0 || sy_s >= rows - 1) continue;
-                for (int col = 0; col < sprite_w; col++) {
+                for (int col = 0; col < entity_w; col++) {
                     int sx_s = draw_left + col;
                     if (sx_s < 0 || sx_s >= cols) continue;
                     if (tz >= z_buf[sx_s]) continue;
-                    attron(COLOR_PAIR(CP_SPRITE_R));
+                    attron(COLOR_PAIR(CP_ENTITY_R));
                     mvaddch(sy_s, sx_s, ' ');
-                    attroff(COLOR_PAIR(CP_SPRITE_R));
+                    attroff(COLOR_PAIR(CP_ENTITY_R));
                 }
             }
             continue;
@@ -287,20 +287,20 @@ void sprites_draw(Player *p, double *z_buf, int rows, int cols)
         const char **art = dir_clr[art_idx];
         const char **clr = dir_clr[art_idx];
 
-        for (int row = 0; row < sprite_h; row++) {
+        for (int row = 0; row < entity_h; row++) {
             int sy_s = draw_top + row;
             if (sy_s < 0 || sy_s >= rows - 1) continue;
 
-            int v = (int)((double)row / sprite_h * SPR_H);
+            int v = (int)((double)row / entity_h * SPR_H);
             if (v < 0)      v = 0;
             if (v >= SPR_H) v = SPR_H - 1;
 
-            for (int col = 0; col < sprite_w; col++) {
+            for (int col = 0; col < entity_w; col++) {
                 int sx_s = draw_left + col;
                 if (sx_s < 0 || sx_s >= cols) continue;
                 if (tz >= z_buf[sx_s]) continue;
 
-                int u = (int)(((double)col + 0.5) / sprite_w * SPR_W);
+                int u = (int)(((double)col + 0.5) / entity_w * SPR_W);
                 if (mirror) u = SPR_W - 1 - u;
                 if (u < 0)      u = 0;
                 if (u >= SPR_W) u = SPR_W - 1;
@@ -313,7 +313,7 @@ void sprites_draw(Player *p, double *z_buf, int rows, int cols)
                 char col_c = clr[v][u];
                 if (ch == ' ' || col_c == ' ') continue;
 
-                int pair = sprite_color(col_c);
+                int pair = entity_color(col_c);
                 attron(COLOR_PAIR(pair) | A_BOLD);
                 mvaddch(sy_s, sx_s, ch);
                 attroff(COLOR_PAIR(pair) | A_BOLD);

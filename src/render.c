@@ -10,7 +10,7 @@
 #include "map.h"
 #include "ray.h"
 #include "gun.h"
-#include "sprite.h"
+#include "entity.h"
 
 // z_buffer — one depth value per screen column, filled by draw_walls
 static double *z_buf = NULL;
@@ -56,7 +56,7 @@ static void draw_walls(Player *p, int rows, int cols)
         dist *= cos(ray_angle - p->angle);
         if (dist < 0.001) dist = 0.001;
 
-        z_buf[x] = dist;   // ← store for sprite occlusion
+        z_buf[x] = dist;   // ← store for entity occlusion
 
         int wall_h = (int)(rows / dist);
         if (wall_h > rows) wall_h = rows;
@@ -220,19 +220,19 @@ static void draw_map_tiles(int ox, int oy, int rows, int cols)
     }
 }
 
-/* ── minimap player + enemies ───────────────────────────────────────────── */
+/* ── minimap player + entities ───────────────────────────────────────────── */
 static void draw_map_player(Player *p, int ox, int oy, int rows, int cols)
 {
-    // draw enemies on map first so player overdraw them
-    for (int i = 0; i < num_enemies; i++) {
-        Enemy *e = &enemies[i];
+    // draw entities on map first so player overdraw them
+    for (int i = 0; i < num_entities; i++) {
+        Entity *e = &entities[i];
         if (!e->active) continue;
         int ey = oy + (int)e->y;
         int ex = ox + (int)(e->x) * 2;
         if (ey > 0 && ey < rows - 1 && ex >= 0 && ex < cols) {
-            attron(COLOR_PAIR(CP_SPRITE_R) | A_BOLD);
+            attron(COLOR_PAIR(CP_ENTITY_R) | A_BOLD);
             mvaddch(ey, ex, 'X');
-            attroff(COLOR_PAIR(CP_SPRITE_R) | A_BOLD);
+            attroff(COLOR_PAIR(CP_ENTITY_R) | A_BOLD);
         }
     }
 
@@ -277,9 +277,9 @@ void render(Player *p, int show_map)
 
     draw_ceiling_floor(rows, cols);
     draw_walls        (p, rows, cols);
-    sprites_draw      (p, z_buf, rows, cols);  // after walls, before HUD/gun
+    entities_draw      (p, z_buf, rows, cols);  // after walls, before HUD/gun
     draw_hud          (p, rows);
-    // draw_crosshair    (rows, cols);
+    draw_crosshair    (rows, cols);
     if (show_map)
         draw_minimap  (p, rows, cols);
     draw_gun          (rows, cols);
