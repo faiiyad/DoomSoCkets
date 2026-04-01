@@ -11,6 +11,8 @@
 #include "render.h"
 #include "title.h"
 #include "entity.h"
+#include "network.h"
+#include "client.h"
 
 static void init_colors(void)
 {
@@ -70,6 +72,14 @@ static void init_colors(void)
         init_pair(PAL[i][0], PAL[i][1], PAL[i][2]);
 }
 
+static void on_server_update(ClientUpdate u)
+{
+    // hook into your entity system here
+    // printf("entity %d => %.2f %.2f %.2f hp=%d\n",
+        //    u.id, u.x, u.y, u.angle, u.health);
+    entity_upsert(u.id, u.x, u.y, u.angle, u.health);
+}
+
 int main(void)
 {
     setlocale(LC_ALL, "");
@@ -81,10 +91,11 @@ int main(void)
     curs_set(0);
     init_colors();
 
-    Player p = { 8.0, 8.0, 0.0 };
-    map_find_spawn(&p.x, &p.y);
+    Player player = { 8.0, 8.0, 0.0 };
+    map_find_spawn(&player.x, &player.y);
 
-    entities_init(p.x + 1.0, p.y);
+    entities_init(player.x + 1.0, player.y);
+    client_connect("127.0.0.1", NETWORK_PORT);
 
 
     // show_title_screen();
@@ -95,35 +106,42 @@ int main(void)
     struct timespec ts = { 0, 16000000L };  // ~60 fps
 
     while (1) {
+        client_recv_updates(on_server_update);
         int ch = getch();
         if (ch == 'q' || ch == 'Q') break;
         if (ch == 'm' || ch == 'M') show_map = !show_map;
         
         if (ch == 'k' || ch == 'K') {
-            p.angle -= ROT_SPD;
-            if (p.angle < 0)        p.angle += 2*M_PI;
+            player.angle -= ROT_SPD;
+            if (player.angle < 0)        player.angle += 2*M_PI;
+            client_send_position(player.x, player.y, player.angle, 0);
         }
         if (ch == 'l' || ch == 'L') {
-            p.angle += ROT_SPD;
-            if (p.angle >= 2*M_PI)  p.angle -= 2*M_PI;
+            player.angle += ROT_SPD;
+            if (player.angle >= 2*M_PI)  player.angle -= 2*M_PI;
+            client_send_position(player.x, player.y, player.angle, 0);
         }
 
-        double nx = p.x, ny = p.y;
+        double nx = player.x, ny = player.y;
         if (ch == KEY_UP   || ch == 'w' || ch == 'W') {
-            nx += cos(p.angle) * MOVE_SPD;
-            ny += sin(p.angle) * MOVE_SPD;
+            nx += cos(player.angle) * MOVE_SPD;
+            ny += sin(player.angle) * MOVE_SPD;
+            client_send_position(nx, ny, player.angle, 0);
         }
         if (ch == KEY_DOWN || ch == 's' || ch == 'S') {
-            nx -= cos(p.angle) * MOVE_SPD;
-            ny -= sin(p.angle) * MOVE_SPD;
+            nx -= cos(player.angle) * MOVE_SPD;
+            ny -= sin(player.angle) * MOVE_SPD;
+            client_send_position(nx, ny, player.angle, 0);
         }
         if (ch == 'a' || ch == 'A' || ch == ',') {
-            nx += cos(p.angle - M_PI / 2) * MOVE_SPD;
-            ny += sin(p.angle - M_PI / 2) * MOVE_SPD;
+            nx += cos(player.angle - M_PI / 2) * MOVE_SPD;
+            ny += sin(player.angle - M_PI / 2) * MOVE_SPD;
+            client_send_position(nx, ny, player.angle, 0);
         }
         if (ch == 'd' || ch == 'D' || ch == '.') {
-            nx += cos(p.angle + M_PI / 2) * MOVE_SPD;
-            ny += sin(p.angle + M_PI / 2) * MOVE_SPD;
+            nx += cos(player.angle + M_PI / 2) * MOVE_SPD;
+            ny += sin(player.angle + M_PI / 2) * MOVE_SPD;
+            client_send_position(nx, ny, player.angle, 0);
         }
 
         if (ch == ' ' && gun_frame == 0) {
@@ -144,18 +162,19 @@ int main(void)
             }
         }
 
-        entities_update(&p, ch);
+        entities_update(&player, ch);
 
         double margin = 0.2;
-        if (!map_solid((int)(nx + margin), (int)(p.y)) &&
-            !map_solid((int)(nx - margin), (int)(p.y))) p.x = nx;
-        if (!map_solid((int)(p.x), (int)(ny + margin)) &&
-            !map_solid((int)(p.x), (int)(ny - margin))) p.y = ny;
+        if (!map_solid((int)(nx + margin), (int)(player.y)) &&
+            !map_solid((int)(nx - margin), (int)(player.y))) player.x = nx;
+        if (!map_solid((int)(player.x), (int)(ny + margin)) &&
+            !map_solid((int)(player.x), (int)(ny - margin))) player.y = ny;
 
-        render(&p, show_map);
+        render(&player, show_map);
         nanosleep(&ts, NULL);
     }
 
+    client_disconnect();
     endwin();
     printf("YO THANKS FOR PLAYING\n");
     return 0;

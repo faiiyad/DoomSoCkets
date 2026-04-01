@@ -91,6 +91,7 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
     int client_idx = *nfds;
     (*pfds)[client_idx].fd       = new_socket;
     (*pfds)[client_idx].events   = POLLIN;
+    (*pfds)[client_idx].revents = 0;
 
     (*clients)[client_idx].fd           = new_socket;
     (*clients)[client_idx].entity.id    = next_entity_id++;

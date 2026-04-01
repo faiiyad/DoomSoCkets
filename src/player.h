@@ -6,4 +6,5 @@ typedef struct {
     double angle;
 } Player;
 
+
 #endif
