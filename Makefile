@@ -6,7 +6,7 @@ TARGET  = raycaster
 SERVER  = server
 
 SRCS        = main.c map.c ray.c gun.c render.c title.c entity.c
-SRCS_SERVER = server.c server_socket.c client_manager.c map.c entity.c ray.c
+SRCS_SERVER = server.c server_ui.c server_socket.c client_manager.c map.c entity.c ray.c
 
 OBJS        = $(SRCS:.c=.o)
 OBJS_SERVER = $(SRCS_SERVER:.c=.o)
@@ -31,7 +31,8 @@ ray.o:            ray.c            ray.h map.h
 gun.o:            gun.c            gun.h defs.h
 render.o:         render.c         render.h defs.h map.h ray.h gun.h player.h
 title.o:          title.c          title.h defs.h
-server.o:         server.c              network.h client_manager.h server_socket.h
+server.o:         server.c              network.h client_manager.h server_socket.h server_ui.h
+server_ui.o:       server_ui.c            server_ui.h client_manager.h map.h
 server_socket.o:  server_socket.c        server_socket.h network.h
 client_manager.o: client_manager.c       client_manager.h entity.h
 
