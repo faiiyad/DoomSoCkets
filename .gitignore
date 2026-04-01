@@ -1,6 +1,7 @@
 *.o
 doom
 raycaster
+server
 /chat_app/client
 /chat_app/server
 

@@ -12,4 +12,7 @@ int map_type(int mx, int my);
 /* Writes the centre of the '9' spawn tile into *x and *y */
 void map_find_spawn(double *x, double *y);
 
+/* Map data buffer shared by server/client code */
+extern const char MAP[MAP_H][MAP_W + 1];
+
 #endif /* RAYCASTER_MAP_H */

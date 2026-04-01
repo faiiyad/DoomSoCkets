@@ -8,12 +8,11 @@
 #define SPR_H 16
 
 typedef struct {
+    int id;
     double     x, y;
     double     angle;
     double     dist;
     int        health;
-    int        active;
-    double        smooth_h;
 } Entity;
 
 extern Entity entities[MAX_ENTITIES];

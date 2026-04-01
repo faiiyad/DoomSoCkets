@@ -155,8 +155,6 @@ void entities_init(double spawn_x, double spawn_y)
     entities[0].y      = spawn_y;
     entities[0].angle  = 0.0;
     entities[0].health = 100;
-    // entities[0].state  = STATE_IDLE; 
-    entities[0].active = 1;
     num_entities       = 1;
 }
 
@@ -165,7 +163,6 @@ void entities_update(Player *p, int input)
     (void)p;
     for (int i = 0; i < num_entities; i++) {
         Entity *e = &entities[i];
-        if (!e->active) continue;
 
         double spd = 0.08;
         double rot = 0.52;
@@ -232,7 +229,6 @@ void entities_draw(Player *p, double *z_buf, int rows, int cols)
 
     for (int i = 0; i < num_entities; i++) {
         Entity *e = &entities[i];
-        if (!e->active) continue;
 
         double sx  = e->x - p->x;
         double sy  = e->y - p->y;
