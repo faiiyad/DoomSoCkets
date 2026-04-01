@@ -1,5 +1,5 @@
 #define _XOPEN_SOURCE_EXTENDED
-#include <ncursesw/ncurses.h>
+#include <ncurses.h>
 #include <wchar.h>
 #include <math.h>
 #include <string.h>
