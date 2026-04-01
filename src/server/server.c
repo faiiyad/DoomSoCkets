@@ -9,6 +9,43 @@
 #include "server_socket.h"
 #include "client_manager.h"
 
+
+void print_server_map(Client *clients, nfds_t nfds)
+{
+    char grid[MAP_H][MAP_W];
+
+    for (int y = 0; y < MAP_H; y++)
+        for (int x = 0; x < MAP_W; x++)
+            grid[y][x] = map_solid(x, y) ? '#' : '.';
+
+    for (nfds_t i = 1; i < nfds; i++) {
+        Entity *e = &clients[i].entity;
+        int ex = (int)e->x;
+        int ey = (int)e->y;
+        if (ex < 0 || ex >= MAP_W || ey < 0 || ey >= MAP_H) continue;
+
+        double a = fmod(e->angle, 2 * M_PI);
+        if (a < 0) a += 2 * M_PI;
+
+        char dir;
+        if      (a < 1*M_PI/4) dir = '>';
+        else if (a < 3*M_PI/4) dir = 'V';
+        else if (a < 5*M_PI/4) dir = '<';
+        else if (a < 7*M_PI/4) dir = '^';
+        else                   dir = '>';
+
+        grid[ey][ex] = dir;
+    }
+
+    printf("\033[2J\033[H");
+    for (int y = 0; y < MAP_H; y++) {
+        for (int x = 0; x < MAP_W; x++)
+            putchar(grid[y][x]);
+        putchar('\n');
+    }
+    printf("clients: %d\n", (int)nfds - 1);
+}
+
 int main(void)
 {
     int server_fd = setup_server_socket();
@@ -41,15 +78,22 @@ int main(void)
                     }
                     // 1.updates capacity
                     // 2.adds new client to pfds and clients
-                    // 3.
+                    // 3.sends itself to the new client (to get its own id)
+                    // 4.sends existing clients to the new client
+                    // 5.broadcasts itself to existing clients
                     add_client(new_socket, &pfds, &clients, &nfds, &capacity);
+                    print_server_map(clients, nfds);
                 } else {
                     if (handle_client_input(i, pfds, clients, &nfds))
                         i--;
+                    
+                    print_server_map(clients, nfds);
                 }
             } else if (pfds[i].revents & (POLLHUP | POLLERR)) {
                 remove_client(i, pfds, clients, &nfds);
                 i--;
+                
+                    print_server_map(clients, nfds);
             }
         }
     }
@@ -59,3 +103,4 @@ int main(void)
     close(server_fd);
     return 0;
 }
+

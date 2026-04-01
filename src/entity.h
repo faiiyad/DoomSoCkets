@@ -18,8 +18,7 @@ typedef struct {
 extern Entity entities[MAX_ENTITIES];
 extern int   num_entities;
 
-void entitys_init(double spawn_x, double spawn_y);
-void entitys_update(Player *p, int input);
-void entitys_draw(Player *p, double *z_buf, int rows, int cols);
-
+void entities_init(double spawn_x, double spawn_y);
+void entities_update(Player *p, int input);
+void entities_draw(Player *p, double *z_buf, int rows, int cols);
 #endif

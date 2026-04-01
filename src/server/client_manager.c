@@ -39,8 +39,8 @@ static void send_one_entity(int fd, const Entity *e)
 }
 
 // One entity to all clients
-static void broadcast_entity(const Entity *e, struct pollfd *pfds,
-                              Client *clients, nfds_t nfds, int exclude_fd)
+static void broadcast_entity(const Entity *e, Client *clients, 
+                            nfds_t nfds, int exclude_fd)
 {
     for (nfds_t i = 1; i < nfds; i++) {
         if (clients[i].fd != exclude_fd)
@@ -101,12 +101,14 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
 
     (*nfds)++;
 
+    // Send itself to the new client
+    send_one_entity(new_socket, &(*clients)[client_idx].entity);
+
     // Send existing entities to the new client
     send_entities_batch(new_socket, *clients, *nfds - 1, new_socket);
 
     // Broadcast the new client's entity to existing clients
-    broadcast_entity(&(*clients)[client_idx].entity,
-                     *pfds, *clients, *nfds, new_socket);
+    broadcast_entity(&(*clients)[client_idx].entity, *clients, *nfds, new_socket);
 
     printf("new client assigned entity id %d idx %d\n",
            (*clients)[client_idx].entity.id, client_idx);
@@ -134,14 +136,27 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
         clients[idx].entity.angle = angle;
 
         if (count == 4) {
-            printf("entity id %d hit entity id %d\n",
-                clients[idx].entity.id, hit_id);
+            for (nfds_t i = 1; i < *nfds; i++) {
+                if (clients[i].entity.id == hit_id) {
+                    int hit;
+                    double dist = cast_ray_to_entity(x, y, angle, &clients[i].entity, 0.5, &hit);
+                    if (hit) {
+                        clients[i].entity.health -= 10;
+                        printf("entity id %d hit entity id %d (health now %d)\n",
+                            clients[idx].entity.id, hit_id,
+                            clients[i].entity.health);
+                        broadcast_entity(&clients[i].entity, clients,
+                                        *nfds, -1);
+                    }
+                    break;
+                }
+            }
         }
 
         printf("updated entity id %d => x=%.2f y=%.2f angle=%.2f\n",
                clients[idx].entity.id, x, y, angle);
                
-        broadcast_entity(&clients[idx].entity, pfds, clients, *nfds,
+        broadcast_entity(&clients[idx].entity, clients, *nfds,
                      clients[idx].fd);
     } else {
         printf("invalid entity update from fd %d: %s\n", pfds[idx].fd, buffer);

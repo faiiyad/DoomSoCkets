@@ -226,7 +226,6 @@ static void draw_map_player(Player *p, int ox, int oy, int rows, int cols)
     // draw entities on map first so player overdraw them
     for (int i = 0; i < num_entities; i++) {
         Entity *e = &entities[i];
-        if (!e->active) continue;
         int ey = oy + (int)e->y;
         int ex = ox + (int)(e->x) * 2;
         if (ey > 0 && ey < rows - 1 && ex >= 0 && ex < cols) {
