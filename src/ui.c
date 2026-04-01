@@ -109,11 +109,11 @@ static void draw_map_tiles(int ox, int oy, int rows, int cols)
                        : (t == 3) ? CP_WALL3_M
                        : (t == 4) ? CP_WALL4_M : CP_WALL1_M;
                 wattron(stdscr, COLOR_PAIR(cp) | A_BOLD);
-                mvwaddstr(stdscr, sy, sx, "  ");
+                mvaddwstr(sy, sx, L"░░");
                 wattroff(stdscr, COLOR_PAIR(cp) | A_BOLD);
             } else {
                 wattron(stdscr, COLOR_PAIR(CP_MAP_EMPTY));
-                mvwaddstr(stdscr, sy, sx, "  ");
+                mvaddwstr(sy, sx, L"  ");
                 wattroff(stdscr, COLOR_PAIR(CP_MAP_EMPTY));
             }
         }

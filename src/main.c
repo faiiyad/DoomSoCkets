@@ -29,14 +29,15 @@ static void init_colors(void)
         { CP_CEIL,     17,           -1  },  // dark navy
         { CP_HUD,      COLOR_BLACK,  COLOR_WHITE },
 
+        //22
         // ── minimap radar ─────────────────────────────────────────────────
-        { CP_MAP_BDR,   64,          22  },  // olive fg, dark green bg
+        { CP_MAP_BDR,   64,          -1  },  // olive fg, dark green bg
         { CP_MAP_P,     124,         232 },  // red on near-black
         { CP_MAP_EMPTY, 232,         232 },  // near-black solid floor
-        { CP_WALL1_M,   28,          28  },  // mid green solid
-        { CP_WALL2_M,   34,          34  },  // green solid
-        { CP_WALL3_M,   40,          40  },  // bright green solid
-        { CP_WALL4_M,   82,          82  },  // lime solid
+        { CP_WALL1_M,   82,          -1  },  // mid green solid
+        { CP_WALL2_M,   34,          -1  },  // green solid
+        { CP_WALL3_M,   40,          -1  },  // bright green solid
+        { CP_WALL4_M,   28,          -1  },  // lime solid
 
         // ── gun ───────────────────────────────────────────────────────────
         { CP_GUN,      238,          -1  },
