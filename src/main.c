@@ -10,7 +10,7 @@
 #include "gun.h"
 #include "render.h"
 #include "title.h"
-#include "sprite.h"
+#include "entity.h"
 
 static void init_colors(void)
 {
@@ -58,12 +58,12 @@ static void init_colors(void)
         { TITLE4,      208,          -1  },
         { TITLEBG,     0,            -1  },
 
-        // sprite
-        { CP_SPRITE_FAR, 160,       160  },  // red
-        { CP_SPRITE_R, 160,         160  },  // red
-        { CP_SPRITE_D, 88,          88 },  // dark red/brown shadow
-        { CP_SPRITE_O, 124,         124  },  // orange highlight
-        { CP_SPRITE_W, 255,         255  },  // white eye
+        // entity
+        { CP_ENTITY_FAR, 160,       160  },  // red
+        { CP_ENTITY_R, 160,         160  },  // red
+        { CP_ENTITY_D, 88,          88 },  // dark red/brown shadow
+        { CP_ENTITY_O, 124,         124  },  // orange highlight
+        { CP_ENTITY_W, 255,         255  },  // white eye
     };
 
     for (int i = 0; i < (int)(sizeof PAL / sizeof PAL[0]); i++)
@@ -84,7 +84,7 @@ int main(void)
     Player p = { 8.0, 8.0, 0.0 };
     map_find_spawn(&p.x, &p.y);
 
-    sprites_init(p.x + 1.0, p.y);
+    entities_init(p.x + 1.0, p.y);
 
 
     // show_title_screen();
@@ -144,7 +144,7 @@ int main(void)
             }
         }
 
-        sprites_update(&p, ch);
+        entities_update(&p, ch);
 
         double margin = 0.2;
         if (!map_solid((int)(nx + margin), (int)(p.y)) &&

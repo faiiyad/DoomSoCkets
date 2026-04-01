@@ -5,7 +5,7 @@ LDFLAGS = -lncurses -lm
 VPATH   = src
 TARGET  = raycaster
 
-SRCS    = main.c map.c ray.c gun.c render.c title.c sprite.c
+SRCS    = main.c map.c ray.c gun.c render.c title.c entity.c
 OBJS    = $(SRCS:.c=.o)
 
 .PHONY: all clean
