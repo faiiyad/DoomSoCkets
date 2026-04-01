@@ -2,8 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "client_manager.h"
+
+void server_log(const char *fmt, ...);
 
 static int next_entity_id = 1;
 
@@ -23,7 +26,7 @@ static void send_entities_batch(int fd, Client *clients, nfds_t nfds, int exclud
 
     if (offset > 0)
         if (write(fd, buf, offset) == -1) {
-            perror("write");
+            server_log("write failed: %s", strerror(errno));
         }
 }
 
@@ -33,8 +36,8 @@ static void send_one_entity(int fd, const Entity *e)
     char buf[64];
     int len = snprintf(buf, sizeof(buf), "%d %.2f %.2f %.2f %d\n",
                        e->id, e->x, e->y, e->angle, e->health);
-    if (write(fd, buf, len)==-1) {
-        perror("write");
+    if (write(fd, buf, len) == -1) {
+        server_log("write failed: %s", strerror(errno));
     }
 }
 
@@ -57,7 +60,7 @@ static void update_capacity(struct pollfd **pfds, Client **clients,
     struct pollfd *new_pfds    = realloc(*pfds,    new_capacity * sizeof(struct pollfd));
     Client        *new_clients = realloc(*clients, new_capacity * sizeof(Client));
     if (new_pfds == NULL || new_clients == NULL) {
-        perror("realloc");
+        server_log("realloc failed: %s", strerror(errno));
         exit(1);
     }
 
@@ -70,7 +73,7 @@ static void update_capacity(struct pollfd **pfds, Client **clients,
         (*clients)[i].entity.id = -1;
     }
     
-    printf("increased capacity from %zu to %zu\n", *capacity, new_capacity);
+    server_log("increased capacity from %zu to %zu", *capacity, new_capacity);
     *capacity = new_capacity;
 }
 
@@ -111,9 +114,9 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
     // Broadcast the new client's entity to existing clients
     broadcast_entity(&(*clients)[client_idx].entity, *clients, *nfds, new_socket);
 
-    printf("new client assigned entity id %d idx %d\n",
-           (*clients)[client_idx].entity.id, client_idx);
-    printf("new connection %d\n", new_socket);
+    server_log("new client assigned entity id %d idx %d",
+               (*clients)[client_idx].entity.id, client_idx);
+    server_log("new connection %d", new_socket);
 }
 
 int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
@@ -122,15 +125,15 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
     char    buffer[1024];
     ssize_t s = read(pfds[idx].fd, buffer, sizeof(buffer) - 1);
     if (s <= 0) {
-        if (s < 0) perror("read");
+        if (s < 0) server_log("read error on fd %d: %s", pfds[idx].fd, strerror(errno));
         remove_client(idx, pfds, clients, nfds);
         return 1;
     }
 
     buffer[s] = '\0';
     double x, y, angle;
-    int hit_id;
-    int count = sscanf(buffer, "%lf %lf %lf %d", &x, &y, &angle, &hit_id);
+    int damage;
+    int count = sscanf(buffer, "%lf %lf %lf %d", &x, &y, &angle, &damage);
     if (count >= 3) {
         clients[idx].entity.x     = x;
         clients[idx].entity.y     = y;
@@ -138,29 +141,27 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
 
         if (count == 4) {
             for (nfds_t i = 1; i < *nfds; i++) {
-                if (clients[i].entity.id == hit_id) {
-                    int hit;
-                    double dist = cast_ray_to_entity(x, y, angle, &clients[i].entity, 0.5, &hit);
-                    if (hit) {
-                        clients[i].entity.health -= 10;
-                        printf("entity id %d hit entity id %d (health now %d)\n",
-                            clients[idx].entity.id, hit_id,
-                            clients[i].entity.health);
-                        broadcast_entity(&clients[i].entity, clients,
-                                        *nfds, -1);
-                    }
-                    break;
+                if (i == idx) continue;
+                int hit;
+                double dist = cast_ray_to_entity(x, y, angle, &clients[i].entity, 0.5, &hit);
+                if (hit) {
+                    clients[i].entity.health -= damage;
+                    server_log("entity id %d hit entity id %d (health now %d)",
+                               clients[idx].entity.id, clients[i].entity.id,
+                               clients[i].entity.health);
+                    broadcast_entity(&clients[i].entity, clients,
+                                    *nfds, -1);
                 }
             }
         }
 
-        printf("updated entity id %d => x=%.2f y=%.2f angle=%.2f\n",
-               clients[idx].entity.id, x, y, angle);
-               
+        server_log("updated entity id %d => x=%.2f y=%.2f angle=%.2f",
+                   clients[idx].entity.id, x, y, angle);
+                   
         broadcast_entity(&clients[idx].entity, clients, *nfds,
                      clients[idx].fd);
     } else {
-        printf("invalid entity update from fd %d: %s\n", pfds[idx].fd, buffer);
+        server_log("invalid entity update from fd %d: %s", pfds[idx].fd, buffer);
     }
     return 0;
 }

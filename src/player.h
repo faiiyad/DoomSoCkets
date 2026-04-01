@@ -4,6 +4,7 @@
 typedef struct {
     double x, y;
     double angle;
+    int health;
 } Player;
 
 
