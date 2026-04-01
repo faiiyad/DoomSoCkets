@@ -81,7 +81,7 @@ int main(void)
     curs_set(0);
     init_colors();
 
-    Player p = { 8.0, 8.0, 0.0 };
+    Player p = { 8.0, 8.0, 0.0, 100 };
     map_find_spawn(&p.x, &p.y);
 
     entities_init(p.x + 1.0, p.y);
