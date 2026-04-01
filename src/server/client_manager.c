@@ -7,7 +7,48 @@
 
 static int next_entity_id = 1;
 
-void update_capacity(struct pollfd **pfds, Client **clients,
+// Batch entities to 1 client
+static void send_entities_batch(int fd, Client *clients, nfds_t nfds, int exclude_fd)
+{
+    char buf[4096];
+    int  offset = 0;
+
+    for (nfds_t i = 1; i < nfds; i++) {
+        if (clients[i].fd == exclude_fd) continue;
+        Entity *e = &clients[i].entity;
+        offset += snprintf(buf + offset, sizeof(buf) - offset,
+                           "%d %.2f %.2f %.2f %d\n",
+                           e->id, e->x, e->y, e->angle, e->health);
+    }
+
+    if (offset > 0)
+        if (write(fd, buf, offset) == -1) {
+            perror("write");
+        }
+}
+
+// One entity to 1 client
+static void send_one_entity(int fd, const Entity *e)
+{
+    char buf[64];
+    int len = snprintf(buf, sizeof(buf), "%d %.2f %.2f %.2f %d\n",
+                       e->id, e->x, e->y, e->angle, e->health);
+    if (write(fd, buf, len)==-1) {
+        perror("write");
+    }
+}
+
+// One entity to all clients
+static void broadcast_entity(const Entity *e, struct pollfd *pfds,
+                              Client *clients, nfds_t nfds, int exclude_fd)
+{
+    for (nfds_t i = 1; i < nfds; i++) {
+        if (clients[i].fd != exclude_fd)
+            send_one_entity(clients[i].fd, e);
+    }
+}
+
+static void update_capacity(struct pollfd **pfds, Client **clients,
                      nfds_t *capacity, nfds_t nfds)
 {
     if (nfds < *capacity) return;
@@ -28,7 +69,8 @@ void update_capacity(struct pollfd **pfds, Client **clients,
         (*clients)[i].fd     = -1;
         (*clients)[i].entity.id = -1;
     }
-
+    
+    printf("increased capacity from %zu to %zu\n", *capacity, new_capacity);
     *capacity = new_capacity;
 }
 
@@ -59,6 +101,13 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
 
     (*nfds)++;
 
+    // Send existing entities to the new client
+    send_entities_batch(new_socket, *clients, *nfds - 1, new_socket);
+
+    // Broadcast the new client's entity to existing clients
+    broadcast_entity(&(*clients)[client_idx].entity,
+                     *pfds, *clients, *nfds, new_socket);
+
     printf("new client assigned entity id %d idx %d\n",
            (*clients)[client_idx].entity.id, client_idx);
     printf("new connection %d\n", new_socket);
@@ -84,12 +133,16 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
         clients[idx].entity.y     = y;
         clients[idx].entity.angle = angle;
 
-        if (count == 4)
+        if (count == 4) {
             printf("entity id %d hit entity id %d\n",
-                   clients[idx].entity.id, hit_id);
+                clients[idx].entity.id, hit_id);
+        }
 
         printf("updated entity id %d => x=%.2f y=%.2f angle=%.2f\n",
                clients[idx].entity.id, x, y, angle);
+               
+        broadcast_entity(&clients[idx].entity, pfds, clients, *nfds,
+                     clients[idx].fd);
     } else {
         printf("invalid entity update from fd %d: %s\n", pfds[idx].fd, buffer);
     }

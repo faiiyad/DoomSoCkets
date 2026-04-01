@@ -3,14 +3,14 @@
 
 #include <poll.h>
 #include "entity.h"
+#include "map.h"
+#include "ray.h"
 
 typedef struct {
     int    fd;
     Entity entity;
 } Client;
 
-void update_capacity(struct pollfd **pfds, Client **clients,
-                     nfds_t *capacity, nfds_t nfds);
 void remove_client(nfds_t idx, struct pollfd *pfds, Client *clients,
                    nfds_t *nfds);
 void add_client(int new_socket, struct pollfd **pfds, Client **clients,

@@ -39,6 +39,9 @@ int main(void)
                         perror("accept");
                         continue;
                     }
+                    // 1.updates capacity
+                    // 2.adds new client to pfds and clients
+                    // 3.
                     add_client(new_socket, &pfds, &clients, &nfds, &capacity);
                 } else {
                     if (handle_client_input(i, pfds, clients, &nfds))

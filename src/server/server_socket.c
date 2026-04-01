@@ -36,6 +36,7 @@ int setup_server_socket(void)
         exit(1);
     }
 
+    // SOMAXCONN is the maximum allowed by the system, 4096 on Linux
     if (listen(server_fd, SOMAXCONN) == -1) {
         perror("listen");
         close(server_fd);
