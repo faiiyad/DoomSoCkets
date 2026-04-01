@@ -151,10 +151,11 @@ static const char **dir_clr[5] = {
 void entities_init(double spawn_x, double spawn_y)
 {
     memset(entities, 0, sizeof(entities));
+    entities[0].id     = 3;
     entities[0].x      = spawn_x;
     entities[0].y      = spawn_y;
     entities[0].angle  = 0.0;
-    entities[0].health = 100;
+    entities[0].health = 10;
     num_entities       = 1;
 }
 
