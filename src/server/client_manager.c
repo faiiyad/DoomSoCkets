@@ -91,6 +91,7 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
     int client_idx = *nfds;
     (*pfds)[client_idx].fd       = new_socket;
     (*pfds)[client_idx].events   = POLLIN;
+    (*pfds)[client_idx].revents = 0; 
 
     (*clients)[client_idx].fd           = new_socket;
     (*clients)[client_idx].entity.id    = next_entity_id++;
@@ -128,8 +129,8 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
 
     buffer[s] = '\0';
     double x, y, angle;
-    int hit_id;
-    int count = sscanf(buffer, "%lf %lf %lf %d", &x, &y, &angle, &hit_id);
+    int damage;
+    int count = sscanf(buffer, "%lf %lf %lf %d", &x, &y, &angle, &damage);
     if (count >= 3) {
         clients[idx].entity.x     = x;
         clients[idx].entity.y     = y;
@@ -137,18 +138,16 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
 
         if (count == 4) {
             for (nfds_t i = 1; i < *nfds; i++) {
-                if (clients[i].entity.id == hit_id) {
-                    int hit;
-                    double dist = cast_ray_to_entity(x, y, angle, &clients[i].entity, 0.5, &hit);
-                    if (hit) {
-                        clients[i].entity.health -= 10;
-                        printf("entity id %d hit entity id %d (health now %d)\n",
-                            clients[idx].entity.id, hit_id,
-                            clients[i].entity.health);
-                        broadcast_entity(&clients[i].entity, clients,
-                                        *nfds, -1);
-                    }
-                    break;
+                if (i == idx) continue;
+                int hit;
+                double dist = cast_ray_to_entity(x, y, angle, &clients[i].entity, 0.5, &hit);
+                if (hit) {
+                    clients[i].entity.health -= damage;
+                    printf("entity id %d hit entity id %d (health now %d)\n",
+                        clients[idx].entity.id, clients[i].entity.id,
+                        clients[i].entity.health);
+                    broadcast_entity(&clients[i].entity, clients,
+                                    *nfds, -1);
                 }
             }
         }
