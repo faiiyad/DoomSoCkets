@@ -126,12 +126,15 @@ void render(Player *p, int show_map)
     draw_walls        (p, rows, cols);
     entities_draw      (p, z_buf, rows, cols);  // after walls, before HUD/gun
     
-    ui_draw_hud          (p);
-    ui_draw_controls     (rows);
+    ui_draw_hud       (p);
+    ui_draw_controls  (rows);
+    ui_draw_server   (rows);
+    ui_draw_eventlog (rows, cols);
     
     draw_crosshair    (rows, cols);
-    if (show_map)
+    if (show_map){
         ui_draw_minimap(p, rows, cols);
+    }
     draw_gun          (rows, cols);
 
     refresh();

@@ -97,6 +97,7 @@ int main(void)
 
     while (1) {
         int ch = getch();
+        if (ch == 'c' || ch == 'C') ui_toggle_connect();
         if (ch == 'q' || ch == 'Q') break;
         if (ch == 'm' || ch == 'M') show_map = !show_map;
         

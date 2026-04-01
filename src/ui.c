@@ -11,6 +11,54 @@
 #include "entity.h"
 
 /* ══════════════════════════════════════════════════════════════════════════
+   SHARED BORDER PRIMITIVES
+   All panel drawing goes through these four functions.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+// Fill l..r with ═, then stamp left and right corner chars over it.
+// Used for top/bottom borders and dividers.
+static void border_hline(int y, int l, int r,
+                          const wchar_t *lc, const wchar_t *rc)
+{
+    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    for (int i = l; i <= r; i++) mvaddwstr(y, i, L"═");
+    mvaddwstr(y, l, lc);
+    mvaddwstr(y, r, rc);
+    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+}
+
+// Same as border_hline but stamps a centered title in CP_MAP_P over the fill.
+// Pass NULL title for a plain ═ line.
+static void border_hline_title(int y, int l, int r,
+                                const wchar_t *lc, const wchar_t *rc,
+                                const char *title)
+{
+    border_hline(y, l, r, lc, rc);
+    if (!title || !title[0]) return;
+    int tlen = (int)strlen(title);
+    int tmid = l + 1 + (r - l - 1 - tlen) / 2;
+    wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+    for (int i = 0; i < tlen; i++)
+        mvaddch(y, tmid + i, title[i]);
+    wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+}
+
+// ║ borders on left and right, spaces in between.
+static void border_row(int y, int l, int r)
+{
+    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    mvaddwstr(y, l, L"║");
+    mvaddwstr(y, r, L"║");
+    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    for (int i = l + 1; i < r; i++) mvaddch(y, i, ' ');
+}
+
+// Convenience macros for the three common border line types
+#define panel_top(y,l,r,title) border_hline_title(y, l, r, L"╔", L"╗", title)
+#define panel_bot(y,l,r)       border_hline(y, l, r, L"╚", L"╝")
+#define panel_div(y,l,r)       border_hline(y, l, r, L"╠", L"╣")
+
+/* ══════════════════════════════════════════════════════════════════════════
    MINIMAP
    ══════════════════════════════════════════════════════════════════════════ */
 
@@ -18,7 +66,6 @@ static void draw_map_border(int ox, int oy, Player *p)
 {
     int border_w = MAP_W * 2 + 2;
     int border_h = MAP_H + 2;
-
     int top      = oy - 1;
     int bot      = oy + border_h - 2;
     int left     = ox - 1;
@@ -32,76 +79,39 @@ static void draw_map_border(int ox, int oy, Player *p)
     int leg_left = right - leg_w;
     int leg_bot  = bot + 2;
 
-    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-
-    mvaddwstr(top - 1, left,  L"╔");
-    mvaddwstr(top - 1, right, L"╗");
-    const char *title = " RADAR ";
-    int tlen = (int)strlen(title);
-    int tmid = left + (border_w - tlen) / 2;
-    for (int i = left + 1; i < right; i++) {
-        move(top - 1, i);
-        if (i >= tmid && i < tmid + tlen) {
-            wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-            wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
-            addch(title[i - tmid]);
-            wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
-            wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-        } else {
-            addwstr(L"═");
-        }
-    }
-
-    mvaddwstr(top, left,  L"╠");
-    mvaddwstr(top, right, L"╣");
-    for (int i = left + 1; i < right; i++)
-        mvaddwstr(top, i, L"═");
-
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    border_hline_title(top - 1, left, right, L"╔", L"╗", "[RADAR]");
+    border_hline(top, left, right, L"╠", L"╣");
 
     wattron(stdscr, COLOR_PAIR(CP_MAP_BDR));
     for (int i = 0; i < MAP_H; i++) {
         mvaddwstr(oy + i, left,  L"║");
         mvaddwstr(oy + i, right, L"║");
     }
+    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR));
 
+    // bottom with coordinate leg
+    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    for (int i = left; i <= right; i++) mvaddwstr(bot, i, L"═");
     mvaddwstr(bot, left,     L"╚");
     mvaddwstr(bot, leg_left, L"╦");
     mvaddwstr(bot, right,    L"╣");
-    for (int i = left + 1;     i < leg_left; i++) mvaddwstr(bot, i, L"═");
-    for (int i = leg_left + 1; i < right;    i++) mvaddwstr(bot, i, L"═");
+    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
 
-    mvaddwstr(bot + 1, leg_left, L"║");
-    mvaddwstr(bot + 1, right,    L"║");
-
+    border_row(bot + 1, leg_left, right);
     move(bot + 1, leg_left + 1);
+    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR));
     for (int i = 0; i < clen; i++) addch(coords[i]);
-    for (int i = leg_left + 1 + clen; i < right; i++) addch(' ');
-
-    mvaddwstr(leg_bot, leg_left, L"╚");
-    mvaddwstr(leg_bot, right,    L"╝");
-    for (int i = leg_left + 1; i < right; i++)
-        mvaddwstr(leg_bot, i, L"═");
-
     wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR));
 
-    int vmid = oy + MAP_H / 2;
-    int hmid = left + border_w / 2;
-    wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
-    mvaddch(top - 1, hmid,      'N');
-    mvaddch(top,     hmid,      'S');
-    mvaddch(vmid,    left  + 1, 'W');
-    mvaddch(vmid,    right - 1, 'E');
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+    panel_bot(leg_bot, leg_left, right);
 }
 
 static void draw_map_tiles(int ox, int oy, int rows, int cols)
 {
-    int mscale = 2;
     for (int my = 0; my < MAP_H; my++) {
         for (int mx = 0; mx < MAP_W; mx++) {
             int sy = oy + my;
-            int sx = ox + mx * mscale;
+            int sx = ox + mx * 2;
             if (sy >= rows - 1 || sx + 1 >= cols) continue;
             if (map_solid(mx, my)) {
                 int t  = map_type(mx, my);
@@ -109,11 +119,11 @@ static void draw_map_tiles(int ox, int oy, int rows, int cols)
                        : (t == 3) ? CP_WALL3_M
                        : (t == 4) ? CP_WALL4_M : CP_WALL1_M;
                 wattron(stdscr, COLOR_PAIR(cp) | A_BOLD);
-                mvaddwstr(sy, sx, L"░░");
+                mvwaddstr(stdscr, sy, sx, "░░");
                 wattroff(stdscr, COLOR_PAIR(cp) | A_BOLD);
             } else {
                 wattron(stdscr, COLOR_PAIR(CP_MAP_EMPTY));
-                mvaddwstr(sy, sx, L"  ");
+                mvwaddstr(stdscr, sy, sx, "  ");
                 wattroff(stdscr, COLOR_PAIR(CP_MAP_EMPTY));
             }
         }
@@ -158,186 +168,109 @@ static void draw_map_player(Player *p, int ox, int oy, int rows, int cols)
 
 void ui_draw_minimap(Player *p, int rows, int cols)
 {
-    int ox = cols - (MAP_W * 2 + 2) - 2;
+    int ox = cols - (MAP_W * 2 + 2) - 1;
     if (ox < 0) ox = 0;
-    int oy = 3;
-    draw_map_border(ox, oy, p);
-    draw_map_tiles (ox, oy, rows, cols);
-    draw_map_player(p, ox, oy, rows, cols);
+    draw_map_border(ox, 3, p);
+    draw_map_tiles (ox, 3, rows, cols);
+    draw_map_player(p,  ox, 3, rows, cols);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   HUD — horizontal bar, top of screen
-   ══════════════════════════════════════════════════════════════════════════
-   Row 0:  ╔════╦══ HP ═══════════╦══ GUN ═══════╦══ KILLS ══╗
-   Row 1:  ║ P1 ║ [████████░░] 75 ║ M16   12dmg  ║     0     ║
-   Row 2:  ╚════╩════════════════╩═════════════╩═══════════╝
+   HUD — horizontal stats bar, top of screen
    ══════════════════════════════════════════════════════════════════════════ */
 
-// column layout — all measured from col 0
-#define P1_INNER    4    // width of P1 cell content
-#define HP_INNER    16   // width of HP cell content
-#define GUN_INNER   14   // width of GUN cell content
-#define KIL_INNER   9    // width of KILLS cell content
-#define BAR_W       10   // filled chars in health bar
+#define HUD_L_SPACE  2
+#define HUD_T_SPACE  1
+#define P_INNER      4
+#define HP_INNER     16
+#define GUN_INNER    13
+#define KIL_INNER    9
+#define BAR_W        10
 
-// derived positions
-#define HUD_L_SPACE  2   // 2 column gap from left edge
-#define HUD_T_SPACE   1   // 1 row gap from top edge
-
-#define P1_L    HUD_L_SPACE
-#define P1_R    (P1_L  + P1_INNER  + 1)
-#define HP_L    P1_R
-#define HP_R    (HP_L  + HP_INNER  + 1)
-#define GUN_L   HP_R
-#define GUN_R   (GUN_L + GUN_INNER + 1)
-#define KIL_L   GUN_R
-#define KIL_R   (KIL_L + KIL_INNER + 1)
-
-// draw a ═ run from col a+1 to col b-1
-static void hud_fill_hline(int row, int a, int b)
-{
-    for (int i = a + 1; i < b; i++)
-        mvaddwstr(row, i, L"═");
-}
-
-// write a section title centred between col a and col b on row, with ═ padding
-static void hud_title(int row, int a, int b, const char *title)
-{
-    int inner = b - a - 1;
-    int tlen  = (int)strlen(title);
-    int pad   = (inner - tlen) / 2;
-    int start = a + 1 + pad;
-
-    for (int i = a + 1; i < b; i++) {
-        move(row, i);
-        int ti = i - start;
-        if (ti >= 0 && ti < tlen) {
-            wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-            wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
-            addch(title[ti]);
-            wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
-            wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-        } else {
-            addwstr(L"═");
-        }
-    }
-}
+#define PLAYER_L  HUD_L_SPACE
+#define PLAYER_R  (PLAYER_L + P_INNER   + 1)
+#define HP_L      PLAYER_R
+#define HP_R      (HP_L     + HP_INNER  + 1)
+#define GUN_L     HP_R
+#define GUN_R     (GUN_L    + GUN_INNER + 1)
+#define KIL_L     GUN_R
+#define KIL_R     (KIL_L    + KIL_INNER + 1)
 
 void ui_draw_hud(Player *p)
 {
-    // ── placeholder values — wire to player fields when ready ─────────────
-    int         player_num = 1;
-    int         hp         = p->health;
-    int         max_hp     = 100;
-    const char *gun_name   = "M16";
-    int         gun_dmg    = 12;
-    int         kills      = 0;   // replace with p->kills
-
+    int hp     = p->health;
+    int max_hp = 100;
     if (hp < 0)      hp = 0;
     if (hp > max_hp) hp = max_hp;
 
-    // ── row 0: top border ─────────────────────────────────────────────────
+    // top border — full ═ fill, then joints, then section titles on top
+    border_hline_title(HUD_T_SPACE, PLAYER_L, KIL_R, L"╔", L"╗", NULL);
     wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    mvaddwstr(HUD_T_SPACE, PLAYER_R, L"╦");
+    mvaddwstr(HUD_T_SPACE, HP_R,     L"╦");
+    mvaddwstr(HUD_T_SPACE, GUN_R,    L"╦");
+    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    border_hline_title(HUD_T_SPACE, HP_L,  HP_R,  L"╦", L"╦", "[HP]");
+    border_hline_title(HUD_T_SPACE, GUN_L, GUN_R, L"╦", L"╦", "[GUN]");
+    border_hline_title(HUD_T_SPACE, KIL_L, KIL_R, L"╦", L"╗", "[KILLS]");
 
-    // corners and joints
-    mvaddwstr(HUD_T_SPACE + 0, P1_L,  L"╔");
-    mvaddwstr(HUD_T_SPACE + 0, P1_R,  L"╦");
-    mvaddwstr(HUD_T_SPACE + 0, HP_R,  L"╦");
-    mvaddwstr(HUD_T_SPACE + 0, GUN_R, L"╦");
-    mvaddwstr(HUD_T_SPACE + 0, KIL_R, L"╗");
-
-    // P1 cell — plain ═ fill, no title
-    hud_fill_hline(HUD_T_SPACE + 0, P1_L, P1_R);
-
-    // titled cells
-    hud_title(HUD_T_SPACE + 0, HP_L,  HP_R,  " HP ");
-    hud_title(HUD_T_SPACE + 0, GUN_L, GUN_R, " GUN ");
-    hud_title(HUD_T_SPACE + 0, KIL_L, KIL_R, " KILLS ");
-
+    // content row — outer borders then internal joints
+    border_row(HUD_T_SPACE + 1, PLAYER_L, KIL_R);
+    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    mvaddwstr(HUD_T_SPACE + 1, PLAYER_R, L"║");
+    mvaddwstr(HUD_T_SPACE + 1, HP_R,     L"║");
+    mvaddwstr(HUD_T_SPACE + 1, GUN_R,    L"║");
     wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
 
-    // ── row 1: content ────────────────────────────────────────────────────
-    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-    mvaddwstr(HUD_T_SPACE + 1, P1_L,  L"║");
-    mvaddwstr(HUD_T_SPACE + 1, P1_R,  L"║");
-    mvaddwstr(HUD_T_SPACE + 1, HP_R,  L"║");
-    mvaddwstr(HUD_T_SPACE + 1, GUN_R, L"║");
-    mvaddwstr(HUD_T_SPACE + 1, KIL_R, L"║");
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-
-    // P1 label — centered in cell, accent color
+    // P1 label
     {
-        char label[8];
-        snprintf(label, sizeof(label), "P%d", player_num);
-        int llen  = (int)strlen(label);
-        int lcol  = P1_L + 1 + (P1_INNER - llen) / 2;
-        for (int i = P1_L + 1; i < P1_R; i++) mvaddch(HUD_T_SPACE + 1, i, ' ');
+        int lcol = PLAYER_L + 1 + (P_INNER - 2) / 2;
         wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
-        mvprintw(HUD_T_SPACE + 1, lcol, "%s", label);
+        mvprintw(HUD_T_SPACE + 1, lcol, "P1");
         wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
     }
 
     // HP bar
     {
         int filled   = (BAR_W * hp) / max_hp;
-        int bar_pair = (hp > max_hp * 2/3) ? CP_WALL3
-                     : (hp > max_hp * 1/3) ? CP_WALL4
+        int bar_pair = (hp > max_hp*2/3) ? CP_WALL3
+                     : (hp > max_hp/3)   ? CP_WALL4
                      : CP_MAP_P;
         int col = HP_L + 1;
-
-        for (int i = HP_L + 1; i < HP_R; i++) mvaddch(HUD_T_SPACE + 1, i, ' ');
-
         mvaddch(HUD_T_SPACE + 1, col++, '[');
-
         wattron(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
-        for (int i = 0; i < filled; i++)     { mvaddwstr(HUD_T_SPACE + 1, col++, L"█"); }
+        for (int i = 0; i < filled;  i++) mvaddwstr(HUD_T_SPACE + 1, col++, L"█");
         wattroff(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
-
         wattron(stdscr, COLOR_PAIR(CP_MAP_BDR));
-        for (int i = filled; i < BAR_W; i++) { mvaddwstr(HUD_T_SPACE + 1, col++, L"░"); }
+        for (int i = filled; i < BAR_W; i++) mvaddwstr(HUD_T_SPACE + 1, col++, L"░");
         wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR));
-
         mvaddch(HUD_T_SPACE + 1, col++, ']');
-
         wattron(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
         mvprintw(HUD_T_SPACE + 1, col, " %d", hp);
         wattroff(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
     }
 
     // GUN cell
-    {
-        for (int i = GUN_L + 1; i < GUN_R; i++) mvaddch(HUD_T_SPACE + 1, i, ' ');
-        char gunbuf[GUN_INNER + 1];
-        snprintf(gunbuf, sizeof(gunbuf), " %-6s %3ddmg", gun_name, gun_dmg);
-        wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-        mvprintw(HUD_T_SPACE + 1, GUN_L + 1, "%-*.*s", GUN_INNER, GUN_INNER, gunbuf);
-        wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-    }
+    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    mvprintw(HUD_T_SPACE + 1, GUN_L + 1, " %-6s %2ddmg", "M16", 12);
+    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
 
-    // KILLS cell — centered number
+    // KILLS cell
     {
-        for (int i = KIL_L + 1; i < KIL_R; i++) mvaddch(HUD_T_SPACE + 1, i, ' ');
         char kbuf[8];
-        snprintf(kbuf, sizeof(kbuf), "%d", kills);
-        int klen = (int)strlen(kbuf);
-        int kcol = KIL_L + 1 + (KIL_INNER - klen) / 2;
+        snprintf(kbuf, sizeof(kbuf), "%d", 0);
+        int kcol = KIL_L + 1 + (KIL_INNER - (int)strlen(kbuf)) / 2;
         wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
         mvprintw(HUD_T_SPACE + 1, kcol, "%s", kbuf);
         wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
     }
 
-    // ── row 2: bottom border ──────────────────────────────────────────────
+    // bottom border — same pattern as top
+    border_hline(HUD_T_SPACE + 2, PLAYER_L, KIL_R, L"╚", L"╝");
     wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-    mvaddwstr(HUD_T_SPACE + 2, P1_L,  L"╚");
-    mvaddwstr(HUD_T_SPACE + 2, P1_R,  L"╩");
-    mvaddwstr(HUD_T_SPACE + 2, HP_R,  L"╩");
-    mvaddwstr(HUD_T_SPACE + 2, GUN_R, L"╩");
-    mvaddwstr(HUD_T_SPACE + 2, KIL_R, L"╝");
-    hud_fill_hline(HUD_T_SPACE + 2, P1_L,  P1_R);
-    hud_fill_hline(HUD_T_SPACE + 2, HP_L,  HP_R);
-    hud_fill_hline(HUD_T_SPACE + 2, GUN_L, GUN_R);
-    hud_fill_hline(HUD_T_SPACE + 2, KIL_L, KIL_R);
+    mvaddwstr(HUD_T_SPACE + 2, PLAYER_R, L"╩");
+    mvaddwstr(HUD_T_SPACE + 2, HP_R,     L"╩");
+    mvaddwstr(HUD_T_SPACE + 2, GUN_R,    L"╩");
     wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
 }
 
@@ -345,14 +278,14 @@ void ui_draw_hud(Player *p)
    CONTROLS — vertical panel, bottom-left
    ══════════════════════════════════════════════════════════════════════════ */
 
-#define KEY_INNER  12   // content width between ║ borders
-#define KEY_L_SPACE    2   // 2 column gap from left edge
-#define KEY_BOT_SPACE     1   // 1 row gap from bottom edge
+#define KEY_INNER    12
+#define KEY_L_SPACE   2
+#define KEY_B_SPACE   1
+#define KEY_NBINDS    9   // also used by server panel to locate keys_top
 
 void ui_draw_controls(int rows)
 {
-    typedef struct { const char *key; const char *desc; } Bind;
-    static const Bind binds[] = {
+    static const struct { const char *key, *desc; } binds[KEY_NBINDS] = {
         { "W",   "forward" },
         { "S",   "back"    },
         { "A",   "strafe<" },
@@ -363,61 +296,155 @@ void ui_draw_controls(int rows)
         { "M",   "map"     },
         { "Q",   "quit"    },
     };
-    int nbinds = (int)(sizeof(binds) / sizeof(binds[0]));
 
-    // panel sits at bottom-left, exactly tall enough for all binds + 2 border rows
-    int panel_h = nbinds + 2;
-    int top     = rows - panel_h - KEY_BOT_SPACE;
-    int left    = KEY_L_SPACE;
-    int right   = KEY_L_SPACE + KEY_INNER + 1;
+    int top   = rows - (KEY_NBINDS + 2) - KEY_B_SPACE;
+    int left  = KEY_L_SPACE;
+    int right = KEY_L_SPACE + KEY_INNER + 1;
 
-    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-    mvaddwstr(top, left,  L"╔");
-    mvaddwstr(top, right, L"╗");
-    {
-        const char *title = " KEYS ";
-        int tlen = (int)strlen(title);
-        int tmid = left + 1 + (KEY_INNER - tlen) / 2;
-        for (int i = left + 1; i < right; i++) {
-            move(top, i);
-            int ti = i - tmid;
-            if (ti >= 0 && ti < tlen) {
-                wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-                wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
-                addch(title[ti]);
-                wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
-                wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-            } else {
-                addwstr(L"═");
-            }
-        }
-    }
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    panel_top(top, left, right, "[KEYS]");
 
-    for (int b = 0; b < nbinds; b++) {
+    for (int b = 0; b < KEY_NBINDS; b++) {
         int row = top + 1 + b;
-
-        wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-        mvaddwstr(row, left,  L"║");
-        mvaddwstr(row, right, L"║");
-        wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-
-        for (int i = left + 1; i < right; i++) mvaddch(row, i, ' ');
-
+        border_row(row, left, right);
         wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
         mvprintw(row, left + 1, " %-3s", binds[b].key);
         wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
-
         wattron(stdscr, COLOR_PAIR(CP_MAP_BDR));
         mvprintw(row, left + 5, "%-*s", KEY_INNER - 4, binds[b].desc);
         wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR));
     }
 
-    int bot = top + panel_h - 1;
-    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
-    mvaddwstr(bot, left,  L"╚");
-    mvaddwstr(bot, right, L"╝");
-    for (int i = left + 1; i < right; i++)
-        mvaddwstr(bot, i, L"═");
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    panel_bot(top + KEY_NBINDS + 1, left, right);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SERVER PANEL — left side, between HUD and keys
+   ══════════════════════════════════════════════════════════════════════════ */
+
+static int srv_connected = 0;
+
+void ui_toggle_connect(void) { srv_connected = !srv_connected; }
+
+#define SRV_INNER  20
+#define SRV_LEFT   KEY_L_SPACE
+
+void ui_draw_server(int rows)
+{
+    int keys_top = rows - (KEY_NBINDS + 2) - KEY_B_SPACE;
+    int top      = HUD_T_SPACE + 3 + 1;
+    int bot      = keys_top - 2;
+    int l        = SRV_LEFT;
+    int r        = SRV_LEFT + SRV_INNER + 1;
+
+    if (bot - top < 3) return;
+
+    panel_top(top, l, r, "[SERVER]");
+
+    border_row(top + 1, l, r);
+    if (srv_connected) {
+        wattron(stdscr, COLOR_PAIR(CP_WALL3) | A_BOLD);
+        mvprintw(top + 1, l + 2, "● CONNECTED C=leave");
+        wattroff(stdscr, COLOR_PAIR(CP_WALL3) | A_BOLD);
+    } else {
+        wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+        mvprintw(top + 1, l + 2, "○ OFFLINE   C=join ");
+        wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+    }
+
+    panel_div(top + 2, l, r);
+
+    int content_rows = bot - (top + 2) - 1;
+    int drawn = 0;
+
+    // header
+    if (drawn < content_rows) {
+        border_row(top + 3, l, r);
+        wattron(stdscr, COLOR_PAIR(CP_MAP_BDR));
+        mvprintw(top + 3, l + 2, "%-3s %-10s %-4s", "ID", "HEALTH", "KIL");
+        wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR));
+        drawn++;
+    }
+
+    for (int i = 0; i < num_entities && drawn < content_rows; i++) {
+        Entity *e = &entities[i];
+        int row = top + 3 + drawn;
+        border_row(row, l, r);
+
+        wattron(stdscr, COLOR_PAIR(CP_WALL2) | A_BOLD);
+        mvprintw(row, l + 2, "P%-2d", e->id);
+        wattroff(stdscr, COLOR_PAIR(CP_WALL2) | A_BOLD);
+
+        int hp      = e->health;
+        int bar_max = 10;
+        int filled  = (bar_max * hp) / 100;
+        if (filled < 0) filled = 0;
+        if (filled > bar_max) filled = bar_max;
+        int hp_pair = (hp > 66) ? CP_WALL3 : (hp > 33) ? CP_WALL4 : CP_MAP_P;
+        wattron(stdscr, COLOR_PAIR(hp_pair) | A_BOLD);
+        for (int b = 0; b < filled;   b++) mvaddwstr(row, l + 6 + b, L"█");
+        wattroff(stdscr, COLOR_PAIR(hp_pair) | A_BOLD);
+        wattron(stdscr, COLOR_PAIR(CP_MAP_BDR));
+        for (int b = filled; b < bar_max; b++) mvaddwstr(row, l + 6 + b, L"░");
+        mvprintw(row, l + 17, "%-3d", 10);
+        wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR));
+
+        drawn++;
+    }
+
+    while (drawn < content_rows) {
+        border_row(top + 3 + drawn, l, r);
+        drawn++;
+    }
+
+    panel_bot(bot, l, r);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EVENT LOG — bottom-right, below minimap
+   ══════════════════════════════════════════════════════════════════════════ */
+
+#define LOG_MAX     32
+#define LOG_INNER   (MAP_W * 2 + 2)/2
+#define LOG_HEIGHT  17
+#define LOG_BOT     1
+
+static char log_lines[LOG_MAX][64];
+static int  log_count = 0;
+
+void ui_log_event(const char *msg)
+{
+    if (log_count < LOG_MAX) {
+        snprintf(log_lines[log_count++], 64, "%s", msg);
+    } else {
+        memmove(log_lines[0], log_lines[1], sizeof(log_lines[0]) * (LOG_MAX - 1));
+        snprintf(log_lines[LOG_MAX - 1], 64, "%s", msg);
+    }
+}
+
+void ui_draw_eventlog(int rows, int cols)
+{
+    int r   = cols - 3;
+    int l   = r - LOG_INNER - 1;
+    int bot = rows - 1 - LOG_BOT;
+    int top = bot - LOG_HEIGHT - 1;
+
+    if (l < 0 || top < 0) return;
+
+    panel_top(top, l, r, "[EVENTS]");
+
+    int start = log_count - LOG_HEIGHT;
+    if (start < 0) start = 0;
+
+    for (int row = 0; row < LOG_HEIGHT; row++) {
+        int y  = top + 1 + row;
+        int li = start + row;
+        border_row(y, l, r);
+        if (li < log_count) {
+            wattron(stdscr, COLOR_PAIR(CP_MAP_BDR));
+            mvprintw(y, l + 2, "%-*.*s", LOG_INNER - 2, LOG_INNER - 2, log_lines[li]);
+            wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR));
+        }
+    }
+
+    panel_bot(bot, l, r);
 }
