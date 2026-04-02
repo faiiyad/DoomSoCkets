@@ -63,20 +63,25 @@ static void draw_walls(Player *p, int rows, int cols)
         int top    = half - wall_h / 2;
         int bottom = half + wall_h / 2;
 
-        double bright = 1.0 - (dist / MAX_DEPTH);
-        if (bright < 0) bright = 0;
-        if (side == 1) bright *= 0.6;
+        double bright = 1.0 - (dist * 4 / MAX_DEPTH);
+        if (bright < 0.0) bright = 0.0;
+        if (bright > 1.0) bright = 1.0;
 
         int shade_idx = (int)(bright * (N_SHADES - 1));
         char wch = SHADES[shade_idx];
 
-        int cpair;
-        switch (wtype) {
-            case 2:  cpair = CP_WALL2; break;
-            case 3:  cpair = CP_WALL3; break;
-            case 4:  cpair = CP_WALL4; break;
-            default: cpair = (side == 1) ? CP_XWALL : CP_WALL1; break;
-        }
+        double t = 1.0 - bright;
+        t = t * t * (3.0 - 2.0 * t);
+        if (t < 0.0) t = 0.0;
+        if (t > 1.0) t = 1.0;
+
+        int col_idx = (int)(t * (N_WALL_SHADES - 1));
+        if (col_idx < 0) col_idx = 0;
+        if (col_idx >= N_WALL_SHADES) col_idx = N_WALL_SHADES - 1;
+
+        int cpair = (side == 1) ? CP_WALL_S1 + col_idx : CP_WALL_F1 + col_idx;
+
+        // cpair = (side == 1) ? CP_XWALL : CP_WALL1;
 
         attron(COLOR_PAIR(cpair));
         for (int y = top; y < bottom; y++) {
@@ -128,8 +133,8 @@ void render(Player *p, int show_map)
     
     ui_draw_hud       (p);
     ui_draw_controls  (rows);
-    ui_draw_server   (rows);
-    ui_draw_eventlog (rows, cols);
+    // ui_draw_server   (rows);
+    // ui_draw_eventlog (rows, cols);
     
     draw_crosshair    (rows, cols);
     if (show_map){

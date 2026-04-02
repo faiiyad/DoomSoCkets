@@ -13,6 +13,7 @@ typedef struct {
     double     angle;
     double     dist;
     int        health;
+    int       col;
 } Entity;
 
 extern Entity entities[MAX_ENTITIES];
