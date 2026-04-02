@@ -13,6 +13,7 @@
 #include "entity.h"
 #include "network.h"
 #include "client.h"
+#include "ui.h"
 
 static void init_colors(void)
 {
