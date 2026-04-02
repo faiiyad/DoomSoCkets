@@ -20,7 +20,7 @@ int   num_entities = 0;
 
 // ── FRONT ─────────────────────────────────────────────────────────────────
 
-static const char *imp_front[SPR_H] = {
+static const char *sprite_front[SPR_H] = {
     " DDRRRRRRRRDD ",
     "DORWRRRRRRWROD",
     "DORWRRRRRRWROD",
@@ -39,7 +39,7 @@ static const char *imp_front[SPR_H] = {
     "DRRR      RRRD",
 };
 
-static const char *imp_fside[SPR_H] = {
+static const char *sprite_fside[SPR_H] = {
     " DDOORRRRRRRD ",
     "DDOORRWRRRRWRD",
     "DDOORRWRRRRWRD",
@@ -58,7 +58,7 @@ static const char *imp_fside[SPR_H] = {
     " DORR    DRRD",
 };
 
-static const char *imp_side[SPR_H] = {
+static const char *sprite_side[SPR_H] = {
     " DDDDDDOORRRR ",
     "DDDDDDOOWRRRRW",
     "DDDDDDOOWRRRRW",
@@ -77,7 +77,7 @@ static const char *imp_side[SPR_H] = {
     " DDOOR  DDOOR ",
 };
 
-static const char *imp_bside[SPR_H] = {
+static const char *sprite_bside[SPR_H] = {
     " DDDDDDDDOORR ",
     "DDDDDDDDOORRWR",
     "DDDDDDDDOORRWR",
@@ -96,7 +96,7 @@ static const char *imp_bside[SPR_H] = {
     " DDDO    DDDO",
 };
 
-static const char *imp_back[SPR_H] = {
+static const char *sprite_back[SPR_H] = {
     " DDDDDDDDDDDD ",
     "DDDDDDDDDDDDDD",
     "ODDDDDDDDDDDDO",
@@ -118,27 +118,20 @@ static const char *imp_back[SPR_H] = {
 static int entity_color(Entity *e, char c)
 {
     switch (c) {
-        case 'R': return e->col + 0;
-        case 'O': return e->col + 1;
-        case 'D': return e->col + 2;
+        case 'R': return e->col + 1;
+        case 'O': return e->col + 2;
+        case 'D': return e->col + 3;
         case 'W': return CP_ENTITY_W;
-        default:  return e->col + 0;
+        default:  return e->col + 1;
     }
 }
 
-static const char **dir_art[5] = {
-    (const char **)imp_front,
-    (const char **)imp_fside,
-    (const char **)imp_side,
-    (const char **)imp_bside,
-    (const char **)imp_back,
-};
-static const char **dir_clr[5] = {
-    (const char **)imp_front,
-    (const char **)imp_fside,
-    (const char **)imp_side,
-    (const char **)imp_bside,
-    (const char **)imp_back,
+static const char **sprite_dir[5] = {
+    (const char **)sprite_front,
+    (const char **)sprite_fside,
+    (const char **)sprite_side,
+    (const char **)sprite_bside,
+    (const char **)sprite_back,
 };
 
 // ── scale constants ────────────────────────────────────────────────────────
@@ -156,7 +149,7 @@ void entities_init(double spawn_x, double spawn_y)
     entities[0].y      = spawn_y;
     entities[0].angle  = 0.0;
     entities[0].health = 10;
-    entities[0].col    = CP_ENTITY_B1;
+    entities[0].col    = CP_ENTITY_B;
     num_entities       = 1;
 }
 
@@ -282,8 +275,8 @@ void entities_draw(Player *p, double *z_buf, int rows, int cols)
             case 7: art_idx=1; mirror=1; break;
         }
 
-        const char **art = dir_clr[art_idx];
-        const char **clr = dir_clr[art_idx];
+        const char **art = sprite_dir[art_idx];
+        const char **clr = sprite_dir[art_idx];
 
         for (int row = 0; row < entity_h; row++) {
             int sy_s = draw_top + row;

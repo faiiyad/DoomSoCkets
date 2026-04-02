@@ -135,9 +135,9 @@ static void draw_map_player(Player *p, int ox, int oy, int rows, int cols)
         int ey = oy + (int)e->y;
         int ex = ox + (int)(e->x) * 2;
         if (ey > 0 && ey < rows - 1 && ex >= 0 && ex < cols) {
-            wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+            wattron(stdscr, COLOR_PAIR(e->col) | A_BOLD);
             mvwaddch(stdscr, ey, ex, 'X');
-            wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+            wattroff(stdscr, COLOR_PAIR(e->col) | A_BOLD);
         }
     }
 

@@ -89,22 +89,25 @@ static void init_colors(void)
         { TITLE4,      208,          -1  },
         { TITLEBG,     0,            -1  },
 
-        // ── entity — red (light → dark) ───────────────────────────────────
+        // ── entity — red
+        { CP_ENTITY_R,  160,       -1  },
         { CP_ENTITY_R1,  160,       160  },
         { CP_ENTITY_R2,  124,       124  },
         { CP_ENTITY_R3,  88,         88  },
  
-        // ── entity — yellow (light → dark) ────────────────────────────────
+        // ── entity — yellow
+        { CP_ENTITY_Y,  226,       -1  },
         { CP_ENTITY_Y1,  226,       226  },
         { CP_ENTITY_Y2,  220,       220  },
         { CP_ENTITY_Y3,  214,       214  },
  
-        // ── entity — blue (light → dark) ──────────────────────────────────
+        // ── entity — blue
+        { CP_ENTITY_B,   39,         -1  },
         { CP_ENTITY_B1,  39,         39  },
         { CP_ENTITY_B2,  27,         27  },
         { CP_ENTITY_B3,  21,         21  },
  
-        // ── entity — shared ───────────────────────────────────────────────
+        // ── entity — shared
         { CP_ENTITY_W,   255,       255  },  // white eye
     };
 
