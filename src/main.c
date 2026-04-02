@@ -126,6 +126,9 @@ static void on_server_update(ClientUpdate u)
     // fprintf(log, "got id=%d col=%c x=%.2f y=%.2f health=%d\n",
     //         u.id, u.col, u.x, u.y, u.health);
     // fclose(log);
+    if (u.id == client_get_own_id()){
+        return;
+    }
     entity_upsert(u.id, u.col, u.x, u.y, u.angle, u.health);
 }
 
