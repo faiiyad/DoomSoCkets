@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #define _XOPEN_SOURCE_EXTENDED
-#include <ncursesw/ncurses.h>
+#include <ncurses.h>
 #include "entity.h"
 #include "defs.h"
 #include "map.h"
@@ -149,7 +149,7 @@ void entities_init(double spawn_x, double spawn_y)
     entities[0].y      = spawn_y;
     entities[0].angle  = 0.0;
     entities[0].health = 10;
-    entities[0].col    = CP_ENTITY_B;
+    entities[0].col    = CP_ENTITY_R;
     num_entities       = 1;
 }
 
@@ -309,6 +309,43 @@ void entities_draw(Player *p, double *z_buf, int rows, int cols)
                 mvaddch(sy_s, sx_s, ch);
                 attroff(COLOR_PAIR(pair) | A_BOLD);
             }
+        }
+    }
+}
+
+void entity_upsert(int id, double x, double y, double angle, int health)
+{
+    // update existing
+    for (int i = 0; i < num_entities; i++) {
+        if (entities[i].id == id) {
+            entities[i].x      = x;
+            entities[i].y      = y;
+            entities[i].angle  = angle;
+            entities[i].health = health;
+            
+            return;
+        }
+    }
+
+    // not found, add new
+    if (num_entities >= MAX_ENTITIES) return;
+    entities[num_entities].id     = id;
+    entities[num_entities].x      = x;
+    entities[num_entities].y      = y;
+    entities[num_entities].angle  = angle;
+    entities[num_entities].health = health;
+    entities[num_entities].col    = CP_ENTITY_R;
+    num_entities++;
+}
+
+
+void entity_remove(int id)
+{
+    for (int i = 0; i < num_entities; i++) {
+        if (entities[i].id == id) {
+            entities[i] = entities[num_entities - 1];
+            num_entities--;
+            return;
         }
     }
 }

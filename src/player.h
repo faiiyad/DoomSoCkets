@@ -8,4 +8,5 @@ typedef struct {
     int col;
 } Player;
 
+
 #endif

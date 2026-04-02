@@ -78,14 +78,14 @@ static void update_capacity(struct pollfd **pfds, Client **clients,
     *capacity = new_capacity;
 }
 
-void remove_client(nfds_t idx, struct pollfd *pfds, Client *clients,
-                   nfds_t *nfds)
-{
-    close(pfds[idx].fd);
-    pfds[idx]     = pfds[*nfds - 1];
-    clients[idx]  = clients[*nfds - 1];
-    (*nfds)--;
-}
+// void remove_client(nfds_t idx, struct pollfd *pfds, Client *clients,
+//                    nfds_t *nfds)
+// {
+//     close(pfds[idx].fd);
+//     pfds[idx]     = pfds[*nfds - 1];
+//     clients[idx]  = clients[*nfds - 1];
+//     (*nfds)--;
+// }
 
 void add_client(int new_socket, struct pollfd **pfds, Client **clients,
                 nfds_t *nfds, nfds_t *capacity)
@@ -95,7 +95,7 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
     int client_idx = *nfds;
     (*pfds)[client_idx].fd       = new_socket;
     (*pfds)[client_idx].events   = POLLIN;
-    (*pfds)[client_idx].revents = 0; 
+    (*pfds)[client_idx].revents = 0;
 
     (*clients)[client_idx].fd           = new_socket;
     (*clients)[client_idx].entity.id    = next_entity_id++;
@@ -167,4 +167,24 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
         server_log("invalid entity update from fd %d: %s", pfds[idx].fd, buffer);
     }
     return 0;
+}
+
+
+void remove_client(nfds_t idx, struct pollfd *pfds, Client *clients,
+                   nfds_t *nfds)
+{
+    // broadcast removal to all other clients
+    char buf[32];
+    int len = snprintf(buf, sizeof(buf), "REMOVE %d\n",
+                       clients[idx].entity.id);
+    for (nfds_t i = 1; i < *nfds; i++) {
+        if (i == idx) continue;
+        if (write(clients[i].fd, buf, len) == -1)
+            perror("write");
+    }
+
+    close(pfds[idx].fd);
+    pfds[idx]    = pfds[*nfds - 1];
+    clients[idx] = clients[*nfds - 1];
+    (*nfds)--;
 }
