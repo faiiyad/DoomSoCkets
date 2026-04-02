@@ -125,6 +125,11 @@ static void on_server_update(ClientUpdate u)
     entity_upsert(u.id, u.x, u.y, u.angle, u.health);
 }
 
+static void on_server_remove(int id)
+{
+    entity_remove(id);
+}
+
 int main(void)
 {
     setlocale(LC_ALL, "");
@@ -136,10 +141,10 @@ int main(void)
     curs_set(0);
     init_colors();
 
-    Player player = { 8.0, 8.0, 0.0 };
+    Player player = { 8.0, 8.0, 0.0, 100};
     map_find_spawn(&player.x, &player.y);
 
-    entities_init(player.x + 1.0, player.y);
+    // entities_init(player.x + 1.0, player.y);
     client_connect("127.0.0.1", NETWORK_PORT);
 
 
@@ -151,7 +156,7 @@ int main(void)
     struct timespec ts = { 0, 16000000L };  // ~60 fps
 
     while (1) {
-        client_recv_updates(on_server_update);
+        client_recv_updates(on_server_update, on_server_remove);
         int ch = getch();
         if (ch == 'c' || ch == 'C') ui_toggle_connect();
         if (ch == 'q' || ch == 'Q') break;

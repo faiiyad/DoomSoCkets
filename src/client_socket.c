@@ -28,7 +28,7 @@ int setup_client_socket(const char *host, int port)
     }
 
     if (connect(sock_fd, (struct sockaddr *)&address, sizeof(address)) == -1) {
-        perror("connect");
+        perror("connect-client");
         close(sock_fd);
         exit(1);
     }

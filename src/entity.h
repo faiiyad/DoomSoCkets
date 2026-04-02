@@ -23,5 +23,6 @@ void entities_init(double spawn_x, double spawn_y);
 void entities_update(Player *p, int input);
 void entities_draw(Player *p, double *z_buf, int rows, int cols);
 void entity_upsert(int id, double x, double y, double angle, int health);
+void entity_remove(int id);
 
 #endif

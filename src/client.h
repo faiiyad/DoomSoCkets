@@ -11,6 +11,6 @@ typedef struct {
     int    health;
 } ClientUpdate;
 
-void client_recv_updates(void (*on_update)(ClientUpdate));
+void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int));
 
 #endif

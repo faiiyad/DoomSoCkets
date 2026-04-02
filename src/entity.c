@@ -335,3 +335,15 @@ void entity_upsert(int id, double x, double y, double angle, int health)
     entities[num_entities].health = health;
     num_entities++;
 }
+
+
+void entity_remove(int id)
+{
+    for (int i = 0; i < num_entities; i++) {
+        if (entities[i].id == id) {
+            entities[i] = entities[num_entities - 1];
+            num_entities--;
+            return;
+        }
+    }
+}

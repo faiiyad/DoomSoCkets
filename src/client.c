@@ -47,11 +47,10 @@ void client_disconnect(void)
 }
 
 
-void client_recv_updates(void (*on_update)(ClientUpdate))
+void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int))
 {
     if (sock_fd == -1) return;
 
-    // Check if data is available without blocking
     struct pollfd pfd = { .fd = sock_fd, .events = POLLIN };
     while (poll(&pfd, 1, 0) > 0 && (pfd.revents & POLLIN)) {
         static char buf[4096];
@@ -66,24 +65,25 @@ void client_recv_updates(void (*on_update)(ClientUpdate))
         buf_len += n;
         buf[buf_len] = '\0';
 
-        // Process all complete lines
         char *line = buf;
         char *newline;
         while ((newline = strchr(line, '\n')) != NULL) {
             *newline = '\0';
 
+            int id;
             ClientUpdate u;
-            if (sscanf(line, "%d %lf %lf %lf %d",
-                       &u.id, &u.x, &u.y, &u.angle, &u.health) == 5) {
+            if (strncmp(line, "REMOVE", 6) == 0) {
+                if (sscanf(line, "REMOVE %d", &id) == 1)
+                    on_remove(id);
+            } else if (sscanf(line, "%d %lf %lf %lf %d",
+                              &u.id, &u.x, &u.y, &u.angle, &u.health) == 5) {
                 on_update(u);
             }
             line = newline + 1;
         }
 
-        // Move leftover incomplete line to front of buffer
         buf_len = (buf + buf_len) - line;
         memmove(buf, line, buf_len);
-
         pfd.revents = 0;
     }
 }
