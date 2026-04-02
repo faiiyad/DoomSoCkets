@@ -20,27 +20,55 @@ static void init_colors(void)
     start_color();
     use_default_colors();
 
+    // SOME SYSTEMS CANT CHANGE COLOUR
+    // SO NEED TO CHECK  can_change_color()  but works my machine
+
+    for (int i = 0; i < N_WALL_SHADES; i++) {
+        float t = 0.5f + 0.8f * (1.0f - (float)i / (N_WALL_SHADES - 1));
+
+        // front: base rgb(135, 95, 0)
+        init_color(WALL_COLOR_BASE + i,
+            (short)(529 * t),   // 135/255*1000
+            (short)(373 * t),   // 95/255*1000
+            (short)(0));        // stays 0
+
+        init_pair(CP_WALL_F1 + i, WALL_COLOR_BASE + i, -1);
+
+        // side: base rgb(95, 65, 0)
+        init_color(WALL_COLOR_BASE + N_WALL_SHADES + i,
+            (short)(373 * t),   // 95/255*1000
+            (short)(254 * t),   // 65/255*1000
+            (short)(0));
+
+        init_pair(CP_WALL_S1 + i, WALL_COLOR_BASE + N_WALL_SHADES + i, -1);
+    }
+
     // { pair id, fg, bg }  — use -1 for terminal default bg
     static const short PAL[][3] = {
-        // ── 3D view ───────────────────────────────────────────────────────
+        // TODO: need to get rid but used by title rn
+        { CP_WALL4,    226,          -1  }, 
+        { CP_HUD,      COLOR_BLACK,  COLOR_WHITE },
+        // ── 3D view (not used but here just in case) ───────────────────
         { CP_WALL1,    94,           -1  },
-        { CP_WALL2,    51,           -1  },  // bright cyan
-        { CP_WALL3,    46,           -1  },  // bright green
-        { CP_WALL4,    226,          -1  },  // bright yellow
         { CP_XWALL,    58,           -1  },  // olive — dark side face
+        //
         { CP_FLOOR,    240,          -1  },
         { CP_CEIL,     17,           -1  },  // dark navy
-        { CP_HUD,      COLOR_BLACK,  COLOR_WHITE },
 
         //22
         // ── minimap radar ─────────────────────────────────────────────────
-        { CP_MAP_BDR,   64,          -1  },  // olive fg, dark green bg
         { CP_MAP_P,     124,         232 },  // red on near-black
         { CP_MAP_EMPTY, 232,         232 },  // near-black solid floor
-        { CP_WALL1_M,   82,          -1  },  // mid green solid
-        { CP_WALL2_M,   34,          -1  },  // green solid
-        { CP_WALL3_M,   40,          -1  },  // bright green solid
-        { CP_WALL4_M,   28,          -1  },  // lime solid
+        { CP_WALL_M,   82,          -1  },  // mid green solid
+        //82, 34, 40, 28
+
+        // ── UI widget colors ───────────────────────────────────────────────
+        { CP_UI_BDR,   64,          -1  },  // olive fg, dark green bg
+        { CP_UI_GOOD,  46,           -1  },  // good/connected/healthy
+        { CP_UI_WARN,  226,          -1  },  // warning/medium status
+        { CP_UI_BAD,   124,          -1  },  // bad/offline/danger
+        { CP_UI_LABEL, 81,           -1  },  // cyan label text
+        { CP_UI_TEXT,  250,          -1  },  // neutral light grey
 
         // ── gun ───────────────────────────────────────────────────────────
         { CP_GUN,      238,          -1  },
@@ -51,6 +79,7 @@ static void init_colors(void)
         { MUZ_1,       230,          -1  },
         { MUZ_2,       217,          -1  },
         { MUZ_3,       88,           -1  },
+        { GUN_ACC,     51,          -1  },  // aqua
         { GUN_BODY,    64,           -1  },  // olive green  — barrel
         { GUN_TRIM,    22,           -1  },  // dark green   — frame
         { GUN_DIRT,    58,           -1  },  // khaki        — worn detail
@@ -62,12 +91,26 @@ static void init_colors(void)
         { TITLE4,      208,          -1  },
         { TITLEBG,     0,            -1  },
 
-        // entity
-        { CP_ENTITY_FAR, 160,       160  },  // red
-        { CP_ENTITY_R, 160,         160  },  // red
-        { CP_ENTITY_D, 88,          88 },  // dark red/brown shadow
-        { CP_ENTITY_O, 124,         124  },  // orange highlight
-        { CP_ENTITY_W, 255,         255  },  // white eye
+        // ── entity — red
+        { CP_ENTITY_R,  160,       -1  },
+        { CP_ENTITY_R1,  160,       160  },
+        { CP_ENTITY_R2,  124,       124  },
+        { CP_ENTITY_R3,  88,         88  },
+ 
+        // ── entity — yellow
+        { CP_ENTITY_Y,  226,       -1  },
+        { CP_ENTITY_Y1,  226,       226  },
+        { CP_ENTITY_Y2,  220,       220  },
+        { CP_ENTITY_Y3,  214,       214  },
+ 
+        // ── entity — blue
+        { CP_ENTITY_B,   39,         -1  },
+        { CP_ENTITY_B1,  39,         39  },
+        { CP_ENTITY_B2,  27,         27  },
+        { CP_ENTITY_B3,  21,         21  },
+ 
+        // ── entity — shared
+        { CP_ENTITY_W,   255,       255  },  // white eye
     };
 
     for (int i = 0; i < (int)(sizeof PAL / sizeof PAL[0]); i++)

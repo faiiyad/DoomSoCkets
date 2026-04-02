@@ -64,7 +64,7 @@ static int resolve_color(char c) {
     switch (c) {
         case 'F': return GUN_TRIM;
         case 'B': return GUN_BODY;
-        case 'E': return CP_WALL2;
+        case 'E': return GUN_ACC;
         case 'S': return MUZ_1;
         case 'D': return GUN_DIRT;
         case 'H': return HAND_CLR_S;

@@ -274,10 +274,9 @@ static int get_title_color(char c)
 
 void name_printer(char *name, int index, char c){
     int color = get_title_color(c);
-    int len = strlen(name);
     attron(COLOR_PAIR(color));
-    
-    mvprintw(index, 0, name);
+
+    mvprintw(index, 0, "%s", name);
     
     attroff(COLOR_PAIR(color));            
 };
@@ -468,7 +467,7 @@ void show_title_screen(void)
         char bg_ch;
 
         if (frame < 3) {
-            bg_pair = CP_MAP_W;  bg_ch = ' ';
+            bg_pair = CP_UI_BDR;  bg_ch = ' ';
         } else if (frame < 10) {
             bg_pair = MUZ_1;     bg_ch = '#';
         } else if (frame < 20) {

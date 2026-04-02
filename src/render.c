@@ -11,9 +11,9 @@
 #include "entity.h"
 #include "ui.h"
 
-// z_buffer — one depth value per screen column, filled by draw_walls
+// z_buffer, stores distance for each column for entities to check against when drawing
 static double *z_buf = NULL;
-static int     z_buf_cols = 0;
+static int z_buf_cols = 0;
 
 static void ensure_zbuf(int cols)
 {
@@ -24,7 +24,6 @@ static void ensure_zbuf(int cols)
     }
 }
 
-/* ── ceiling and floor ──────────────────────────────────────────────────── */
 static void draw_ceiling_floor(int rows, int cols)
 {
     int half = rows / 2;
@@ -41,7 +40,6 @@ static void draw_ceiling_floor(int rows, int cols)
     }
 }
 
-/* ── wall columns — also fills z_buf ───────────────────────────────────── */
 static void draw_walls(Player *p, int rows, int cols)
 {
     ensure_zbuf(cols);
@@ -55,7 +53,7 @@ static void draw_walls(Player *p, int rows, int cols)
         dist *= cos(ray_angle - p->angle);
         if (dist < 0.001) dist = 0.001;
 
-        z_buf[x] = dist;   // ← store for entity occlusion
+        z_buf[x] = dist;
 
         int wall_h = (int)(rows / dist);
         if (wall_h > rows) wall_h = rows;
@@ -63,20 +61,26 @@ static void draw_walls(Player *p, int rows, int cols)
         int top    = half - wall_h / 2;
         int bottom = half + wall_h / 2;
 
-        double bright = 1.0 - (dist / MAX_DEPTH);
-        if (bright < 0) bright = 0;
-        if (side == 1) bright *= 0.6;
+        double bright = 1.0 - (dist * 4 / MAX_DEPTH);
+        if (bright < 0.0) bright = 0.0;
+        if (bright > 1.0) bright = 1.0;
 
         int shade_idx = (int)(bright * (N_SHADES - 1));
         char wch = SHADES[shade_idx];
 
-        int cpair;
-        switch (wtype) {
-            case 2:  cpair = CP_WALL2; break;
-            case 3:  cpair = CP_WALL3; break;
-            case 4:  cpair = CP_WALL4; break;
-            default: cpair = (side == 1) ? CP_XWALL : CP_WALL1; break;
-        }
+        double t = 1.0 - bright;
+        t = t * t * (3.0 - 2.0 * t);
+        if (t < 0.0) t = 0.0;
+        if (t > 1.0) t = 1.0;
+
+        int col_idx = (int)(t * (N_WALL_SHADES - 1));
+        if (col_idx < 0) col_idx = 0;
+        if (col_idx >= N_WALL_SHADES) col_idx = N_WALL_SHADES - 1;
+
+        int cpair = (side == 1) ? CP_WALL_S1 + col_idx : CP_WALL_F1 + col_idx;
+
+        // No colour shading on walls below
+        // cpair = (side == 1) ? CP_XWALL : CP_WALL1;
 
         attron(COLOR_PAIR(cpair));
         for (int y = top; y < bottom; y++) {
@@ -87,35 +91,17 @@ static void draw_walls(Player *p, int rows, int cols)
     }
 }
 
-/* ── HUD ────────────────────────────────────────────────────────────────── */
-// static void draw_hud(Player *p, int rows)
-// {
-//     attron(COLOR_PAIR(CP_HUD) | A_BOLD);
-//     mvprintw(rows - 1, 0,
-//         " [WASD] Move  [K/L] Turn  [M] Map  [Q] Quit  |  pos(%.1f,%.1f) ang:%.0f° ",
-//         p->x, p->y, p->angle * 180.0 / M_PI);
-//     attroff(COLOR_PAIR(CP_HUD) | A_BOLD);
-// }
-
-/* ── crosshair ──────────────────────────────────────────────────────────── */
 static void draw_crosshair(int rows, int cols)
 {
     int half = rows / 2;
     attron(A_BOLD | COLOR_PAIR(CP_MAP_P));
     
     mvaddch(half, cols / 2,     'x');
-    // mvaddch(half + 1, cols / 2,     '|');
     mvaddch(half,     cols / 2 - 2, '[');
-    // mvaddch(half,     cols / 2 - 1, ' ');
-    // mvaddch(half,     cols / 2 + 1, ' ');
     mvaddch(half,     cols / 2 + 2, ']');
     attroff(A_BOLD | COLOR_PAIR(CP_MAP_P));
 }
 
-/* ── minimap tiles ──────────────────────────────────────────────────────── */
-
-
-/* ── main render entry ──────────────────────────────────────────────────── */
 void render(Player *p, int show_map)
 {
     int rows, cols;
@@ -128,8 +114,8 @@ void render(Player *p, int show_map)
     
     ui_draw_hud       (p);
     ui_draw_controls  (rows);
-    ui_draw_server   (rows);
-    ui_draw_eventlog (rows, cols);
+    // ui_draw_server   (rows);
+    // ui_draw_eventlog (rows, cols);
     
     draw_crosshair    (rows, cols);
     if (show_map){

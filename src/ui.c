@@ -20,11 +20,11 @@
 static void border_hline(int y, int l, int r,
                           const wchar_t *lc, const wchar_t *rc)
 {
-    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    wattron(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
     for (int i = l; i <= r; i++) mvaddwstr(y, i, L"═");
     mvaddwstr(y, l, lc);
     mvaddwstr(y, r, rc);
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    wattroff(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
 }
 
 // Same as border_hline but stamps a centered title in CP_MAP_P over the fill.
@@ -46,10 +46,10 @@ static void border_hline_title(int y, int l, int r,
 // ║ borders on left and right, spaces in between.
 static void border_row(int y, int l, int r)
 {
-    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    wattron(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
     mvaddwstr(y, l, L"║");
     mvaddwstr(y, r, L"║");
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    wattroff(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
     for (int i = l + 1; i < r; i++) mvaddch(y, i, ' ');
 }
 
@@ -82,26 +82,26 @@ static void draw_map_border(int ox, int oy, Player *p)
     border_hline_title(top - 1, left, right, L"╔", L"╗", "[RADAR]");
     border_hline(top, left, right, L"╠", L"╣");
 
-    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR));
+    wattron(stdscr, COLOR_PAIR(CP_UI_BDR));
     for (int i = 0; i < MAP_H; i++) {
         mvaddwstr(oy + i, left,  L"║");
         mvaddwstr(oy + i, right, L"║");
     }
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR));
+    wattroff(stdscr, COLOR_PAIR(CP_UI_BDR));
 
     // bottom with coordinate leg
-    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    wattron(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
     for (int i = left; i <= right; i++) mvaddwstr(bot, i, L"═");
     mvaddwstr(bot, left,     L"╚");
     mvaddwstr(bot, leg_left, L"╦");
     mvaddwstr(bot, right,    L"╣");
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    wattroff(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
 
     border_row(bot + 1, leg_left, right);
     move(bot + 1, leg_left + 1);
-    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR));
+    wattron(stdscr, COLOR_PAIR(CP_UI_BDR));
     for (int i = 0; i < clen; i++) addch(coords[i]);
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR));
+    wattroff(stdscr, COLOR_PAIR(CP_UI_BDR));
 
     panel_bot(leg_bot, leg_left, right);
 }
@@ -114,10 +114,8 @@ static void draw_map_tiles(int ox, int oy, int rows, int cols)
             int sx = ox + mx * 2;
             if (sy >= rows - 1 || sx + 1 >= cols) continue;
             if (map_solid(mx, my)) {
-                int t  = map_type(mx, my);
-                int cp = (t == 2) ? CP_WALL2_M
-                       : (t == 3) ? CP_WALL3_M
-                       : (t == 4) ? CP_WALL4_M : CP_WALL1_M;
+                // int t  = map_type(mx, my);
+                int cp = CP_WALL_M;
                 wattron(stdscr, COLOR_PAIR(cp) | A_BOLD);
                 mvwaddstr(stdscr, sy, sx, "░░");
                 wattroff(stdscr, COLOR_PAIR(cp) | A_BOLD);
@@ -137,9 +135,9 @@ static void draw_map_player(Player *p, int ox, int oy, int rows, int cols)
         int ey = oy + (int)e->y;
         int ex = ox + (int)(e->x) * 2;
         if (ey > 0 && ey < rows - 1 && ex >= 0 && ex < cols) {
-            wattron(stdscr, COLOR_PAIR(CP_ENTITY_R) | A_BOLD);
+            wattron(stdscr, COLOR_PAIR(e->col) | A_BOLD);
             mvwaddch(stdscr, ey, ex, 'X');
-            wattroff(stdscr, COLOR_PAIR(CP_ENTITY_R) | A_BOLD);
+            wattroff(stdscr, COLOR_PAIR(e->col) | A_BOLD);
         }
     }
 
@@ -205,45 +203,45 @@ void ui_draw_hud(Player *p)
 
     // top border — full ═ fill, then joints, then section titles on top
     border_hline_title(HUD_T_SPACE, PLAYER_L, KIL_R, L"╔", L"╗", NULL);
-    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    wattron(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
     mvaddwstr(HUD_T_SPACE, PLAYER_R, L"╦");
     mvaddwstr(HUD_T_SPACE, HP_R,     L"╦");
     mvaddwstr(HUD_T_SPACE, GUN_R,    L"╦");
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    wattroff(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
     border_hline_title(HUD_T_SPACE, HP_L,  HP_R,  L"╦", L"╦", "[HP]");
     border_hline_title(HUD_T_SPACE, GUN_L, GUN_R, L"╦", L"╦", "[GUN]");
     border_hline_title(HUD_T_SPACE, KIL_L, KIL_R, L"╦", L"╗", "[KILLS]");
 
     // content row — outer borders then internal joints
     border_row(HUD_T_SPACE + 1, PLAYER_L, KIL_R);
-    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    wattron(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
     mvaddwstr(HUD_T_SPACE + 1, PLAYER_R, L"║");
     mvaddwstr(HUD_T_SPACE + 1, HP_R,     L"║");
     mvaddwstr(HUD_T_SPACE + 1, GUN_R,    L"║");
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    wattroff(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
 
     // P1 label
     {
         int lcol = PLAYER_L + 1 + (P_INNER - 2) / 2;
-        wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+        wattron(stdscr, COLOR_PAIR(CP_UI_LABEL) | A_BOLD);
         mvprintw(HUD_T_SPACE + 1, lcol, "P1");
-        wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+        wattroff(stdscr, COLOR_PAIR(CP_UI_LABEL) | A_BOLD);
     }
 
     // HP bar
     {
         int filled   = (BAR_W * hp) / max_hp;
-        int bar_pair = (hp > max_hp*2/3) ? CP_WALL3
-                     : (hp > max_hp/3)   ? CP_WALL4
-                     : CP_MAP_P;
+        int bar_pair = (hp > max_hp*2/3) ? CP_UI_GOOD
+                     : (hp > max_hp/3)   ? CP_UI_WARN
+                     : CP_UI_BAD;
         int col = HP_L + 1;
         mvaddch(HUD_T_SPACE + 1, col++, '[');
         wattron(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
         for (int i = 0; i < filled;  i++) mvaddwstr(HUD_T_SPACE + 1, col++, L"█");
         wattroff(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
-        wattron(stdscr, COLOR_PAIR(CP_MAP_BDR));
+        wattron(stdscr, COLOR_PAIR(CP_UI_BDR));
         for (int i = filled; i < BAR_W; i++) mvaddwstr(HUD_T_SPACE + 1, col++, L"░");
-        wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR));
+        wattroff(stdscr, COLOR_PAIR(CP_UI_BDR));
         mvaddch(HUD_T_SPACE + 1, col++, ']');
         wattron(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
         mvprintw(HUD_T_SPACE + 1, col, " %d", hp);
@@ -251,27 +249,27 @@ void ui_draw_hud(Player *p)
     }
 
     // GUN cell
-    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    wattron(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
     mvprintw(HUD_T_SPACE + 1, GUN_L + 1, " %-6s %2ddmg", "M16", 12);
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    wattroff(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
 
     // KILLS cell
     {
         char kbuf[8];
         snprintf(kbuf, sizeof(kbuf), "%d", 0);
         int kcol = KIL_L + 1 + (KIL_INNER - (int)strlen(kbuf)) / 2;
-        wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+        wattron(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
         mvprintw(HUD_T_SPACE + 1, kcol, "%s", kbuf);
-        wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+        wattroff(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
     }
 
     // bottom border — same pattern as top
     border_hline(HUD_T_SPACE + 2, PLAYER_L, KIL_R, L"╚", L"╝");
-    wattron(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    wattron(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
     mvaddwstr(HUD_T_SPACE + 2, PLAYER_R, L"╩");
     mvaddwstr(HUD_T_SPACE + 2, HP_R,     L"╩");
     mvaddwstr(HUD_T_SPACE + 2, GUN_R,    L"╩");
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR) | A_BOLD);
+    wattroff(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -306,12 +304,12 @@ void ui_draw_controls(int rows)
     for (int b = 0; b < KEY_NBINDS; b++) {
         int row = top + 1 + b;
         border_row(row, left, right);
-        wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+        wattron(stdscr, COLOR_PAIR(CP_UI_LABEL) | A_BOLD);
         mvprintw(row, left + 1, " %-3s", binds[b].key);
-        wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
-        wattron(stdscr, COLOR_PAIR(CP_MAP_BDR));
+        wattroff(stdscr, COLOR_PAIR(CP_UI_LABEL) | A_BOLD);
+        wattron(stdscr, COLOR_PAIR(CP_UI_TEXT));
         mvprintw(row, left + 5, "%-*s", KEY_INNER - 4, binds[b].desc);
-        wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR));
+        wattroff(stdscr, COLOR_PAIR(CP_UI_TEXT));
     }
 
     panel_bot(top + KEY_NBINDS + 1, left, right);
@@ -342,13 +340,13 @@ void ui_draw_server(int rows)
 
     border_row(top + 1, l, r);
     if (srv_connected) {
-        wattron(stdscr, COLOR_PAIR(CP_WALL3) | A_BOLD);
+        wattron(stdscr, COLOR_PAIR(CP_UI_GOOD) | A_BOLD);
         mvprintw(top + 1, l + 2, "● CONNECTED C=leave");
-        wattroff(stdscr, COLOR_PAIR(CP_WALL3) | A_BOLD);
+        wattroff(stdscr, COLOR_PAIR(CP_UI_GOOD) | A_BOLD);
     } else {
-        wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+        wattron(stdscr, COLOR_PAIR(CP_UI_BAD) | A_BOLD);
         mvprintw(top + 1, l + 2, "○ OFFLINE   C=join ");
-        wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+        wattroff(stdscr, COLOR_PAIR(CP_UI_BAD) | A_BOLD);
     }
 
     panel_div(top + 2, l, r);
@@ -359,9 +357,9 @@ void ui_draw_server(int rows)
     // header
     if (drawn < content_rows) {
         border_row(top + 3, l, r);
-        wattron(stdscr, COLOR_PAIR(CP_MAP_BDR));
+        wattron(stdscr, COLOR_PAIR(CP_UI_TEXT));
         mvprintw(top + 3, l + 2, "%-3s %-10s %-4s", "ID", "HEALTH", "KIL");
-        wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR));
+        wattroff(stdscr, COLOR_PAIR(CP_UI_TEXT));
         drawn++;
     }
 
@@ -370,23 +368,23 @@ void ui_draw_server(int rows)
         int row = top + 3 + drawn;
         border_row(row, l, r);
 
-        wattron(stdscr, COLOR_PAIR(CP_WALL2) | A_BOLD);
+        wattron(stdscr, COLOR_PAIR(CP_UI_LABEL) | A_BOLD);
         mvprintw(row, l + 2, "P%-2d", e->id);
-        wattroff(stdscr, COLOR_PAIR(CP_WALL2) | A_BOLD);
+        wattroff(stdscr, COLOR_PAIR(CP_UI_LABEL) | A_BOLD);
 
         int hp      = e->health;
         int bar_max = 10;
         int filled  = (bar_max * hp) / 100;
         if (filled < 0) filled = 0;
         if (filled > bar_max) filled = bar_max;
-        int hp_pair = (hp > 66) ? CP_WALL3 : (hp > 33) ? CP_WALL4 : CP_MAP_P;
+        int hp_pair = (hp > 66) ? CP_UI_GOOD : (hp > 33) ? CP_UI_WARN : CP_UI_BAD;
         wattron(stdscr, COLOR_PAIR(hp_pair) | A_BOLD);
         for (int b = 0; b < filled;   b++) mvaddwstr(row, l + 6 + b, L"█");
         wattroff(stdscr, COLOR_PAIR(hp_pair) | A_BOLD);
-        wattron(stdscr, COLOR_PAIR(CP_MAP_BDR));
+        wattron(stdscr, COLOR_PAIR(CP_UI_BDR));
         for (int b = filled; b < bar_max; b++) mvaddwstr(row, l + 6 + b, L"░");
         mvprintw(row, l + 17, "%-3d", 10);
-        wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR));
+        wattroff(stdscr, COLOR_PAIR(CP_UI_BDR));
 
         drawn++;
     }
@@ -440,9 +438,9 @@ void ui_draw_eventlog(int rows, int cols)
         int li = start + row;
         border_row(y, l, r);
         if (li < log_count) {
-            wattron(stdscr, COLOR_PAIR(CP_MAP_BDR));
+            wattron(stdscr, COLOR_PAIR(CP_UI_BDR));
             mvprintw(y, l + 2, "%-*.*s", LOG_INNER - 2, LOG_INNER - 2, log_lines[li]);
-            wattroff(stdscr, COLOR_PAIR(CP_MAP_BDR));
+            wattroff(stdscr, COLOR_PAIR(CP_UI_BDR));
         }
     }
 
