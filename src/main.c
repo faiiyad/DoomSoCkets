@@ -122,7 +122,11 @@ static void on_server_update(ClientUpdate u)
     // hook into your entity system here
     // printf("entity %d => %.2f %.2f %.2f hp=%d\n",
         //    u.id, u.x, u.y, u.angle, u.health);
-    entity_upsert(u.id, u.x, u.y, u.angle, u.health);
+    // FILE *log = fopen("client.log", "a");
+    // fprintf(log, "got id=%d col=%c x=%.2f y=%.2f health=%d\n",
+    //         u.id, u.col, u.x, u.y, u.health);
+    // fclose(log);
+    entity_upsert(u.id, u.col, u.x, u.y, u.angle, u.health);
 }
 
 static void on_server_remove(int id)
@@ -141,11 +145,12 @@ int main(void)
     curs_set(0);
     init_colors();
 
-    Player player = { 8.0, 8.0, 0.0, 100};
+    Player player = { 8.0, 8.0, 0.0, 100, 'B'};
     map_find_spawn(&player.x, &player.y);
 
     // entities_init(player.x + 1.0, player.y);
     client_connect("127.0.0.1", NETWORK_PORT);
+    client_recv_initial(on_server_update);
 
 
     // show_title_screen();
@@ -158,7 +163,13 @@ int main(void)
     while (1) {
         client_recv_updates(on_server_update, on_server_remove);
         int ch = getch();
-        if (ch == 'c' || ch == 'C') ui_toggle_connect();
+
+        if ((ch == 'c' || ch == 'C') && !client_is_connected()) {
+            ui_toggle_connect();
+            client_connect("127.0.0.1", NETWORK_PORT);
+            client_recv_initial(on_server_update);
+        }
+
         if (ch == 'q' || ch == 'Q') break;
         if (ch == 'm' || ch == 'M') show_map = !show_map;
         
@@ -213,10 +224,7 @@ int main(void)
             }
         }
 
-        if ((ch == 'c' || ch == 'C') && !client_is_connected()) {
-            client_connect("127.0.0.1", NETWORK_PORT);
-            client_recv_initial(on_server_update);
-        }
+        
 
         entities_update(&player, ch);
 

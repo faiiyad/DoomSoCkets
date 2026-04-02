@@ -9,6 +9,7 @@ void client_disconnect(void);
 
 typedef struct {
     int    id;
+    char   col;
     double x, y, angle;
     int    health;
 } ClientUpdate;

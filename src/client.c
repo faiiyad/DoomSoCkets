@@ -81,10 +81,10 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
             if (strncmp(line, "REMOVE", 6) == 0) {
                 if (sscanf(line, "REMOVE %d", &id) == 1)
                     on_remove(id);
-            } else if (sscanf(line, "%d %lf %lf %lf %d",
-                              &u.id, &u.x, &u.y, &u.angle, &u.health) == 5) {
-                on_update(u);
-            }
+            } else if (sscanf(line, "%d %c %lf %lf %lf %d",
+                        &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
+                    on_update(u);
+                }
             line = newline + 1;
         }
 
@@ -114,8 +114,8 @@ void client_recv_initial(void (*on_update)(ClientUpdate))
     while ((newline = strchr(line, '\n')) != NULL) {
         *newline = '\0';
         ClientUpdate u;
-        if (sscanf(line, "%d %lf %lf %lf %d",
-                   &u.id, &u.x, &u.y, &u.angle, &u.health) == 5) {
+        if (sscanf(line, "%d %c %lf %lf %lf %d",
+                &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
             on_update(u);
         }
         line = newline + 1;
