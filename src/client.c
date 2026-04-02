@@ -93,3 +93,31 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
         pfd.revents = 0;
     }
 }
+
+
+void client_recv_initial(void (*on_update)(ClientUpdate))
+{
+    if (sock_fd == -1) return;
+
+    // wait up to 500ms for the initial batch
+    struct pollfd pfd = { .fd = sock_fd, .events = POLLIN };
+    if (poll(&pfd, 1, 500) <= 0) return;
+
+    char buf[4096];
+    ssize_t n = read(sock_fd, buf, sizeof(buf) - 1);
+    if (n <= 0) return;
+    buf[n] = '\0';
+
+    // parse all lines from the single message
+    char *line = buf;
+    char *newline;
+    while ((newline = strchr(line, '\n')) != NULL) {
+        *newline = '\0';
+        ClientUpdate u;
+        if (sscanf(line, "%d %lf %lf %lf %d",
+                   &u.id, &u.x, &u.y, &u.angle, &u.health) == 5) {
+            on_update(u);
+        }
+        line = newline + 1;
+    }
+}

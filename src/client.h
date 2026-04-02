@@ -14,5 +14,6 @@ typedef struct {
 } ClientUpdate;
 
 void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int));
+void client_recv_initial(void (*on_update)(ClientUpdate));
 
 #endif

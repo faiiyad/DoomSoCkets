@@ -215,6 +215,7 @@ int main(void)
 
         if ((ch == 'c' || ch == 'C') && !client_is_connected()) {
             client_connect("127.0.0.1", NETWORK_PORT);
+            client_recv_initial(on_server_update);
         }
 
         entities_update(&player, ch);
