@@ -95,11 +95,13 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
 }
 
 
+static int own_id = -1;
+
+// in client_recv_initial, the FIRST line is always your own entity
 void client_recv_initial(void (*on_update)(ClientUpdate))
 {
     if (sock_fd == -1) return;
 
-    // wait up to 500ms for the initial batch
     struct pollfd pfd = { .fd = sock_fd, .events = POLLIN };
     if (poll(&pfd, 1, 500) <= 0) return;
 
@@ -108,16 +110,26 @@ void client_recv_initial(void (*on_update)(ClientUpdate))
     if (n <= 0) return;
     buf[n] = '\0';
 
-    // parse all lines from the single message
     char *line = buf;
     char *newline;
+    int first = 1;
     while ((newline = strchr(line, '\n')) != NULL) {
         *newline = '\0';
         ClientUpdate u;
         if (sscanf(line, "%d %c %lf %lf %lf %d",
-                &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
-            on_update(u);
+                   &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
+            if (first) {
+                own_id = u.id;  // first line is always yourself
+                first = 0;
+            } else {
+                on_update(u);   // rest are existing clients
+            }
         }
         line = newline + 1;
     }
+}
+
+int client_get_own_id(void)
+{
+    return own_id;
 }
