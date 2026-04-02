@@ -114,14 +114,14 @@ void render(Player *p, int show_map)
     
     ui_draw_hud       (p);
     ui_draw_controls  (rows);
-    // ui_draw_server   (rows);
-    // ui_draw_eventlog (rows, cols);
+    ui_draw_server   (rows);
+    ui_draw_eventlog (rows, cols);
     
     draw_crosshair    (rows, cols);
     if (show_map){
         ui_draw_minimap(p, rows, cols);
     }
-    draw_gun          (rows, cols);
+    draw_gun          (1, rows, cols);
 
     refresh();
 }

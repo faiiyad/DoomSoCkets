@@ -9,6 +9,6 @@ extern float gun_offset2;
 extern int gun_timer;
 
 
-void draw_gun(int rows, int cols);
+void draw_gun(int gun_id, int rows, int cols);
 
 #endif

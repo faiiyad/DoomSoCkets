@@ -10,13 +10,13 @@ int gun_status = 0;
 float gun_offset  = 20.0f;
 float gun_offset2 = 20.0f;
 
-// ── gun art ────────────────────────────────────────────────────────────────
-static const char *gun_art[] = {
+// ── gun0 art ───────────────────────────────────────────────────────────────
+static const char *gun0_art[] = {
     "   ___",
     "  [ X ]",
     "   {T}",
     " _/#0#\\_",
-    "[@\\=---\\\\",
+    "[@\\=---\\\\_",
     "[$@\\=----\\\\",
     "[\\$@\\==---\\\\",
     "\\[\\$@\\==---\\\\_",
@@ -35,14 +35,13 @@ static const char *gun_art[] = {
     "      /_/Y$||==__/",
 };
 
-// ── colour map ─────────────────────────────────────────────────────────────
-static const char *gun_clr[] = {
+static const char *gun0_clr[] = {
     "   BBB",
     "  F G F",
     "   FFF",
-    " BFBFBB",
-    "FEFBBBBF",
-    "FBEFBBBF",
+    " FFBFBFF",
+    "FEFBBBBFF",
+    "FBEFBBBBBF",
     "FFBEFBBBBBF",
     "FFFBEFBBBBBFFF",
     " FFFBEFBBBBBBFF",
@@ -60,6 +59,58 @@ static const char *gun_clr[] = {
     "      FDFFBBBBBFFF",
 };
 
+// ── gun1 art ───────────────────────────────────────────────────────────────
+static const char *gun1_art[] = {
+    "   ___",
+    "  [ X ]",
+    "   {T}",
+    "  /#0#\\",
+    " |\\=---\\ ",
+    " |@\\=---\\",
+    " |@[\\==--\\",
+    " |@|$\\_==-\\_",
+    " |@\\$[\\@\\==\\@\\",
+    "  \\@\\$[\\@\\==\\@\\",
+    "   \\@\\$[\\@\\==\\@\\ ",
+    "    \\@\\|_V[===\\V",
+    "     \\@|@\\\\]___]\\__",
+    "      \\|_/\\\\==\\}___}_",
+    "         |*\\Y==\\}____}_",
+    "       _/**/]L==-\\}_____}",
+    "      /V*_/$/@L==-\\}_____}",
+    "    _/**/$$/\\$@\\==-\\}_____}",
+    "   /V**/$/   \\$@\\==-//_|_\\\\",
+    "   |**/$/    /L$@\\==\\\\____\\\\",
+    "    \\V$/    /L_\\$@\\==V_____V",
+    "           /L__/\\$@\\==\\=====\\",
+};
+
+static const char *gun1_clr[] = {
+    "   BBB",
+    "  F G F",
+    "   FFF",
+    "  FBFBF",
+    " FFBBBBF",
+    " FEFBBBBF",
+    " FEFFBBBBF",
+    " FEFFFFBBBFF",
+    " FEFFFFEFBBFEF",
+    "  FEFFFFEFBBFEF",
+    "   FEFFFFEFBBFEF",
+    "    FEFFFFFBBBFF",
+    "     FEFEFFFFFFFFFF",
+    "      FFFFFFBBFHHHHHF",
+    "         FDFFBBFHHHHHHF",
+    "       FFDDFFFBBBFHHHHHHH",
+    "      FFDFFFFEFBBBFHHHHHHH",
+    "    FFDDFFFFFFFEFBBBFHHHHHHH",
+    "   FFDDFFF   FFEFBBBFFBBBFF",
+    "   FDDFFF    FFFEFBBFFBBBBFF",
+    "    FFFF    FFBFFEFBBFBBBBBF",
+    "           FFBBFFFEFBBFBBBBBF",
+};
+
+// ── shared colour resolver ─────────────────────────────────────────────────
 static int resolve_color(char c) {
     switch (c) {
         case 'F': return GUN_TRIM;
@@ -73,8 +124,24 @@ static int resolve_color(char c) {
     }
 }
 
-void draw_gun(int rows, int cols)
+// ── draw_gun ───────────────────────────────────────────────────────────────
+// gun_id: 0 = gun0, 1 = gun1
+void draw_gun(int gun_id, int rows, int cols)
 {
+    const char **art;
+    const char **clr;
+    int num_rows;
+
+    if (gun_id == 1) {
+        art      = gun1_art;
+        clr      = gun1_clr;
+        num_rows = (int)(sizeof(gun1_art) / sizeof(gun1_art[0]));
+    } else {
+        art      = gun0_art;
+        clr      = gun0_clr;
+        num_rows = (int)(sizeof(gun0_art) / sizeof(gun0_art[0]));
+    }
+
     /* ── slide animation ─────────────────────────────────────── */
     float target2 = (gun_status == 1) ? 0.0f : 20.0f;
     gun_offset  += (0.0f    - gun_offset)  * 0.18f;
@@ -84,9 +151,8 @@ void draw_gun(int rows, int cols)
     int base      = rows + kick;
     int cx        = cols - 55;
     int mirror_cx = 55;
-    int r         = base - 20 + (int)gun_offset;
+    int r         = base - 22 + (int)gun_offset;
     int r2        = base - 20 + (int)gun_offset2;
-    int num_rows  = (int)(sizeof(gun_art) / sizeof(gun_art[0]));
 
     /* ── muzzle flash — right gun ────────────────────────────── */
     if (gun_frame == 1) {
@@ -136,14 +202,14 @@ void draw_gun(int rows, int cols)
 
     /* ── right gun ───────────────────────────────────────────── */
     for (int row = 0; row < num_rows; row++) {
-        const char *art = gun_art[row];
-        const char *clr = gun_clr[row];
+        const char *a = art[row];
+        const char *c = clr[row];
         int ci = 0;
-        for (int col = 0; art[col] != '\0'; col++) {
-            if (art[col] == ' ') { ci++; continue; }
-            int pair = resolve_color(clr[ci]);
+        for (int col = 0; a[col] != '\0'; col++) {
+            if (a[col] == ' ') { ci++; continue; }
+            int pair = resolve_color(c[ci]);
             attron(COLOR_PAIR(pair) | A_BOLD);
-            mvaddch(r + row, cx + col, art[col]);
+            mvaddch(r + row, cx + col, a[col]);
             attroff(COLOR_PAIR(pair) | A_BOLD);
             ci++;
         }
@@ -152,17 +218,17 @@ void draw_gun(int rows, int cols)
     /* ── left (mirrored) gun ─────────────────────────────────── */
     if (gun_offset2 < 19.5f) {
         for (int row = 0; row < num_rows; row++) {
-            const char *art = gun_art[row];
-            const char *clr = gun_clr[row];
+            const char *a = art[row];
+            const char *c = clr[row];
             int art_len = 0;
-            while (art[art_len] != '\0') art_len++;
+            while (a[art_len] != '\0') art_len++;
             int ci = 0;
             for (int col = 0; col < art_len; col++) {
-                if (art[col] == ' ') { ci++; continue; }
-                int pair = resolve_color(clr[ci]);
+                if (a[col] == ' ') { ci++; continue; }
+                int pair = resolve_color(c[ci]);
                 int draw_col = mirror_cx - col;
                 attron(COLOR_PAIR(pair) | A_BOLD);
-                mvaddch(r2 + row, draw_col, art[col]);
+                mvaddch(r2 + row, draw_col, a[col]);
                 attroff(COLOR_PAIR(pair) | A_BOLD);
                 ci++;
             }
