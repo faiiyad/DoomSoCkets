@@ -5,6 +5,7 @@ typedef struct {
     double x, y;
     double angle;
     int health;
+    int col;
 } Player;
 
 #endif

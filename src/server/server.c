@@ -18,7 +18,7 @@ int main(void)
     Client        *clients = NULL;
     nfds_t capacity = INITIAL_CLIENTS;
     nfds_t nfds     = 0;
-
+    
     init_server_state(server_fd, &pfds, &clients, &capacity, &nfds);
     init_server_ui();
     draw_server_ui(clients, nfds);

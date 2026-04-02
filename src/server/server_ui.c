@@ -53,7 +53,7 @@ void server_log(const char *fmt, ...)
     va_end(args);
 
     server_log_head = (server_log_head + 1) % SERVER_LOG_LINES;
-    strncpy(server_log_lines[server_log_head], line, SERVER_LOG_LINE_LENGTH - 1);
+    snprintf(server_log_lines[server_log_head], SERVER_LOG_LINE_LENGTH, "%s", line);
     server_log_lines[server_log_head][SERVER_LOG_LINE_LENGTH - 1] = '\0';
     if (server_log_count < SERVER_LOG_LINES)
         server_log_count++;

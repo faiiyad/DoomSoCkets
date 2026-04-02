@@ -5,10 +5,13 @@
 #include <errno.h>
 
 #include "client_manager.h"
+#include "network.h"
 
 void server_log(const char *fmt, ...);
 
 static int next_entity_id = 1;
+static const char ENTITY_COLOURS[] = {'Y', 'B', 'R'};
+static int next_colour_idx = 0;
 
 // Batch entities to 1 client
 static void send_entities_batch(int fd, Client *clients, nfds_t nfds, int exclude_fd)
@@ -20,8 +23,7 @@ static void send_entities_batch(int fd, Client *clients, nfds_t nfds, int exclud
         if (clients[i].fd == exclude_fd) continue;
         Entity *e = &clients[i].entity;
         offset += snprintf(buf + offset, sizeof(buf) - offset,
-                           "%d %.2f %.2f %.2f %d\n",
-                           e->id, e->x, e->y, e->angle, e->health);
+                           ENTITY_FMT, ENTITY_FMT_ARGS(e));
     }
 
     if (offset > 0)
@@ -34,8 +36,7 @@ static void send_entities_batch(int fd, Client *clients, nfds_t nfds, int exclud
 static void send_one_entity(int fd, const Entity *e)
 {
     char buf[64];
-    int len = snprintf(buf, sizeof(buf), "%d %.2f %.2f %.2f %d\n",
-                       e->id, e->x, e->y, e->angle, e->health);
+    int len = snprintf(buf, sizeof(buf), ENTITY_FMT, ENTITY_FMT_ARGS(e));
     if (write(fd, buf, len) == -1) {
         server_log("write failed: %s", strerror(errno));
     }
@@ -102,6 +103,8 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
     (*clients)[client_idx].entity.y     = 0.0;
     (*clients)[client_idx].entity.angle = 0.0;
     (*clients)[client_idx].entity.health = 100;
+    (*clients)[client_idx].entity.col = ENTITY_COLOURS[next_colour_idx];
+    next_colour_idx = (next_colour_idx + 1) % 3;
 
     (*nfds)++;
 
@@ -133,7 +136,7 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
     buffer[s] = '\0';
     double x, y, angle;
     int damage;
-    int count = sscanf(buffer, "%lf %lf %lf %d", &x, &y, &angle, &damage);
+    int count = sscanf(buffer, ENTITY_SCAN_FMT, &x, &y, &angle, &damage);
     if (count >= 3) {
         clients[idx].entity.x     = x;
         clients[idx].entity.y     = y;
@@ -143,7 +146,7 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
             for (nfds_t i = 1; i < *nfds; i++) {
                 if (i == idx) continue;
                 int hit;
-                double dist = cast_ray_to_entity(x, y, angle, &clients[i].entity, 0.5, &hit);
+                cast_ray_to_entity(x, y, angle, &clients[i].entity, 0.5, &hit);
                 if (hit) {
                     clients[i].entity.health -= damage;
                     server_log("entity id %d hit entity id %d (health now %d)",
