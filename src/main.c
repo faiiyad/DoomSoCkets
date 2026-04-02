@@ -213,6 +213,10 @@ int main(void)
             }
         }
 
+        if ((ch == 'c' || ch == 'C') && !client_is_connected()) {
+            client_connect("127.0.0.1", NETWORK_PORT);
+        }
+
         entities_update(&player, ch);
 
         double margin = 0.2;

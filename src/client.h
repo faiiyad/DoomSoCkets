@@ -3,7 +3,9 @@
 
 int  client_connect(const char *host, int port);
 void client_send_position(double x, double y, double angle, int id);
+int client_is_connected(void);
 void client_disconnect(void);
+
 
 typedef struct {
     int    id;

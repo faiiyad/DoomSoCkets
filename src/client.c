@@ -19,7 +19,7 @@ int client_connect(const char *host, int port)
 void client_send_position(double x, double y, double angle, int id)
 {
     if (sock_fd == -1) {
-        fprintf(stderr, "client_send_position: not connected\n");
+        // fprintf(stderr, "client_send_position: not connected\n");
         return;
     }
 
@@ -35,6 +35,12 @@ void client_send_position(double x, double y, double angle, int id)
     if (write(sock_fd, buf, len) == -1)
         perror("write");
 }
+
+int client_is_connected(void)
+{
+    return sock_fd != -1;
+}
+
 
 void client_disconnect(void)
 {

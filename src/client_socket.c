@@ -15,7 +15,7 @@ int setup_client_socket(const char *host, int port)
 
     if ((sock_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("socket");
-        exit(1);
+        return -1;
     }
 
     memset(&address, 0, sizeof(address));
@@ -24,13 +24,13 @@ int setup_client_socket(const char *host, int port)
     if (inet_pton(AF_INET, host, &address.sin_addr) <= 0) {
         perror("inet_pton");
         close(sock_fd);
-        exit(1);
+        return -1;
     }
 
     if (connect(sock_fd, (struct sockaddr *)&address, sizeof(address)) == -1) {
         perror("connect-client");
         close(sock_fd);
-        exit(1);
+        return -1;
     }
 
     return sock_fd;
@@ -46,9 +46,12 @@ void init_client_state(const char *host, int port, struct pollfd **pfds,
     }
 
     *sock_fd = setup_client_socket(host, port);
+    if (*sock_fd == -1) {
+        printf("server offline, starting in single player\n");
+        return;
+    }
 
     (*pfds)[0].fd     = *sock_fd;
     (*pfds)[0].events = POLLIN;
-
     printf("connected to %s:%d\n", host, port);
 }
