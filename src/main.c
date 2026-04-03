@@ -142,6 +142,15 @@ static void on_server_remove(int id)
     entity_remove(id);
 }
 
+static void death(Player *player){
+    player->x = -100;
+    player->y = -100;
+    client_send_position(player->x, player->y, player->angle, 0);
+    show_death_screen(player);
+    client_send_position(player->x, player->y, player->angle, 0);
+
+}
+
 int main(void)
 {
     setlocale(LC_ALL, "");
@@ -162,7 +171,7 @@ int main(void)
 
 
     // show_title_screen();
-    show_death_screen();
+    
     // flushinp(); 
 
     int show_map = 1;
@@ -181,6 +190,12 @@ int main(void)
 
         if (ch == 'q' || ch == 'Q') break;
         if (ch == 'm' || ch == 'M') show_map = !show_map;
+
+
+        // PLACEHOLDER FOR TESTING
+        if (ch == '5'){
+            death(&player);
+        }
         
         if (ch == 'k' || ch == 'K') {
             player.angle -= ROT_SPD;

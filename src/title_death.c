@@ -5,6 +5,7 @@
 #include <time.h>
 #include "title.h"
 #include "defs.h"
+#include "player.h"
 
 
 static const char *SKULL_ART[] = {
@@ -187,7 +188,7 @@ void draw_jaw(int rows, int cols, double offset, int toggle)
 }
 
 
-void show_death_screen(void)
+void show_death_screen(Player *player)
 {
     nodelay(stdscr, TRUE);  // non-blocking input
     curs_set(0);
@@ -201,6 +202,14 @@ void show_death_screen(void)
 
         if (ch == 'Q' || ch == 'q'){
             // printf("YO THANKS FOR PLAYING\n");
+            return;
+        }
+
+        if (ch == 'r' || ch == "R"){
+            player->x = 6.5;
+            player->y = 3.5;
+            player->angle = 0;
+            player-> health = 100;
             return;
         }
 
