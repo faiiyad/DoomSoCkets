@@ -97,6 +97,10 @@ typedef enum {
     CP_WALL4,
     CP_HUD,
 
+    // Skull
+    CP_SKULL_W,
+    CP_SKULL_R,
+
     CP_COUNT   // total — used to size the table
 } ColorPair;
 #endif

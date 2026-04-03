@@ -111,6 +111,11 @@ static void init_colors(void)
  
         // ── entity — shared
         { CP_ENTITY_W,   255,       255  },  // white eye
+
+
+        // death skull - white skull, red eyes
+        {CP_SKULL_W, 255, -1},
+        {CP_SKULL_R, 124, -1}
     };
 
     for (int i = 0; i < (int)(sizeof PAL / sizeof PAL[0]); i++)
@@ -157,6 +162,7 @@ int main(void)
 
 
     // show_title_screen();
+    show_death_screen();
     // flushinp(); 
 
     int show_map = 1;
