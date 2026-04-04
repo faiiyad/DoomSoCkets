@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 typedef struct {
+    int id;
     double x, y;
     double angle;
     int health;

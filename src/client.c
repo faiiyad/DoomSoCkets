@@ -110,7 +110,7 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
 }
 
 
-static int own_id = -1;
+// static int own_id = -1;
 
 // in client_recv_initial, the FIRST line is always your own entity
 void client_recv_initial(Player *p, void (*on_update)(ClientUpdate))
