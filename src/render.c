@@ -124,5 +124,7 @@ void render(Player *p, int show_map)
     draw_gun          (p->cur_gun, rows, cols);
     draw_hit_indicator(rows, cols);
 
+    draw_face(rows, cols);
+
     refresh();
 }
