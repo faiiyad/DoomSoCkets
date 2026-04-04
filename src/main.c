@@ -206,6 +206,7 @@ int main(void)
     // flushinp(); 
 
     int show_map = 1;
+    int hit_flash = 0; // count down frames to show hit indicator
 
     struct timespec ts = { 0, 16000000L };  // ~60 fps
 

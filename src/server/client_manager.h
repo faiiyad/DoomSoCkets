@@ -9,6 +9,7 @@
 typedef struct {
     int    fd;
     Entity entity;
+    int    kills;   // server-side kill count for this client
 } Client;
 
 void remove_client(nfds_t idx, struct pollfd *pfds, Client *clients,
