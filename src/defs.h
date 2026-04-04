@@ -101,6 +101,10 @@ typedef enum {
     CP_SKULL_W,
     CP_SKULL_R,
 
+    // Blood
+    CP_BLOOD_1,
+    CP_BLOOD_2,
+
     CP_COUNT   // total — used to size the table
 } ColorPair;
 #endif

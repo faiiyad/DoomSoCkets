@@ -1,11 +1,11 @@
 CC      = gcc
 CFLAGS  = -Wall -Wextra -O2 -Isrc
-LDFLAGS = -lncursesw -lm
+LDFLAGS = -lncurses -lm
 VPATH   = src:src/server
 TARGET  = raycaster
 SERVER  = server
 
-SRCS        = main.c map.c ray.c gun.c render.c ui.c title.c entity.c client.c client_socket.c title_death.c
+SRCS        = main.c map.c ray.c gun.c render.c ui.c title.c entity.c client.c client_socket.c title_death.c render_hit_indicator.c
 SRCS_SERVER = server.c server_ui.c server_socket.c client_manager.c map.c entity.c ray.c
 
 OBJS        = $(SRCS:.c=.o)
@@ -39,6 +39,7 @@ server_socket.o:  server_socket.c        server_socket.h network.h
 client_manager.o: client_manager.c       client_manager.h entity.h
 client.o:        client.c        client.h network.h client_socket.h
 client_socket.o: client_socket.c client_socket.h network.h
+render_hit_indicator.o: render_hit_indicator.c   defs.h render.h
 
 clean:
 	rm -f $(OBJS) $(OBJS_SERVER) $(TARGET) $(SERVER)

@@ -115,7 +115,13 @@ static void init_colors(void)
 
         // death skull - white skull, red eyes
         {CP_SKULL_W, 255, -1},
-        {CP_SKULL_R, 124, -1}
+        {CP_SKULL_R, 124, -1},
+
+        // blood for hit indicators.
+        {CP_BLOOD_1, 124, -1},
+        {CP_BLOOD_2, 160, -1}
+
+
     };
 
     for (int i = 0; i < (int)(sizeof PAL / sizeof PAL[0]); i++)
@@ -195,6 +201,10 @@ int main(void)
         // PLACEHOLDER FOR TESTING
         if (ch == '5'){
             death(&player);
+        }
+        // placeholder for testing
+        if (ch == '6'){
+            trigger_hit_indicator();
         }
         
         if (ch == 'k' || ch == 'K') {

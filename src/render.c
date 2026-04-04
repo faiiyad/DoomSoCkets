@@ -122,6 +122,7 @@ void render(Player *p, int show_map)
         ui_draw_minimap(p, rows, cols);
     }
     draw_gun          (1, rows, cols);
+    draw_hit_indicator(rows, cols);
 
     refresh();
 }
