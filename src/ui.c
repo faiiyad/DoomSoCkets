@@ -442,9 +442,9 @@ void ui_draw_eventlog(int rows, int cols)
         int li = start + row;
         border_row(y, l, r);
         if (li < log_count) {
-            wattron(stdscr, COLOR_PAIR(CP_UI_BDR));
+            wattron(stdscr, COLOR_PAIR(CP_UI_TEXT));
             mvprintw(y, l + 2, "%-*.*s", LOG_INNER - 2, LOG_INNER - 2, log_lines[li]);
-            wattroff(stdscr, COLOR_PAIR(CP_UI_BDR));
+            wattroff(stdscr, COLOR_PAIR(CP_UI_TEXT));
         }
     }
 

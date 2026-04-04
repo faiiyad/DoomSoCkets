@@ -218,7 +218,7 @@ void init_guns(void)
     guns[4].art = gun2_art;
     guns[4].clr = gun2_clr;
     guns[4].dmg = 30;
-    guns[4].cx = -57;
+    guns[4].cx = -56;
     guns[4].r = -21;
     guns[4].num_art_rows = (int)(sizeof(gun2_art) / sizeof(gun2_art[0]));
     guns[4].num_muzzles = 4;
