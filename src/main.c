@@ -190,9 +190,16 @@ int main(void)
     map_find_spawn(&player.x, &player.y);
     init_guns();
 
+    if (net_connect("127.0.0.1") != 0) {
+        endwin();
+        fprintf(stderr, "Failed to connect to server\n");
+        return 1;
+    }
     // entities_init(player.x + 1.0, player.y);
-    // client_connect("127.0.0.1", NETWORK_PORT);
-    // client_recv_initial(&player, on_server_update);
+    client_connect("127.0.0.1", NETWORK_PORT);
+    client_recv_initial(on_server_update);
+
+    
 
     // show_title_screen();
     
@@ -278,9 +285,11 @@ int main(void)
             client_send_position(nx, ny, player.angle, 0);
         }
 
+
         if (ch == ' ' && gun_frame == 0) {
             gun_frame = 1;
             gun_timer = 10;
+            client_send_position(player.x, player.y, player.angle, 10)
         }
         if (gun_timer > 0) {
             gun_timer--;

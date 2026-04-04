@@ -9,7 +9,10 @@ int client_get_own_id(void);
 void client_send_position(double x, double y, double angle, int id);
 int client_is_connected(void);
 void client_disconnect(void);
-
+// Add these to client.h:
+int  client_get_own_health(void);   // our health as server sees it
+int  client_pop_hit(void);          // returns 1 once if we were just hit, then resets
+int  client_get_kills(void);        // our kill count
 
 typedef struct {
     int    id;
