@@ -119,7 +119,13 @@ static void init_colors(void)
 
         // blood for hit indicators.
         {CP_BLOOD_1, 124, -1},
-        {CP_BLOOD_2, 160, -1}
+        {CP_BLOOD_2, 160, -1},
+
+        // KILLSSSS
+        { CP_FACE_1, 226, -1 },   // bright yellow
+        { CP_FACE_2, 220, -1 },   // yellow-orange
+        { CP_FACE_3, 214, -1 },   // orange
+        { CP_FACE_4, 208, -1 }   // dim orange
 
 
     };
@@ -225,6 +231,15 @@ int main(void)
         if (ch == '6'){
             trigger_hit_indicator();
         }
+
+        if (ch == '7'){
+            int krab = (player.cur_gun != 4);
+            trigger_face_glow(krab);
+        }
+
+        
+
+
         
         if (ch == '8'){
             show_end_screen(entities, num_entities);
