@@ -9,6 +9,7 @@
 #include "defs.h"
 #include "map.h"
 #include "entity.h"
+#include "gun.h"
 
 /* ══════════════════════════════════════════════════════════════════════════
    SHARED BORDER PRIMITIVES
@@ -181,7 +182,7 @@ void ui_draw_minimap(Player *p, int rows, int cols)
 #define HUD_T_SPACE  1
 #define P_INNER      4
 #define HP_INNER     16
-#define GUN_INNER    13
+#define GUN_INNER    26
 #define KIL_INNER    9
 #define BAR_W        10
 
@@ -250,7 +251,8 @@ void ui_draw_hud(Player *p)
 
     // GUN cell
     wattron(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
-    mvprintw(HUD_T_SPACE + 1, GUN_L + 1, " %-6s %2ddmg", "M16", 12);
+    mvprintw(HUD_T_SPACE + 1, GUN_L + 1, " %d/%d", p->cur_gun + 1, p->unlocked_guns);
+    mvprintw(HUD_T_SPACE + 1, GUN_L + 5, " %-14s %2ddmg", guns[p->cur_gun].name, guns[p->cur_gun].dmg);
     wattroff(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
 
     // KILLS cell

@@ -75,8 +75,8 @@ static void init_colors(void)
         { CP_FLASH,    226,          -1  },
         { HAND_CLR,    124,          -1  },
         { HAND_CLR_S,  131,          -1  },
-        { GUN_BDR,     255,          -1  },
-        { MUZ_1,       230,          -1  },
+        { GUN_BDR,     232,          -1  },
+        { MUZ_1,       255,          -1  },
         { MUZ_2,       217,          -1  },
         { MUZ_3,       88,           -1  },
         { GUN_ACC,     51,          -1  },  // aqua
@@ -148,8 +148,9 @@ int main(void)
     curs_set(0);
     init_colors();
 
-    Player player = { 8.0, 8.0, 0.0, 100, 'B'};
+    Player player = { 8.0, 8.0, 0.0, 100, 'B', 0, 5};
     map_find_spawn(&player.x, &player.y);
+    init_guns();
 
     // entities_init(player.x + 1.0, player.y);
     client_connect("127.0.0.1", NETWORK_PORT);
@@ -219,12 +220,7 @@ int main(void)
         }
         // double guns
         if (ch == 'e' || ch == 'E'){
-            if (gun_status == 0){
-                gun_status = 1;
-            }
-            else{
-                gun_status = 0;
-            }
+            player.cur_gun = (player.cur_gun + 1) % player.unlocked_guns;
         }
 
         
