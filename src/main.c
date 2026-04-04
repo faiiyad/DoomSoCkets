@@ -189,12 +189,21 @@ int main(void)
         if (ch == 'm' || ch == 'M') show_map = !show_map;
         
         if (ch == 'k' || ch == 'K') {
-            player.angle -= ROT_SPD;
+            if (player.cur_gun == 4){
+                player.angle -= ROT_SPD/3;
+            }else{
+                player.angle -= ROT_SPD;
+            }
+            
             if (player.angle < 0)        player.angle += 2*M_PI;
             client_send_position(player.x, player.y, player.angle, 0);
         }
         if (ch == 'l' || ch == 'L') {
-            player.angle += ROT_SPD;
+            if (player.cur_gun == 4){
+                player.angle += ROT_SPD/3;
+            }else{
+                player.angle += ROT_SPD;
+            }
             if (player.angle >= 2*M_PI)  player.angle -= 2*M_PI;
             client_send_position(player.x, player.y, player.angle, 0);
         }
