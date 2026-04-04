@@ -153,8 +153,6 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
         clients[idx].entity.angle = angle;
 
         if (x < -50 && y < -50) {
-            clients[idx].entity.x      = 6.5;
-            clients[idx].entity.y      = 3.5;
             clients[idx].entity.health = 100;
             broadcast_entity(&clients[idx].entity, clients, *nfds, -1);
             server_log("entity id %d respawned", clients[idx].entity.id);
