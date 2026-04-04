@@ -226,7 +226,7 @@ void ui_draw_hud(Player *p)
     {
         int lcol = PLAYER_L + 1 + (P_INNER - 2) / 2;
         wattron(stdscr, COLOR_PAIR(CP_UI_LABEL) | A_BOLD);
-        mvprintw(HUD_T_SPACE + 1, lcol, "P1");
+        mvprintw(HUD_T_SPACE + 1, lcol, "P%d", p->id);
         wattroff(stdscr, COLOR_PAIR(CP_UI_LABEL) | A_BOLD);
     }
 
@@ -259,7 +259,7 @@ void ui_draw_hud(Player *p)
     // KILLS cell
     {
         char kbuf[8];
-        snprintf(kbuf, sizeof(kbuf), "%d", client_get_kills());
+        snprintf(kbuf, sizeof(kbuf), "%d", p->kills);
         int kcol = KIL_L + 1 + (KIL_INNER - (int)strlen(kbuf)) / 2;
         wattron(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
         mvprintw(HUD_T_SPACE + 1, kcol, "%s", kbuf);

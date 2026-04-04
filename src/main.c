@@ -15,6 +15,8 @@
 #include "client.h"
 #include "ui.h"
 
+static Player player;
+
 static void init_colors(void)
 {
     start_color();
@@ -146,6 +148,15 @@ void apply_player_color(int col) {
     init_pair(CP_UI_LABEL, fg, -1);
 }
 
+static void death(Player *player){
+    player->x = -100;
+    player->y = -100;
+    client_send_position(player->x, player->y, player->angle, 0);
+    show_death_screen(player);
+    client_send_position(player->x, player->y, player->angle, 0);
+
+}
+
 static void on_server_update(ClientUpdate u)
 {
     // hook into your entity system here
@@ -155,8 +166,23 @@ static void on_server_update(ClientUpdate u)
     // fprintf(log, "got id=%d col=%c x=%.2f y=%.2f health=%d\n",
     //         u.id, u.col, u.x, u.y, u.health);
     // fclose(log);
-    if (u.id == client_get_own_id()){
+    // printf("got id=%d me=%d\n",
+    //         u.id, player.id);
+    if (u.id == player.id){
+        ui_log_event("I GOT HIT");
+        player.health = u.health;
+        trigger_hit_indicator();
+        if (player.health <= 0){
+            death(&player);
+        }
+        // perror("IGOTHIT");
         return;
+    }
+    if (u.health <= 0){
+        ui_log_event("ENTITYDED");
+        int krab = (player.cur_gun != 4);
+        trigger_face_glow(krab);
+        // perror("ENTITYDIED");
     }
     entity_upsert(u.id, u.col, u.x, u.y, u.angle, u.health);
 }
@@ -166,14 +192,6 @@ static void on_server_remove(int id)
     entity_remove(id);
 }
 
-static void death(Player *player){
-    player->x = -100;
-    player->y = -100;
-    client_send_position(player->x, player->y, player->angle, 0);
-    show_death_screen(player);
-    client_send_position(player->x, player->y, player->angle, 0);
-
-}
 
 int main(void)
 {
@@ -186,7 +204,7 @@ int main(void)
     curs_set(0);
     init_colors();
 
-    Player player = { 8.0, 8.0, 0.0, 100, 'B', 0, 5};
+    player = (Player){ 0, 8.0, 8.0, 0.0, 100, CP_ENTITY_R, 2, 0, 5};
     map_find_spawn(&player.x, &player.y);
     init_guns();
 

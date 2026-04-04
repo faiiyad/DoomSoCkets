@@ -7,6 +7,7 @@ typedef struct {
     double angle;
     int health;
     int col;
+    int kills;
     int cur_gun;
     int unlocked_guns;
 } Player;

@@ -25,7 +25,7 @@ int client_connect(const char *host, int port)
     return sock_fd;
 }
 
-void client_send_position(double x, double y, double angle, int id)
+void client_send_position(double x, double y, double angle, int dmg)
 {
     if (sock_fd == -1) {
         return;
@@ -39,7 +39,12 @@ void client_send_position(double x, double y, double angle, int id)
     if (pfd.revents & (POLLHUP | POLLERR)) { fprintf(stderr, "socket error\n"); return; }
 
     char buf[64];
-    int len = snprintf(buf, sizeof(buf), "%.2f %.2f %.2f %d\n", x, y, angle, id);
+    int len;
+    if(dmg == 0) {
+        len = snprintf(buf, sizeof(buf), "%.2f %.2f %.2f\n", x, y, angle);
+    } else {
+        len = snprintf(buf, sizeof(buf), "%.2f %.2f %.2f %d\n", x, y, angle, dmg);
+    }
     if (write(sock_fd, buf, len) == -1)
         perror("write");
 }
@@ -92,13 +97,14 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
                 kill_count++;
             } else if (sscanf(line, "%d %c %lf %lf %lf %d",
                         &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
-                if (u.id == own_id) {
-                    if (u.health < own_health)
-                        hit_flag = 1;
-                    own_health = u.health;
-                } else {
-                    on_update(u);
-                }
+                // if (u.id == own_id) {
+                //     if (u.health < own_health)
+                //         hit_flag = 1;
+                //     own_health = u.health;
+                // } else {
+                //     on_update(u);
+                // }
+                on_update(u);
             }
             line = newline + 1;
         }
@@ -134,7 +140,8 @@ void client_recv_initial(Player *p, void (*on_update)(ClientUpdate))
         if (sscanf(line, "%d %c %lf %lf %lf %d",
                    &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
             if (first) {
-                own_id = u.id;  // first line is always yourself
+                // own_id = u.id;  // first line is always yourself
+                p->id = u.id;
                 p->x = u.x;
                 p->y = u.y;
                 p->angle = u.angle;
@@ -149,7 +156,7 @@ void client_recv_initial(Player *p, void (*on_update)(ClientUpdate))
     }
 }
 
-int client_get_own_id(void)     { return own_id;     }
-int client_get_own_health(void) { return own_health; }
-int client_pop_hit(void)        { int v = hit_flag; hit_flag = 0; return v; }
-int client_get_kills(void)      { return kill_count; }
+// int client_get_own_id(void)     { return own_id;     }
+// int client_get_own_health(void) { return own_health; }
+// int client_pop_hit(void)        { int v = hit_flag; hit_flag = 0; return v; }
+// int client_get_kills(void)      { return kill_count; }
