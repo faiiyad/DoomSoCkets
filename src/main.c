@@ -230,7 +230,7 @@ int main(void)
             trigger_hit_indicator();
         }
 
-        if (ch == '7' || player.kill_count < prev_kill){
+        if (ch == '7' || player.kill_count > prev_kill){
             int krab = (player.cur_gun != 4);
             trigger_face_glow(krab);
         }

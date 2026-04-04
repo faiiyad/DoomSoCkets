@@ -11,7 +11,7 @@ static int hit_timer = 0;
 
 void trigger_hit_indicator(void)
 {   
-    hit_timer = 12;  // frames to show
+    hit_timer = 30;  // frames to show
 }
 
 void draw_hit_indicator(int rows, int cols)

@@ -83,6 +83,7 @@ void client_recv_updates(Player *p, void (*on_update)(ClientUpdate), void (*on_r
                 if (sscanf(line, "REMOVE %d", &id) == 1)
                     on_remove(id);
             } else if (strncmp(line, "KILL", 4) == 0) {
+                // printf("%d", p->kill_count);
                 p->kill_count++;
             } else if (sscanf(line, "%d %c %lf %lf %lf %d",
                         &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
