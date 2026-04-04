@@ -182,6 +182,13 @@ static void on_server_update(ClientUpdate u)
         ui_log_event("ENTITYDED");
         int krab = (player.cur_gun != 4);
         trigger_face_glow(krab);
+
+        player.kills += 1;
+        player.unlocked_guns = player.unlocked_guns + 1;
+        if (player.unlocked_guns > GUN_COUNT) player.unlocked_guns = GUN_COUNT;
+        player.cur_gun = player.unlocked_guns - 1;
+
+        ui_log_event("New Gun");
         // perror("ENTITYDIED");
     }
     entity_upsert(u.id, u.col, u.x, u.y, u.angle, u.health);
@@ -204,7 +211,7 @@ int main(void)
     curs_set(0);
     init_colors();
 
-    player = (Player){ 0, 8.0, 8.0, 0.0, 100, CP_ENTITY_R, 2, 0, 5};
+    player = (Player){ 0, 8.0, 8.0, 0.0, 100, CP_ENTITY_R, 0, 0, 1};
     map_find_spawn(&player.x, &player.y);
     init_guns();
 
