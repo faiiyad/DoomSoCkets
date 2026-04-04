@@ -186,14 +186,14 @@ int main(void)
     curs_set(0);
     init_colors();
 
-    Player player = { 8.0, 8.0, 0.0, 100, 'B', 0, 5};
+    Player player = { 8.0, 8.0, 0.0, 100, CP_ENTITY_B, 0, 5};
     map_find_spawn(&player.x, &player.y);
     init_guns();
 
     // Add 2 temp enemies for testing
     entity_upsert(1, 'R', player.x + 1.0, player.y, 0.5, 50);
     entity_upsert(2, 'Y', player.x - 1.0, player.y, 2.0, 75);
-    entity_upsert(3, 'B', player.x, player.y + 1.0, 1.0, 100);
+    // entity_upsert(3, 'B', player.x, player.y + 1.0, 1.0, 100);
 
     // entities_init(player.x + 1.0, player.y);
     // client_connect("127.0.0.1", NETWORK_PORT);
@@ -242,7 +242,7 @@ int main(void)
 
         
         if (ch == '8'){
-            show_end_screen(entities, num_entities);
+            show_end_screen(&player, entities, num_entities);
         }
         
         if (ch == 'k' || ch == 'K') {
