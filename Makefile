@@ -1,11 +1,11 @@
 CC      = gcc
 CFLAGS  = -Wall -Wextra -O2 -Isrc
-LDFLAGS = -lncurses -lm
+LDFLAGS = -lncursesw -lm
 VPATH   = src:src/server
 TARGET  = raycaster
 SERVER  = server
 
-SRCS        = main.c map.c ray.c gun.c render.c ui.c title.c entity.c client.c client_socket.c title_death.c render_hit_indicator.c
+SRCS        = main.c map.c ray.c gun.c render.c ui.c title.c entity.c client.c client_socket.c title_death.c render_hit_indicator.c title_end.c
 SRCS_SERVER = server.c server_ui.c server_socket.c client_manager.c map.c entity.c ray.c
 
 OBJS        = $(SRCS:.c=.o)
