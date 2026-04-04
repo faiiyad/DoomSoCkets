@@ -77,7 +77,6 @@ static void update_capacity(struct pollfd **pfds, Client **clients,
     server_log("increased capacity from %zu to %zu", *capacity, new_capacity);
     *capacity = new_capacity;
 }
-
 // void remove_client(nfds_t idx, struct pollfd *pfds, Client *clients,
 //                    nfds_t *nfds)
 // {
@@ -97,13 +96,14 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
     (*pfds)[client_idx].events   = POLLIN;
     (*pfds)[client_idx].revents = 0;
 
-    (*clients)[client_idx].fd           = new_socket;
-    (*clients)[client_idx].entity.id    = next_entity_id++;
-    (*clients)[client_idx].entity.x     = 0.0;
-    (*clients)[client_idx].entity.y     = 0.0;
-    (*clients)[client_idx].entity.angle = 0.0;
+    (*clients)[client_idx].fd            = new_socket;
+    (*clients)[client_idx].entity.id     = next_entity_id++;
+    (*clients)[client_idx].entity.x      = 0.0;
+    (*clients)[client_idx].entity.y      = 0.0;
+    (*clients)[client_idx].entity.angle  = 0.0;
     (*clients)[client_idx].entity.health = 100;
-    (*clients)[client_idx].entity.col = ENTITY_COLOURS[next_colour_idx];
+    (*clients)[client_idx].entity.col    = ENTITY_COLOURS[next_colour_idx];
+    (*clients)[client_idx].kills         = 0;  // initialise kill count
     next_colour_idx = (next_colour_idx + 1) % 3;
 
     (*nfds)++;
@@ -152,8 +152,20 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
                     server_log("entity id %d hit entity id %d (health now %d)",
                                clients[idx].entity.id, clients[i].entity.id,
                                clients[i].entity.health);
-                    broadcast_entity(&clients[i].entity, clients,
-                                    *nfds, -1);
+                    broadcast_entity(&clients[i].entity, clients, *nfds, -1);
+
+                    // If the hit killed them, tell the shooter they got a kill
+                    if (clients[i].entity.health <= 0) {
+                        clients[idx].kills++;
+                        char kill_msg[32];
+                        int klen = snprintf(kill_msg, sizeof(kill_msg),
+                                            "KILL %d\n", clients[idx].entity.id);
+                        if (write(clients[idx].fd, kill_msg, klen) == -1)
+                            server_log("write failed: %s", strerror(errno));
+                        server_log("entity id %d killed entity id %d (kills: %d)",
+                                   clients[idx].entity.id, clients[i].entity.id,
+                                   clients[idx].kills);
+                    }
                 }
             }
         }
@@ -161,14 +173,12 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
         server_log("updated entity id %d => x=%.2f y=%.2f angle=%.2f",
                    clients[idx].entity.id, x, y, angle);
                    
-        broadcast_entity(&clients[idx].entity, clients, *nfds,
-                     clients[idx].fd);
+        broadcast_entity(&clients[idx].entity, clients, *nfds, clients[idx].fd);
     } else {
         server_log("invalid entity update from fd %d: %s", pfds[idx].fd, buffer);
     }
     return 0;
 }
-
 
 void remove_client(nfds_t idx, struct pollfd *pfds, Client *clients,
                    nfds_t *nfds)

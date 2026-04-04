@@ -151,11 +151,6 @@ int main(void)
     Player player = { 8.0, 8.0, 0.0, 100, 'B'};
     map_find_spawn(&player.x, &player.y);
 
-    if (net_connect("127.0.0.1") != 0) {
-        endwin();
-        fprintf(stderr, "Failed to connect to server\n");
-        return 1;
-    }
     // entities_init(player.x + 1.0, player.y);
     client_connect("127.0.0.1", NETWORK_PORT);
     client_recv_initial(on_server_update);
@@ -166,6 +161,7 @@ int main(void)
     // flushinp(); 
 
     int show_map = 1;
+    int hit_flash = 0; // count down frames to show hit indicator
 
     struct timespec ts = { 0, 16000000L };  // ~60 fps
 
@@ -219,7 +215,7 @@ int main(void)
         if (ch == ' ' && gun_frame == 0) {
             gun_frame = 1;
             gun_timer = 10;
-            client_send_position(player.x, player.y, player.angle, 10)
+            client_send_position(player.x, player.y, player.angle, 10);
         }
         if (gun_timer > 0) {
             gun_timer--;
