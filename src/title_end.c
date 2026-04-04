@@ -213,11 +213,14 @@ static void draw_podium(int y0, int cols, Entity *sorted, int n)
 }
 
 // ── public entry point ─────────────────────────────────────────────────────
-void show_end_screen(Entity *entities, int num_entities)
+void show_end_screen(Player *p, Entity *entities, int num_entities)
 {
     Entity sorted[MAX_ENTITIES];
-    int count = (num_entities < MAX_ENTITIES) ? num_entities : MAX_ENTITIES;
+    Entity player_entity = { .id = 0, .col = p->col, .kills = 0 };
+
+    int count = (num_entities+1 < MAX_ENTITIES) ? num_entities+1 : MAX_ENTITIES;
     memcpy(sorted, entities, sizeof(Entity) * count);
+    sorted[num_entities] = player_entity;
     qsort(sorted, count, sizeof(Entity), cmp_kills);
 
     spin_angle[0] = 0.0;
