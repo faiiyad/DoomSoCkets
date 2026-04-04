@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include "network.h"
 #include "client_socket.h"
+#include "ui.h"
 
 int setup_client_socket(const char *host, int port)
 {
@@ -28,7 +29,7 @@ int setup_client_socket(const char *host, int port)
     }
 
     if (connect(sock_fd, (struct sockaddr *)&address, sizeof(address)) == -1) {
-        perror("connect-client");
+        // perror("connect-client");
         close(sock_fd);
         return -1;
     }
@@ -47,11 +48,14 @@ void init_client_state(const char *host, int port, struct pollfd **pfds,
 
     *sock_fd = setup_client_socket(host, port);
     if (*sock_fd == -1) {
-        printf("server offline, starting in single player\n");
+        ui_log_event("Server Offline");
         return;
     }
 
     (*pfds)[0].fd     = *sock_fd;
     (*pfds)[0].events = POLLIN;
-    printf("connected to %s:%d\n", host, port);
+    
+    char buf[64];
+    snprintf(buf, sizeof(buf), "Connected to %s:%d", host, port);
+    ui_log_event(buf);
 }

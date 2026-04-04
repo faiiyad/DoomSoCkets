@@ -6,6 +6,9 @@
 #include "network.h"
 #include "client_socket.h"
 #include "client.h"
+#include "player.h"
+#include "entity.h"
+#include "defs.h"
 
 static struct pollfd *pfds    = NULL;
 static int            sock_fd = -1;
@@ -98,7 +101,7 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
 static int own_id = -1;
 
 // in client_recv_initial, the FIRST line is always your own entity
-void client_recv_initial(void (*on_update)(ClientUpdate))
+void client_recv_initial(Player *p, void (*on_update)(ClientUpdate))
 {
     if (sock_fd == -1) return;
 
@@ -120,6 +123,11 @@ void client_recv_initial(void (*on_update)(ClientUpdate))
                    &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
             if (first) {
                 own_id = u.id;  // first line is always yourself
+                p->x = u.x;
+                p->y = u.y;
+                p->angle = u.angle;
+                p->health = u.health;
+                p->col = col_from_char(u.col);
                 first = 0;
             } else {
                 on_update(u);   // rest are existing clients

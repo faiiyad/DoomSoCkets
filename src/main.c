@@ -117,6 +117,18 @@ static void init_colors(void)
         init_pair(PAL[i][0], PAL[i][1], PAL[i][2]);
 }
 
+void apply_player_color(int col) {
+    short fg;
+    switch (col) {
+        case CP_ENTITY_R: fg = 160; break;
+        case CP_ENTITY_Y: fg = 226; break;
+        case CP_ENTITY_B: fg =  39; break;
+        default:          fg = 255; break;
+    }
+    init_pair(GUN_ACC,     fg, -1);
+    init_pair(CP_UI_LABEL, fg, -1);
+}
+
 static void on_server_update(ClientUpdate u)
 {
     // hook into your entity system here
@@ -153,9 +165,8 @@ int main(void)
     init_guns();
 
     // entities_init(player.x + 1.0, player.y);
-    client_connect("127.0.0.1", NETWORK_PORT);
-    client_recv_initial(on_server_update);
-
+    // client_connect("127.0.0.1", NETWORK_PORT);
+    // client_recv_initial(&player, on_server_update);
 
     // show_title_screen();
     // flushinp(); 
@@ -169,9 +180,9 @@ int main(void)
         int ch = getch();
 
         if ((ch == 'c' || ch == 'C') && !client_is_connected()) {
-            ui_toggle_connect();
             client_connect("127.0.0.1", NETWORK_PORT);
-            client_recv_initial(on_server_update);
+            client_recv_initial(&player, on_server_update);
+            apply_player_color(player.col);
         }
 
         if (ch == 'q' || ch == 'Q') break;
