@@ -203,7 +203,9 @@ int main(void)
         if ((ch == 'c' || ch == 'C') && !client_is_connected()) {
             client_connect("127.0.0.1", NETWORK_PORT);
             client_recv_initial(&player, on_server_update);
-            apply_player_color(player.col);
+            if(client_is_connected()){
+                apply_player_color(player.col);
+            }
         }
 
         if (ch == 'q' || ch == 'Q') break;
