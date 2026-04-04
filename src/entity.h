@@ -14,6 +14,7 @@ typedef struct {
     double     dist;
     int        health;
     int       col;
+    int is_local;
 } Entity;
 
 extern Entity entities[MAX_ENTITIES];

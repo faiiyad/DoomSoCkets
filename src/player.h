@@ -9,6 +9,7 @@ typedef struct {
     int col;
     int cur_gun;
     int unlocked_guns;
+    int kill_count;
 } Player;
 
 

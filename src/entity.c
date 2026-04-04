@@ -150,6 +150,7 @@ void entities_init(double spawn_x, double spawn_y)
     entities[0].angle  = 0.0;
     entities[0].health = 10;
     entities[0].col    = CP_ENTITY_R;
+    entities[0].is_local = 1;
     num_entities       = 1;
 }
 
@@ -157,7 +158,10 @@ void entities_update(Player *p, int input)
 {
     (void)p;
     for (int i = 0; i < num_entities; i++) {
+
+
         Entity *e = &entities[i];
+        if (!e->is_local) continue;
 
         double spd = 0.08;
         double rot = 0.52;
@@ -332,6 +336,7 @@ void entity_upsert(int id, char col, double x, double y, double angle, int healt
             entities[i].y      = y;
             entities[i].angle  = angle;
             entities[i].health = health;
+            entities[0].is_local = 0;
             return;
         }
     }

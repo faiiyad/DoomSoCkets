@@ -13,12 +13,6 @@
 static struct pollfd *pfds    = NULL;
 static int            sock_fd = -1;
 
-static int own_id     = -1;
-static int own_health = 100;
-static int hit_flag   = 0;
-static int kill_count = 0;
-
-
 int client_connect(const char *host, int port)
 {
     init_client_state(host, port, &pfds, &sock_fd);
@@ -59,7 +53,8 @@ void client_disconnect(void)
     pfds = NULL;
 }
 
-void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int))
+
+void client_recv_updates(Player *p, void (*on_update)(ClientUpdate), void (*on_remove)(int))
 {
     if (sock_fd == -1) return;
 
@@ -88,14 +83,14 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
                 if (sscanf(line, "REMOVE %d", &id) == 1)
                     on_remove(id);
             } else if (strncmp(line, "KILL", 4) == 0) {
-                // Server confirmed we got a kill — server is authoritative
-                kill_count++;
+                p->kill_count++;
             } else if (sscanf(line, "%d %c %lf %lf %lf %d",
                         &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
-                if (u.id == own_id) {
-                    if (u.health < own_health)
-                        hit_flag = 1;
-                    own_health = u.health;
+                if (u.id == p->id) {
+                    if (u.health < p->health){
+                        p->health = u.health;
+                    }
+                    
                 } else {
                     on_update(u);
                 }
@@ -134,7 +129,7 @@ void client_recv_initial(Player *p, void (*on_update)(ClientUpdate))
         if (sscanf(line, "%d %c %lf %lf %lf %d",
                    &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
             if (first) {
-                own_id = u.id;  // first line is always yourself
+                p->id = u.id;  // first line is always yourself
                 p->x = u.x;
                 p->y = u.y;
                 p->angle = u.angle;
@@ -148,8 +143,3 @@ void client_recv_initial(Player *p, void (*on_update)(ClientUpdate))
         line = newline + 1;
     }
 }
-
-int client_get_own_id(void)     { return own_id;     }
-int client_get_own_health(void) { return own_health; }
-int client_pop_hit(void)        { int v = hit_flag; hit_flag = 0; return v; }
-int client_get_kills(void)      { return kill_count; }

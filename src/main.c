@@ -148,16 +148,6 @@ void apply_player_color(int col) {
 
 static void on_server_update(ClientUpdate u)
 {
-    // hook into your entity system here
-    // printf("entity %d => %.2f %.2f %.2f hp=%d\n",
-        //    u.id, u.x, u.y, u.angle, u.health);
-    // FILE *log = fopen("client.log", "a");
-    // fprintf(log, "got id=%d col=%c x=%.2f y=%.2f health=%d\n",
-    //         u.id, u.col, u.x, u.y, u.health);
-    // fclose(log);
-    if (u.id == client_get_own_id()){
-        return;
-    }
     entity_upsert(u.id, u.col, u.x, u.y, u.angle, u.health);
 }
 
@@ -186,7 +176,7 @@ int main(void)
     curs_set(0);
     init_colors();
 
-    Player player = { 8.0, 8.0, 0.0, 100, 'B', 0, 5};
+    Player player = { 0, 8.0, 8.0, 0.0, 100, CP_ENTITY_B, 0, 5, 0 };
     map_find_spawn(&player.x, &player.y);
     init_guns();
 
@@ -208,10 +198,15 @@ int main(void)
     int show_map = 1;
     int hit_flash = 0; // count down frames to show hit indicator
 
-    struct timespec ts = { 0, 16000000L };  // ~60 fps
+    struct timespec ts = { 0, 16000000L };
+    
+    int prev_health = 100;
+    int prev_kill = 0;
 
     while (1) {
-        client_recv_updates(on_server_update, on_server_remove);
+        prev_health = player.health;
+        prev_kill = player.kill_count;
+        client_recv_updates(&player, on_server_update, on_server_remove);
         int ch = getch();
 
         if ((ch == 'c' || ch == 'C') && !client_is_connected()) {
@@ -227,15 +222,15 @@ int main(void)
 
 
         // PLACEHOLDER FOR TESTING
-        if (ch == '5'){
+        if (ch == '5' || player.health <= 0){
             death(&player);
         }
         // placeholder for testing
-        if (ch == '6'){
+        if (ch == '6' || player.health < prev_health){
             trigger_hit_indicator();
         }
 
-        if (ch == '7'){
+        if (ch == '7' || player.kill_count < prev_kill){
             int krab = (player.cur_gun != 4);
             trigger_face_glow(krab);
         }
