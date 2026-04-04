@@ -1,6 +1,6 @@
 CC      = gcc
 CFLAGS  = -Wall -Wextra -O2 -Isrc
-LDFLAGS = -lncurses -lm
+LDFLAGS = -lncursesw -lm
 VPATH   = src:src/server
 TARGET  = raycaster
 SERVER  = server
