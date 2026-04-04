@@ -97,6 +97,63 @@ static const char *JAW_ART[] = {
 #define JAW_LINES 20
 #define JAW_WIDTH 45
 
+static const char *YOU_ART[] = {
+    "@@@@@@@@@@@@@@@    @@@@@@@@@@@@@@@   @@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@@@@@@     @@@@@@@@@@@@@@@",
+    "  @@@@@@@@@@          @@@@@@@@@@  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@         @@@@@@@@@@",
+    "  @@@@@@@@@@          @@@@@@@@@@  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@         @@@@@@@@@@",
+    "  @@@@@@@@@@          @@@@@@@@@@  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@         @@@@@@@@@@",
+    "  @@@@@@@@@@          @@@@@@@@@@  @@@@@@@@@@          @@@@@@@@@@  @@@@@@@@@@         @@@@@@@@@@",
+    "  @@@@@@@@@@@@@    @@@@@@@@@@@@@  @@@@@@@@@@          @@@@@@@@@@  @@@@@@@@@@         @@@@@@@@@@",
+    "  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@          @@@@@@@@@@  @@@@@@@@@@         @@@@@@@@@@",
+    "     @@@@@@@@@@@@@@@@@@@@@@@@     @@@@@@@@@@          @@@@@@@@@@  @@@@@@@@@@         @@@@@@@@@@",
+    "       @@@@@@@@@@@@@@@@@@@@       @@@@@@@@@@          @@@@@@@@@@  @@@@@@@@@@         @@@@@@@@@@",
+    "          @@@@@@@@@@@@@@          @@@@@@@@@@          @@@@@@@@@@  @@@@@@@@@@         @@@@@@@@@@",
+    "            @@@@@@@@@@            @@@@@@@@@@          @@@@@@@@@@  @@@@@@@@@@@@       @@@@@@@@@@",
+    "            @@@@@@@@@@            @@@@@@@@@@          @@@@@@@@@@  @@@@@@@@@@@@       @@@@@@@@@@",
+    "            @@@@@@@@@@            @@@@@@@@@@          @@@@@@@@@@    @@@@@@@@@@@@@    @@@@@@@@@@",
+    "            @@@@@@@@@@            @@@@@@@@@@@@     @@@@@@@@@@@@@       @@@@@@@@@@@@  @@@@@@@@@@",
+    "            @@@@@@@@@@               @@@@@@@@@@@@@@@@@@@@@@@@            @@@@@@@@@@@@@@@@@@@@@@",
+    "            @@@@@@@@@@               @@@@@@@@@@@@@@@@@@@@@@@@            @@@@@@@@@@@@@@@@@@@@@@",
+    "            @@@@@@@@@@                 @@@@@@@@@@@@@@@@@@@@                 @@@@@@@@@@@@@@@@@@@",
+    "            @@@@@@@@@@                   @@@@@@@@@@@@@@@                      @@@@@@@@@@@@@@@@@",
+    "            @@@@@@@@                        @@@@@@@@@@                          @@@@@@@@@@@@@@@",
+    "            @@@@@@@@                        @@@@@@@@@@                          @@@@@@@@@@@@@@@",
+    "            @@@@@                             @@@@@                                @@@@@@@@@@@@",
+    "                                                                                               ",
+    "                                                                                               ",
+};
+
+#define YOU_LINES 23
+#define YOU_WIDTH 99
+
+static const char *DIED_ART[] = {
+    "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ @@@@@@@@@    @@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@@@@@@@@@@@@@@@@@@",
+    "  @@@@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@    @@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@@@@@@@@@@@@@@@@@@",
+    "  @@@@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@    @@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@@@@@@@@@@@@@@@@@@",
+    "  @@@@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@    @@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@@@@@@@@@@@@@@@@@@",
+    "  @@@@@@@@@         @@@@@@@@@  @@@@@@@@@    @@@@@@@@@                  @@@@@@@@@         @@@@@@@@@",
+    "  @@@@@@@@@         @@@@@@@@@  @@@@@@@@@    @@@@@@@@@                  @@@@@@@@@         @@@@@@@@@",
+    "  @@@@@@@@@         @@@@@@@@@  @@@@@@@@@    @@@@@@@@@@@@@@@@@@         @@@@@@@@@         @@@@@@@@@",
+    "  @@@@@@@@@         @@@@@@@@@  @@@@@@@@@    @@@@@@@@@@@@@@@@@@         @@@@@@@@@         @@@@@@@@@",
+    "  @@@@@@@@@         @@@@@@@@@  @@@@@@@@@    @@@@@@@@@@@@@@@@@@         @@@@@@@@@         @@@@@@@@@",
+    "  @@@@@@@@@         @@@@@@@@@  @@@@@@@@@    @@@@@@@@@@@@@@@@@@         @@@@@@@@@         @@@@@@@@@",
+    "  @@@@@@@@@       @@@@@@@@@@@  @@@@@@@@@    @@@@@@@@@                  @@@@@@@@@       @@@@@@@@@@@",
+    "  @@@@@@@@@    @@@@@@@@@@@@    @@@@@@@@@    @@@@@@@@@                  @@@@@@@@@    @@@@@@@@@@@@",
+    "  @@@@@@@@@  @@@@@@@@@@@@      @@@@@@@@@    @@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@  @@@@@@@@@@@",
+    "  @@@@@@@@@@@@@@@@@@@@         @@@@@@@@@    @@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@@@@@@@@@@@",
+    "  @@@@@@@@@@@@@@@@@@           @@@@@@@@@    @@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@@@@@@@@@",
+    "  @@@@@@@@@@@@@@@@@@           @@@@@@@@@    @@@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@@@@@@@@@",
+    "  @@@@@@@@@@@@@@@@             @@@@@@@@@                               @@@@@@@@@@@@@@@@",
+    "  @@@@@@@@@@@@@@               @@@@@@@                                 @@@@@@@@@@@@@@",
+    "@@@@@@@@@@@@@                  @@@@@                                 @@@@@@@@@@@@@",
+};
+
+#define DIED_LINES 19
+#define DIED_WIDTH 98
+
+
+
+
 void draw_skull(int rows, int cols, int toggle)
 {
     // draw every Nth row and scale x
@@ -120,7 +177,7 @@ void draw_skull(int rows, int cols, int toggle)
             int draw_col = skull_x + j / scale_x;
             if (draw_col < 0 || draw_col >= cols) continue;
 
-            if (art[j] == " ") continue;
+            if (art[j] == ' ') continue;
 
             if (art[j] == '*') {
                 if (toggle == 0){
@@ -189,6 +246,79 @@ void draw_jaw(int rows, int cols, double offset, int toggle)
 }
 
 
+void draw_you(int rows, int cols)
+{
+    int scale_y = 2;
+    int scale_x = 2;
+
+    int drawn_h = YOU_LINES / scale_y;
+    int drawn_w = YOU_WIDTH / scale_x;
+
+    // align vertically with skull
+    int skull_drawn_h = SKULL_LINES / scale_y;
+    int skull_y = (rows - skull_drawn_h) / 2;
+    int y0 = skull_y + (skull_drawn_h - drawn_h) / 2;
+
+    // place to the left of skull
+    int skull_drawn_w = SKULL_WIDTH / scale_x;
+    int skull_x = (cols - skull_drawn_w) / 2;
+    int x0 = skull_x - drawn_w - 2;
+
+    for (int i = 0; i < YOU_LINES; i += scale_y) {
+        const char *art = YOU_ART[i];
+        int art_len = (int)strlen(art);
+        int draw_row = y0 + i / scale_y;
+        if (draw_row < 0 || draw_row >= rows - 1) continue;
+
+        for (int j = 0; j < art_len; j += scale_x) {
+            if (art[j] == ' ') continue;
+            int draw_col = x0 + j / scale_x;
+            if (draw_col < 0 || draw_col >= cols) continue;
+
+            attron(COLOR_PAIR(CP_SKULL_W) | A_BOLD);
+            mvaddch(draw_row, draw_col, art[j]);
+            attroff(COLOR_PAIR(CP_SKULL_W) | A_BOLD);
+        }
+    }
+}
+
+void draw_died(int rows, int cols)
+{
+    int scale_y = 2;
+    int scale_x = 2;
+
+    int drawn_h = DIED_LINES / scale_y;
+    int drawn_w = DIED_WIDTH / scale_x;
+
+    // align vertically with skull
+    int skull_drawn_h = SKULL_LINES / scale_y;
+    int skull_y = (rows - skull_drawn_h) / 2;
+    int y0 = skull_y + (skull_drawn_h - drawn_h) / 2;
+
+    // place to the right of skull
+    int skull_drawn_w = SKULL_WIDTH / scale_x;
+    int skull_x = (cols - skull_drawn_w) / 2;
+    int x0 = skull_x + skull_drawn_w + 2;
+
+    for (int i = 0; i < DIED_LINES; i += scale_y) {
+        const char *art = DIED_ART[i];
+        int art_len = (int)strlen(art);
+        int draw_row = y0 + i / scale_y;
+        if (draw_row < 0 || draw_row >= rows - 1) continue;
+
+        for (int j = 0; j < art_len; j += scale_x) {
+            if (art[j] == ' ') continue;
+            int draw_col = x0 + j / scale_x;
+            if (draw_col < 0 || draw_col >= cols) continue;
+
+            attron(COLOR_PAIR(CP_SKULL_W) | A_BOLD);
+            mvaddch(draw_row, draw_col, art[j]);
+            attroff(COLOR_PAIR(CP_SKULL_W) | A_BOLD);
+        }
+    }
+}
+
+
 void show_death_screen(Player *player)
 {
     nodelay(stdscr, TRUE);  // non-blocking input
@@ -198,15 +328,18 @@ void show_death_screen(Player *player)
     static int jaw_tick = 0;
     struct timespec ts = { 0, 50000000L };  // 50ms = ~20fps
     int toggle = 0;
-
+    trigger_hit_indicator();
     while (ch != '\n' && ch != '\r' && ch != KEY_ENTER) {
+
+       
+        
 
         if (ch == 'Q' || ch == 'q'){
             // printf("YO THANKS FOR PLAYING\n");
             return;
         }
 
-        if (ch == 'r' || ch == "R"){
+        if (ch == 'r' || ch == 'R'){
             player->x = 6.5;
             player->y = 3.5;
             player->angle = 0;
@@ -218,8 +351,11 @@ void show_death_screen(Player *player)
             jaw_tick = 0;
         }
         int rows, cols;
+        
         getmaxyx(stdscr, rows, cols);
         erase();
+
+        
 
         attron(COLOR_PAIR(CP_FLOOR));
         for (int y = 0; y < rows; y++)
@@ -237,23 +373,19 @@ void show_death_screen(Player *player)
         double jaw_offset = 7 + 2.5 + 2.5 * sin(jaw_tick * 1.5);
         draw_jaw(rows, cols, jaw_offset, toggle);
 
+        draw_you(rows, cols);
+        draw_died(rows, cols);
+
         // find bottom of jaw
         int scale_y = 2;
         int jaw_bottom = (rows - JAW_LINES / scale_y) / 2 + (SKULL_LINES / scale_y / 2)  - 10 + JAW_LINES / scale_y + 7;
 
-        // YOU DIED
-        if (jaw_tick % 60 == 0){
-            
-        }
 
         attron(COLOR_PAIR(TITLE3) | A_BOLD);
-        mvprintw(jaw_bottom, (cols - 4) / 2, "YOU DIED");
+        mvprintw(jaw_bottom, (cols - 14) / 2, "PRESS R TO RESPAWN");
         attroff(COLOR_PAIR(TITLE3) | A_BOLD);
 
-        // PRESS R TO RESPAWN
-        attron(COLOR_PAIR(CP_UI_TEXT));
-        mvprintw(jaw_bottom + 2, (cols - 14) / 2, "PRESS R TO RESPAWN");
-        attroff(COLOR_PAIR(CP_UI_TEXT));
+        draw_hit_indicator_loop(rows, cols);
 
         refresh();
 
