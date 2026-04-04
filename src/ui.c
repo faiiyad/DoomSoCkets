@@ -4,7 +4,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
-
+#include "client.h"
 #include "ui.h"
 #include "defs.h"
 #include "map.h"
@@ -259,7 +259,7 @@ void ui_draw_hud(Player *p)
     // KILLS cell
     {
         char kbuf[8];
-        snprintf(kbuf, sizeof(kbuf), "%d", 0);
+        snprintf(kbuf, sizeof(kbuf), "%d", client_get_kills());
         int kcol = KIL_L + 1 + (KIL_INNER - (int)strlen(kbuf)) / 2;
         wattron(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
         mvprintw(HUD_T_SPACE + 1, kcol, "%s", kbuf);
