@@ -387,7 +387,7 @@ void ui_draw_server(int rows)
         wattroff(stdscr, COLOR_PAIR(hp_pair) | A_BOLD);
         wattron(stdscr, COLOR_PAIR(CP_UI_BDR));
         for (int b = filled; b < bar_max; b++) mvaddwstr(row, l + 6 + b, L"░");
-        mvprintw(row, l + 17, "%-3d", 10);
+        mvprintw(row, l + 17, "%-3d", e->kills);
         wattroff(stdscr, COLOR_PAIR(CP_UI_BDR));
 
         drawn++;
