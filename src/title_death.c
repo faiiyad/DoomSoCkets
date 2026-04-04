@@ -6,6 +6,7 @@
 #include "title.h"
 #include "defs.h"
 #include "player.h"
+#include "render.h"
 
 
 static const char *SKULL_ART[] = {
@@ -105,7 +106,7 @@ void draw_skull(int rows, int cols, int toggle)
     int drawn_h = SKULL_LINES / scale_y;
     int drawn_w = SKULL_WIDTH / scale_x;
 
-    int skull_y = (rows - drawn_h) / 2 - 15;
+    int skull_y = (rows - drawn_h) / 2 - 10;
     int skull_x = (cols - drawn_w) / 2;
 
     for (int i = 0; i < SKULL_LINES; i += scale_y) {
@@ -157,7 +158,7 @@ void draw_jaw(int rows, int cols, double offset, int toggle)
     int drawn_w = JAW_WIDTH / scale_x;
 
     // position below the skull
-    int jaw_y = (rows - drawn_h) / 2 + (SKULL_LINES / scale_y/2) + (int)offset -20;
+    int jaw_y = (rows - drawn_h) / 2 + (SKULL_LINES / scale_y/2) + (int)offset - 15;
     int jaw_x = (cols - drawn_w) / 2;
 
     for (int i = 0; i < JAW_LINES; i += scale_y) {
@@ -233,12 +234,12 @@ void show_death_screen(Player *player)
         draw_skull(rows, cols, toggle);
 
         jaw_tick++;
-        double jaw_offset = 7 + 2.5 + 2.5 * sin(jaw_tick * 0.77);
+        double jaw_offset = 7 + 2.5 + 2.5 * sin(jaw_tick * 1.5);
         draw_jaw(rows, cols, jaw_offset, toggle);
 
         // find bottom of jaw
         int scale_y = 2;
-        int jaw_bottom = (rows - JAW_LINES / scale_y) / 2 + (SKULL_LINES / scale_y / 2)  - 10 + JAW_LINES / scale_y + 2;
+        int jaw_bottom = (rows - JAW_LINES / scale_y) / 2 + (SKULL_LINES / scale_y / 2)  - 10 + JAW_LINES / scale_y + 7;
 
         // YOU DIED
         if (jaw_tick % 60 == 0){
