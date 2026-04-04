@@ -314,7 +314,7 @@ void entities_draw(Player *p, double *z_buf, int rows, int cols)
 }
 
 
-static int col_from_char(char c)
+int col_from_char(char c)
 {
     switch (c) {
         case 'R': return CP_ENTITY_R;

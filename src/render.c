@@ -121,7 +121,7 @@ void render(Player *p, int show_map)
     if (show_map){
         ui_draw_minimap(p, rows, cols);
     }
-    draw_gun          (1, rows, cols);
+    draw_gun          (p->cur_gun, rows, cols);
     draw_hit_indicator(rows, cols);
 
     refresh();

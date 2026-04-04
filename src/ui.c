@@ -9,6 +9,8 @@
 #include "defs.h"
 #include "map.h"
 #include "entity.h"
+#include "gun.h"
+#include "client.h"
 
 /* ══════════════════════════════════════════════════════════════════════════
    SHARED BORDER PRIMITIVES
@@ -181,7 +183,7 @@ void ui_draw_minimap(Player *p, int rows, int cols)
 #define HUD_T_SPACE  1
 #define P_INNER      4
 #define HP_INNER     16
-#define GUN_INNER    13
+#define GUN_INNER    26
 #define KIL_INNER    9
 #define BAR_W        10
 
@@ -250,7 +252,8 @@ void ui_draw_hud(Player *p)
 
     // GUN cell
     wattron(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
-    mvprintw(HUD_T_SPACE + 1, GUN_L + 1, " %-6s %2ddmg", "M16", 12);
+    mvprintw(HUD_T_SPACE + 1, GUN_L + 1, " %d/%d", p->cur_gun + 1, p->unlocked_guns);
+    mvprintw(HUD_T_SPACE + 1, GUN_L + 5, " %-14s %2ddmg", guns[p->cur_gun].name, guns[p->cur_gun].dmg);
     wattroff(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
 
     // KILLS cell
@@ -319,10 +322,6 @@ void ui_draw_controls(int rows)
    SERVER PANEL — left side, between HUD and keys
    ══════════════════════════════════════════════════════════════════════════ */
 
-static int srv_connected = 0;
-
-void ui_toggle_connect(void) { srv_connected = !srv_connected; }
-
 #define SRV_INNER  20
 #define SRV_LEFT   KEY_L_SPACE
 
@@ -339,14 +338,19 @@ void ui_draw_server(int rows)
     panel_top(top, l, r, "[SERVER]");
 
     border_row(top + 1, l, r);
-    if (srv_connected) {
+    if (client_is_connected()) {
         wattron(stdscr, COLOR_PAIR(CP_UI_GOOD) | A_BOLD);
-        mvprintw(top + 1, l + 2, "● CONNECTED C=leave");
+        mvprintw(top + 1, l + 2, "● CONNECTED");
         wattroff(stdscr, COLOR_PAIR(CP_UI_GOOD) | A_BOLD);
     } else {
         wattron(stdscr, COLOR_PAIR(CP_UI_BAD) | A_BOLD);
-        mvprintw(top + 1, l + 2, "○ OFFLINE   C=join ");
+        mvprintw(top + 1, l + 2, "○ OFFLINE");
         wattroff(stdscr, COLOR_PAIR(CP_UI_BAD) | A_BOLD);
+        
+        wattron(stdscr, COLOR_PAIR(CP_UI_TEXT));
+        mvprintw(top + 1, l + 14, "C=join ");        
+        wattroff(stdscr, COLOR_PAIR(CP_UI_TEXT));
+        
     }
 
     panel_div(top + 2, l, r);

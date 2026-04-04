@@ -75,8 +75,8 @@ static void init_colors(void)
         { CP_FLASH,    226,          -1  },
         { HAND_CLR,    124,          -1  },
         { HAND_CLR_S,  131,          -1  },
-        { GUN_BDR,     255,          -1  },
-        { MUZ_1,       230,          -1  },
+        { GUN_BDR,     232,          -1  },
+        { MUZ_1,       255,          -1  },
         { MUZ_2,       217,          -1  },
         { MUZ_3,       88,           -1  },
         { GUN_ACC,     51,          -1  },  // aqua
@@ -128,6 +128,18 @@ static void init_colors(void)
         init_pair(PAL[i][0], PAL[i][1], PAL[i][2]);
 }
 
+void apply_player_color(int col) {
+    short fg;
+    switch (col) {
+        case CP_ENTITY_R: fg = 160; break;
+        case CP_ENTITY_Y: fg = 226; break;
+        case CP_ENTITY_B: fg =  39; break;
+        default:          fg = 255; break;
+    }
+    init_pair(GUN_ACC,     fg, -1);
+    init_pair(CP_UI_LABEL, fg, -1);
+}
+
 static void on_server_update(ClientUpdate u)
 {
     // hook into your entity system here
@@ -168,13 +180,13 @@ int main(void)
     curs_set(0);
     init_colors();
 
-    Player player = { 8.0, 8.0, 0.0, 100, 'B'};
+    Player player = { 8.0, 8.0, 0.0, 100, 'B', 0, 5};
     map_find_spawn(&player.x, &player.y);
+    init_guns();
 
     // entities_init(player.x + 1.0, player.y);
-    client_connect("127.0.0.1", NETWORK_PORT);
-    client_recv_initial(on_server_update);
-
+    // client_connect("127.0.0.1", NETWORK_PORT);
+    // client_recv_initial(&player, on_server_update);
 
     // show_title_screen();
     
@@ -189,9 +201,9 @@ int main(void)
         int ch = getch();
 
         if ((ch == 'c' || ch == 'C') && !client_is_connected()) {
-            ui_toggle_connect();
             client_connect("127.0.0.1", NETWORK_PORT);
-            client_recv_initial(on_server_update);
+            client_recv_initial(&player, on_server_update);
+            apply_player_color(player.col);
         }
 
         if (ch == 'q' || ch == 'Q') break;
@@ -208,12 +220,21 @@ int main(void)
         }
         
         if (ch == 'k' || ch == 'K') {
-            player.angle -= ROT_SPD;
+            if (player.cur_gun == 4){
+                player.angle -= ROT_SPD/3;
+            }else{
+                player.angle -= ROT_SPD;
+            }
+            
             if (player.angle < 0)        player.angle += 2*M_PI;
             client_send_position(player.x, player.y, player.angle, 0);
         }
         if (ch == 'l' || ch == 'L') {
-            player.angle += ROT_SPD;
+            if (player.cur_gun == 4){
+                player.angle += ROT_SPD/3;
+            }else{
+                player.angle += ROT_SPD;
+            }
             if (player.angle >= 2*M_PI)  player.angle -= 2*M_PI;
             client_send_position(player.x, player.y, player.angle, 0);
         }
@@ -250,12 +271,7 @@ int main(void)
         }
         // double guns
         if (ch == 'e' || ch == 'E'){
-            if (gun_status == 0){
-                gun_status = 1;
-            }
-            else{
-                gun_status = 0;
-            }
+            player.cur_gun = (player.cur_gun + 1) % player.unlocked_guns;
         }
 
         

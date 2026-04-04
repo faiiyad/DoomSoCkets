@@ -99,8 +99,8 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
 
     (*clients)[client_idx].fd           = new_socket;
     (*clients)[client_idx].entity.id    = next_entity_id++;
-    (*clients)[client_idx].entity.x     = 0.0;
-    (*clients)[client_idx].entity.y     = 0.0;
+    (*clients)[client_idx].entity.x     = 6.5;
+    (*clients)[client_idx].entity.y     = 3.5;
     (*clients)[client_idx].entity.angle = 0.0;
     (*clients)[client_idx].entity.health = 100;
     (*clients)[client_idx].entity.col = ENTITY_COLOURS[next_colour_idx];
