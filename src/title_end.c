@@ -81,8 +81,8 @@ static const char *SKELETON_MIRROR_ART[] = {
 
 static int cmp_kills(const void *a, const void *b)
 {
-    // return ((Entity *)b)->kills - ((Entity *)a)->kills;
-    return 1;
+    return ((Entity *)b)->kills - ((Entity *)a)->kills;
+    // return 1;
 }
 
 static void draw_skeleton(int rows, int cols)

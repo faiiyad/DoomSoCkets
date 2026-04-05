@@ -336,7 +336,7 @@ int main(void)
         if (ch == ' ' && gun_frame == 0) {
             gun_frame = 1;
             gun_timer = 10;
-            client_send_position(player.x, player.y, player.angle, 10);
+            client_send_position(player.x, player.y, player.angle, guns[player.cur_gun].dmg);
         }
         if (gun_timer > 0) {
             gun_timer--;
