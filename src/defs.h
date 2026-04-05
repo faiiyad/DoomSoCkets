@@ -73,6 +73,8 @@ typedef enum {
     TITLE3,
     TITLE4,
     TITLEBG,
+    TITLERED,
+    TITLERED2,
 
     // entity — red
     CP_ENTITY_R,
