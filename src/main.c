@@ -251,6 +251,7 @@ int main(void)
 
     int show_map = 1;
     int hit_flash = 0; // count down frames to show hit indicator
+    int toggle_dash = 0;
 
     struct timespec ts = { 0, 16000000L };  // ~60 fps
 
@@ -287,7 +288,11 @@ int main(void)
         if (ch == '8'){
             show_end_screen(&player, entities, num_entities);
         }
+        
+        if (ch == '\t'){
+            toggle_dash = !toggle_dash;
 
+        }
 
         
         if (ch == 'k' || ch == 'K') {
@@ -300,6 +305,7 @@ int main(void)
             if (player.angle < 0)        player.angle += 2*M_PI;
             client_send_position(player.x, player.y, player.angle, 0);
         }
+
         if (ch == 'l' || ch == 'L') {
             if (player.cur_gun == 4){
                 player.angle += ROT_SPD/3;
@@ -310,23 +316,55 @@ int main(void)
             client_send_position(player.x, player.y, player.angle, 0);
         }
 
+        // SPIN
+        if(!toggle_dash && ch == KEY_UP){
+            player.angle -= ROT_SPD/SPIN_BALANCE;
+            if (player.angle < 0)        player.angle += 2*M_PI;
+            client_send_position(player.x, player.y, player.angle, 0);;
+        }
+        
+        if(!toggle_dash && ch == KEY_DOWN){
+            player.angle += ROT_SPD/SPIN_BALANCE;
+            if (player.angle >= 2*M_PI)  player.angle -= 2*M_PI;
+            client_send_position(player.x, player.y, player.angle, 0);
+
+        }
         double nx = player.x, ny = player.y;
-        if (ch == KEY_UP   || ch == 'w' || ch == 'W') {
+
+
+        // DASH
+
+
+
+        if ((toggle_dash && ch == KEY_UP)) {
+            nx += cos(player.angle) * MOVE_SPD * DASH_BALANCE;
+            ny += sin(player.angle) * MOVE_SPD * DASH_BALANCE;
+            client_send_position(nx, ny, player.angle, 0);
+        }
+        if ((toggle_dash && ch == KEY_DOWN)) {
+            nx -= cos(player.angle) * MOVE_SPD * DASH_BALANCE;
+            ny -= sin(player.angle) * MOVE_SPD * DASH_BALANCE;
+            client_send_position(nx, ny, player.angle, 0);
+        }
+
+
+        
+        if (ch == 'w' || ch == 'W') {
             nx += cos(player.angle) * MOVE_SPD;
             ny += sin(player.angle) * MOVE_SPD;
             client_send_position(nx, ny, player.angle, 0);
         }
-        if (ch == KEY_DOWN || ch == 's' || ch == 'S') {
+        if (ch == 's' || ch == 'S') {
             nx -= cos(player.angle) * MOVE_SPD;
             ny -= sin(player.angle) * MOVE_SPD;
             client_send_position(nx, ny, player.angle, 0);
         }
-        if (ch == 'a' || ch == 'A' || ch == ',') {
+        if (ch == 'a' || ch == 'A') {
             nx += cos(player.angle - M_PI / 2) * MOVE_SPD;
             ny += sin(player.angle - M_PI / 2) * MOVE_SPD;
             client_send_position(nx, ny, player.angle, 0);
         }
-        if (ch == 'd' || ch == 'D' || ch == '.') {
+        if (ch == 'd' || ch == 'D') {
             nx += cos(player.angle + M_PI / 2) * MOVE_SPD;
             ny += sin(player.angle + M_PI / 2) * MOVE_SPD;
             client_send_position(nx, ny, player.angle, 0);
