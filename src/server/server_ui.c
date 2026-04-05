@@ -127,6 +127,13 @@ void draw_server_ui(Client *clients, nfds_t nfds)
     doupdate();
 }
 
+void server_ui_handle_resize(void)
+{
+    endwin();
+    refresh();
+    clear();
+}
+
 int server_ui_get_input(void)
 {
     return getch();

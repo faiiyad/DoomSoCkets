@@ -153,8 +153,17 @@ static void death(Player *player){
     player->y = -100;
     client_send_position(player->x, player->y, player->angle, 0);
     show_death_screen(player);
+    player->health = 100;
     client_send_position(player->x, player->y, player->angle, 0);
 
+}
+
+static void on_server_respawn(int respawn_id, double new_x, double new_y){
+    if (respawn_id == player.id){
+        player.x = new_x;
+        player.y = new_y;
+    }
+    client_send_position(player.x, player.y, player.angle, 0);
 }
 
 static void on_server_update(ClientUpdate u)
@@ -256,7 +265,8 @@ int main(void)
     struct timespec ts = { 0, 16000000L };  // ~60 fps
 
     while (1) {
-        client_recv_updates(on_server_update, on_server_remove, on_server_kill, on_server_win);
+        client_recv_updates(on_server_update, on_server_remove, on_server_kill, on_server_win,
+                            on_server_respawn);
         int ch = getch();
 
         if ((ch == 'c' || ch == 'C') && !client_is_connected()) {

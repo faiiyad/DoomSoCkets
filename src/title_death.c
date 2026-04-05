@@ -331,19 +331,8 @@ void show_death_screen(Player *player)
     trigger_hit_indicator();
     while (ch != '\n' && ch != '\r' && ch != KEY_ENTER) {
 
-       
-        
-
-        if (ch == 'Q' || ch == 'q'){
-            // printf("YO THANKS FOR PLAYING\n");
-            return;
-        }
 
         if (ch == 'r' || ch == 'R'){
-            player->x = 6.5;
-            player->y = 3.5;
-            player->angle = 0;
-            player-> health = 100;
             return;
         }
 

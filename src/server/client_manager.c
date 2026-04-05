@@ -3,15 +3,31 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
-
 #include "client_manager.h"
 #include "network.h"
+
 
 void server_log(const char *fmt, ...);
 
 static int next_entity_id = 1;
 static const char ENTITY_COLOURS[] = {'Y', 'B', 'R'};
 static int next_colour_idx = 0;
+static int spawn_index = 0;
+
+double spawn[3][2] = {{11.2, 2.8}, {1.7, 2.7}, {13, 1.6}};
+
+
+
+Spawn random_spawn(){
+    Spawn r_spawn;
+    r_spawn.x = spawn[spawn_index][0];
+    r_spawn.y = spawn[spawn_index][1];
+    spawn_index++;
+    if (spawn_index >=3){
+        spawn_index = 0;
+    }
+    return r_spawn;
+}
 
 // Batch entities to 1 client
 static void send_entities_batch(int fd, Client *clients, nfds_t nfds, int first_fd)
@@ -101,6 +117,10 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
 {
     update_capacity(pfds, clients, capacity, *nfds);
 
+    Spawn r_spawn = random_spawn();
+    double x = r_spawn.x;
+    double y = r_spawn.y;
+
     int client_idx = *nfds;
     (*pfds)[client_idx].fd       = new_socket;
     (*pfds)[client_idx].events   = POLLIN;
@@ -108,8 +128,8 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
 
     (*clients)[client_idx].fd           = new_socket;
     (*clients)[client_idx].entity.id    = next_entity_id++;
-    (*clients)[client_idx].entity.x     = 6.5;
-    (*clients)[client_idx].entity.y     = 3.5;
+    (*clients)[client_idx].entity.x     = x;
+    (*clients)[client_idx].entity.y     = y;
     (*clients)[client_idx].entity.angle = 0.0;
     (*clients)[client_idx].entity.health = 100;
     (*clients)[client_idx].entity.col    = ENTITY_COLOURS[next_colour_idx];
@@ -153,8 +173,21 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
         clients[idx].entity.angle = angle;
 
         if (x < -50 && y < -50) {
+
+            Spawn r_spawn = random_spawn();
+            double x = r_spawn.x;
+            double y = r_spawn.y;
             clients[idx].entity.health = 100;
-            broadcast_entity(&clients[idx].entity, clients, *nfds, -1);
+            clients[idx].entity.x = x;
+            clients[idx].entity.y = y;
+            server_log("set respawn at %.2f, %.2f", clients[idx].entity.x, clients[idx].entity.y);
+            char respawn_msg[32];
+            int respawn_len = snprintf(respawn_msg, sizeof(respawn_msg), "RESPAWN %d %.2f %.2f\n",
+                    clients[idx].entity.id, clients[idx].entity.x, clients[idx].entity.y);
+            for (nfds_t j = 1; j < *nfds; j++) {
+                            if (write(clients[j].fd, respawn_msg, respawn_len) == -1)
+                                server_log("write failed: %s", strerror(errno));
+                        }
             server_log("entity id %d respawned", clients[idx].entity.id);
             return 0;
         }
