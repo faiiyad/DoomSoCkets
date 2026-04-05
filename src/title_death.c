@@ -382,7 +382,7 @@ void show_death_screen(Player *player)
 
 
         attron(COLOR_PAIR(TITLE3) | A_BOLD);
-        mvprintw(jaw_bottom, (cols - 14) / 2, "PRESS R TO RESPAWN");
+        mvprintw(rows - 6, (cols - 18) / 2, "PRESS R TO RESPAWN");
         attroff(COLOR_PAIR(TITLE3) | A_BOLD);
 
         draw_hit_indicator_loop(rows, cols);

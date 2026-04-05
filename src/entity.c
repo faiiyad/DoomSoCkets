@@ -115,7 +115,7 @@ static const char *sprite_back[SPR_H] = {
     "ODDD      DDDO",
 };
 
-static int entity_color(Entity *e, char c)
+int entity_color(Entity *e, char c)
 {
     switch (c) {
         case 'R': return e->col + 1;
@@ -126,7 +126,7 @@ static int entity_color(Entity *e, char c)
     }
 }
 
-static const char **sprite_dir[5] = {
+const char **sprite_dir[5] = {
     (const char **)sprite_front,
     (const char **)sprite_fside,
     (const char **)sprite_side,

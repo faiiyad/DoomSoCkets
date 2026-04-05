@@ -223,7 +223,7 @@ int main(void)
 
     // show_title_screen();
     
-    // flushinp(); 
+    // flushinp(); typedef struct {
 
     int show_map = 1;
     int hit_flash = 0; // count down frames to show hit indicator
@@ -263,6 +263,10 @@ int main(void)
         
 
 
+        
+        if (ch == '8'){
+            show_end_screen(&player, entities, num_entities);
+        }
         
         if (ch == 'k' || ch == 'K') {
             if (player.cur_gun == 4){
