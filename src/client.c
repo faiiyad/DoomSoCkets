@@ -13,16 +13,21 @@
 static struct pollfd *pfds    = NULL;
 static int            sock_fd = -1;
 
+static int own_id     = -1;
+static int own_health = 100;
+static int hit_flag   = 0;
+static int kill_count = 0;
+
+
 int client_connect(const char *host, int port)
 {
     init_client_state(host, port, &pfds, &sock_fd);
     return sock_fd;
 }
 
-void client_send_position(double x, double y, double angle, int id)
+void client_send_position(double x, double y, double angle, int dmg)
 {
     if (sock_fd == -1) {
-        // fprintf(stderr, "client_send_position: not connected\n");
         return;
     }
 
@@ -34,7 +39,12 @@ void client_send_position(double x, double y, double angle, int id)
     if (pfd.revents & (POLLHUP | POLLERR)) { fprintf(stderr, "socket error\n"); return; }
 
     char buf[64];
-    int len = snprintf(buf, sizeof(buf), "%.2f %.2f %.2f %d\n", x, y, angle, id);
+    int len;
+    if(dmg == 0) {
+        len = snprintf(buf, sizeof(buf), "%.2f %.2f %.2f\n", x, y, angle);
+    } else {
+        len = snprintf(buf, sizeof(buf), "%.2f %.2f %.2f %d\n", x, y, angle, dmg);
+    }
     if (write(sock_fd, buf, len) == -1)
         perror("write");
 }
@@ -43,7 +53,6 @@ int client_is_connected(void)
 {
     return sock_fd != -1;
 }
-
 
 void client_disconnect(void)
 {
@@ -55,8 +64,7 @@ void client_disconnect(void)
     pfds = NULL;
 }
 
-
-void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int))
+void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int), void (*on_kill)(int, int))
 {
     if (sock_fd == -1) return;
 
@@ -84,10 +92,14 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
             if (strncmp(line, "REMOVE", 6) == 0) {
                 if (sscanf(line, "REMOVE %d", &id) == 1)
                     on_remove(id);
-            } else if (sscanf(line, "%d %c %lf %lf %lf %d",
-                        &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
-                    on_update(u);
-                }
+            } else if (strncmp(line, "KILL", 4) == 0) {
+                int killer_id, victim_id;
+                if (sscanf(line, "KILL %d %d", &killer_id, &victim_id) == 2)
+                    on_kill(killer_id, victim_id);
+            } else if (sscanf(line, "%d %c %lf %lf %lf %d %d",
+                        &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health, &u.kills) == 7) {
+                on_update(u);
+            }
             line = newline + 1;
         }
 
@@ -98,7 +110,7 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
 }
 
 
-static int own_id = -1;
+// static int own_id = -1;
 
 // in client_recv_initial, the FIRST line is always your own entity
 void client_recv_initial(Player *p, void (*on_update)(ClientUpdate))
@@ -119,25 +131,28 @@ void client_recv_initial(Player *p, void (*on_update)(ClientUpdate))
     while ((newline = strchr(line, '\n')) != NULL) {
         *newline = '\0';
         ClientUpdate u;
-        if (sscanf(line, "%d %c %lf %lf %lf %d",
-                   &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
+        // printf("initial data: %s\n", line);
+        if (sscanf(line, "%d %c %lf %lf %lf %d %d",
+                   &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health, &u.kills) == 7) {
             if (first) {
-                own_id = u.id;  // first line is always yourself
+                // own_id = u.id;  // first line is always yourself
+                p->id = u.id;
                 p->x = u.x;
                 p->y = u.y;
                 p->angle = u.angle;
                 p->health = u.health;
                 p->col = col_from_char(u.col);
+                p->kills = u.kills;
                 first = 0;
             } else {
-                on_update(u);   // rest are existing clients
+                on_update(u);
             }
         }
         line = newline + 1;
     }
 }
 
-int client_get_own_id(void)
-{
-    return own_id;
-}
+// int client_get_own_id(void)     { return own_id;     }
+// int client_get_own_health(void) { return own_health; }
+// int client_pop_hit(void)        { int v = hit_flag; hit_flag = 0; return v; }
+// int client_get_kills(void)      { return kill_count; }

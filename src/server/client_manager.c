@@ -14,18 +14,26 @@ static const char ENTITY_COLOURS[] = {'Y', 'B', 'R'};
 static int next_colour_idx = 0;
 
 // Batch entities to 1 client
-static void send_entities_batch(int fd, Client *clients, nfds_t nfds, int exclude_fd)
+static void send_entities_batch(int fd, Client *clients, nfds_t nfds, int first_fd)
 {
     char buf[4096];
     int  offset = 0;
 
     for (nfds_t i = 1; i < nfds; i++) {
-        if (clients[i].fd == exclude_fd) continue;
+        if (clients[i].fd != first_fd) continue;
+        server_log("sending initial entity %d to new client fd %d",
+                   clients[i].entity.id, clients[i].fd);
         Entity *e = &clients[i].entity;
         offset += snprintf(buf + offset, sizeof(buf) - offset,
                            ENTITY_FMT, ENTITY_FMT_ARGS(e));
     }
-
+    for (nfds_t i = 1; i < nfds; i++) {
+        if (clients[i].fd == first_fd) continue;
+        Entity *e = &clients[i].entity;
+        offset += snprintf(buf + offset, sizeof(buf) - offset,
+                           ENTITY_FMT, ENTITY_FMT_ARGS(e));
+    }
+    server_log("%s", buf);
     if (offset > 0)
         if (write(fd, buf, offset) == -1) {
             server_log("write failed: %s", strerror(errno));
@@ -46,6 +54,8 @@ static void send_one_entity(int fd, const Entity *e)
 static void broadcast_entity(const Entity *e, Client *clients, 
                             nfds_t nfds, int exclude_fd)
 {
+    server_log("broadcasting entity id %d health=%d",
+               e->id, e->health);
     for (nfds_t i = 1; i < nfds; i++) {
         if (clients[i].fd != exclude_fd)
             send_one_entity(clients[i].fd, e);
@@ -77,7 +87,6 @@ static void update_capacity(struct pollfd **pfds, Client **clients,
     server_log("increased capacity from %zu to %zu", *capacity, new_capacity);
     *capacity = new_capacity;
 }
-
 // void remove_client(nfds_t idx, struct pollfd *pfds, Client *clients,
 //                    nfds_t *nfds)
 // {
@@ -103,16 +112,17 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
     (*clients)[client_idx].entity.y     = 3.5;
     (*clients)[client_idx].entity.angle = 0.0;
     (*clients)[client_idx].entity.health = 100;
-    (*clients)[client_idx].entity.col = ENTITY_COLOURS[next_colour_idx];
+    (*clients)[client_idx].entity.col    = ENTITY_COLOURS[next_colour_idx];
+    (*clients)[client_idx].entity.kills         = 0;  
     next_colour_idx = (next_colour_idx + 1) % 3;
 
     (*nfds)++;
 
-    // Send itself to the new client
-    send_one_entity(new_socket, &(*clients)[client_idx].entity);
+    // // Send itself to the new client
+    // send_one_entity(new_socket, &(*clients)[client_idx].entity);
 
-    // Send existing entities to the new client
-    send_entities_batch(new_socket, *clients, *nfds - 1, new_socket);
+    // Send existing entities to the new client with the new client first in the batch
+    send_entities_batch(new_socket, *clients, *nfds, new_socket);
 
     // Broadcast the new client's entity to existing clients
     broadcast_entity(&(*clients)[client_idx].entity, *clients, *nfds, new_socket);
@@ -142,33 +152,56 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
         clients[idx].entity.y     = y;
         clients[idx].entity.angle = angle;
 
+        if (x < -50 && y < -50) {
+            clients[idx].entity.health = 100;
+            broadcast_entity(&clients[idx].entity, clients, *nfds, -1);
+            server_log("entity id %d respawned", clients[idx].entity.id);
+            return 0;
+        }
+        
         if (count == 4) {
+        server_log("CLI: id %d => x=%.2f y=%.2f angle=%.2f damage=%d",
+                   clients[idx].entity.id, x, y, angle, damage);
             for (nfds_t i = 1; i < *nfds; i++) {
                 if (i == idx) continue;
                 int hit;
                 cast_ray_to_entity(x, y, angle, &clients[i].entity, 0.5, &hit);
                 if (hit) {
                     clients[i].entity.health -= damage;
-                    server_log("entity id %d hit entity id %d (health now %d)",
+                    server_log("SRV: id %d hit id %d (health now %d)",
                                clients[idx].entity.id, clients[i].entity.id,
                                clients[i].entity.health);
-                    broadcast_entity(&clients[i].entity, clients,
-                                    *nfds, -1);
+                    broadcast_entity(&clients[i].entity, clients, *nfds, -1);
+
+                    if (clients[i].entity.health <= 0) {
+                        char kill_msg[32];
+                        int kill_len = snprintf(kill_msg, sizeof(kill_msg), "KILL %d %d\n",
+                                                clients[idx].entity.id, clients[i].entity.id);
+                        for (nfds_t j = 1; j < *nfds; j++) {
+                            if (write(clients[j].fd, kill_msg, kill_len) == -1)
+                                server_log("write failed: %s", strerror(errno));
+                        }
+                        clients[idx].entity.kills += 1;
+                        server_log("SRV: id %d killed id %d (total kills: %d)",
+                                clients[idx].entity.id, clients[i].entity.id,
+                                clients[idx].entity.kills);
+                    }
                 }
             }
+        } else {
+        server_log("CLI: id %d => x=%.2f y=%.2f angle=%.2f",
+                   clients[idx].entity.id, x, y, angle);
+            broadcast_entity(&clients[idx].entity, clients, *nfds, clients[idx].fd);
         }
 
-        server_log("updated entity id %d => x=%.2f y=%.2f angle=%.2f",
-                   clients[idx].entity.id, x, y, angle);
+        // server_log("updated entity id %d => x=%.2f y=%.2f angle=%.2f",
+                //    clients[idx].entity.id, x, y, angle);
                    
-        broadcast_entity(&clients[idx].entity, clients, *nfds,
-                     clients[idx].fd);
     } else {
         server_log("invalid entity update from fd %d: %s", pfds[idx].fd, buffer);
     }
     return 0;
 }
-
 
 void remove_client(nfds_t idx, struct pollfd *pfds, Client *clients,
                    nfds_t *nfds)

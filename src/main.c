@@ -15,6 +15,8 @@
 #include "client.h"
 #include "ui.h"
 
+static Player player;
+
 static void init_colors(void)
 {
     start_color();
@@ -146,26 +148,6 @@ void apply_player_color(int col) {
     init_pair(CP_UI_LABEL, fg, -1);
 }
 
-static void on_server_update(ClientUpdate u)
-{
-    // hook into your entity system here
-    // printf("entity %d => %.2f %.2f %.2f hp=%d\n",
-        //    u.id, u.x, u.y, u.angle, u.health);
-    // FILE *log = fopen("client.log", "a");
-    // fprintf(log, "got id=%d col=%c x=%.2f y=%.2f health=%d\n",
-    //         u.id, u.col, u.x, u.y, u.health);
-    // fclose(log);
-    if (u.id == client_get_own_id()){
-        return;
-    }
-    entity_upsert(u.id, u.col, u.x, u.y, u.angle, u.health);
-}
-
-static void on_server_remove(int id)
-{
-    entity_remove(id);
-}
-
 static void death(Player *player){
     player->x = -100;
     player->y = -100;
@@ -174,6 +156,44 @@ static void death(Player *player){
     client_send_position(player->x, player->y, player->angle, 0);
 
 }
+
+static void on_server_update(ClientUpdate u)
+{
+    if (u.id == player.id){
+        ui_log_event("I GOT HIT");
+        player.health = u.health;
+        trigger_hit_indicator();
+        return;
+    }
+    entity_upsert(u.id, u.col, u.x, u.y, u.angle, u.health, u.kills);
+}
+
+static void on_server_remove(int id)
+{
+    entity_remove(id);
+}
+
+static void on_server_kill(int killer_id, int victim_id)
+{
+    if (killer_id == player.id) {
+        player.kills += 1;
+        ui_log_event("I KILLED");
+        int krab = (player.cur_gun != 4);
+        trigger_face_glow(krab);
+        player.unlocked_guns = player.unlocked_guns + 1;
+        if (player.unlocked_guns > GUN_COUNT) player.unlocked_guns = GUN_COUNT;
+        player.cur_gun = player.unlocked_guns - 1;
+
+    } else if (victim_id == player.id) {
+        ui_log_event("I DIED");
+        if (player.health <= 0){
+            death(&player);
+        }
+
+    }
+    entity_upsert_kill(killer_id, victim_id);
+}
+
 
 int main(void)
 {
@@ -186,29 +206,32 @@ int main(void)
     curs_set(0);
     init_colors();
 
-    Player player = { 8.0, 8.0, 0.0, 100, CP_ENTITY_B, 0, 5};
+    player = (Player){ 0, 8.0, 8.0, 0.0, 100, CP_ENTITY_R, 0, 0, 1};
     map_find_spawn(&player.x, &player.y);
     init_guns();
 
-    // Add 2 temp enemies for testing
-    entity_upsert(1, 'R', player.x + 1.0, player.y, 0.5, 50);
-    entity_upsert(2, 'Y', player.x - 1.0, player.y, 2.0, 75);
-    // entity_upsert(3, 'B', player.x, player.y + 1.0, 1.0, 100);
-
+    // if (net_connect("127.0.0.1") != 0) {
+    //     endwin();
+    //     fprintf(stderr, "Failed to connect to server\n");
+    //     return 1;
+    // }
     // entities_init(player.x + 1.0, player.y);
     // client_connect("127.0.0.1", NETWORK_PORT);
-    // client_recv_initial(&player, on_server_update);
+    // client_recv_initial(on_server_update);
+
+    
 
     // show_title_screen();
     
     // flushinp(); typedef struct {
 
     int show_map = 1;
+    int hit_flash = 0; // count down frames to show hit indicator
 
     struct timespec ts = { 0, 16000000L };  // ~60 fps
 
     while (1) {
-        client_recv_updates(on_server_update, on_server_remove);
+        client_recv_updates(on_server_update, on_server_remove, on_server_kill);
         int ch = getch();
 
         if ((ch == 'c' || ch == 'C') && !client_is_connected()) {
@@ -287,9 +310,11 @@ int main(void)
             client_send_position(nx, ny, player.angle, 0);
         }
 
+
         if (ch == ' ' && gun_frame == 0) {
             gun_frame = 1;
             gun_timer = 10;
+            client_send_position(player.x, player.y, player.angle, 10);
         }
         if (gun_timer > 0) {
             gun_timer--;

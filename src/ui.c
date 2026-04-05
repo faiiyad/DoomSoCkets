@@ -4,7 +4,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
-
+#include "client.h"
 #include "ui.h"
 #include "defs.h"
 #include "map.h"
@@ -161,9 +161,9 @@ static void draw_map_player(Player *p, int ox, int oy, int rows, int cols)
     else if (a < 15*M_PI/8) arrow = L"↗";
     else                    arrow = L"→";
 
-    wattron(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+    wattron(stdscr, COLOR_PAIR(p->col) | A_BOLD);
     mvaddwstr(py_m, px_m, arrow);
-    wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
+    wattroff(stdscr, COLOR_PAIR(p->col) | A_BOLD);
 }
 
 void ui_draw_minimap(Player *p, int rows, int cols)
@@ -222,12 +222,12 @@ void ui_draw_hud(Player *p)
     mvaddwstr(HUD_T_SPACE + 1, GUN_R,    L"║");
     wattroff(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
 
-    // P1 label
+    // P label
     {
         int lcol = PLAYER_L + 1 + (P_INNER - 2) / 2;
-        wattron(stdscr, COLOR_PAIR(CP_UI_LABEL) | A_BOLD);
-        mvprintw(HUD_T_SPACE + 1, lcol, "P1");
-        wattroff(stdscr, COLOR_PAIR(CP_UI_LABEL) | A_BOLD);
+        wattron(stdscr, COLOR_PAIR(p->col) | A_BOLD);
+        mvprintw(HUD_T_SPACE + 1, lcol, "P%d", p->id);
+        wattroff(stdscr, COLOR_PAIR(p->col) | A_BOLD);
     }
 
     // HP bar
@@ -259,7 +259,7 @@ void ui_draw_hud(Player *p)
     // KILLS cell
     {
         char kbuf[8];
-        snprintf(kbuf, sizeof(kbuf), "%d", 0);
+        snprintf(kbuf, sizeof(kbuf), "%d", p->kills);
         int kcol = KIL_L + 1 + (KIL_INNER - (int)strlen(kbuf)) / 2;
         wattron(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
         mvprintw(HUD_T_SPACE + 1, kcol, "%s", kbuf);
@@ -372,9 +372,9 @@ void ui_draw_server(int rows)
         int row = top + 3 + drawn;
         border_row(row, l, r);
 
-        wattron(stdscr, COLOR_PAIR(CP_UI_LABEL) | A_BOLD);
+        wattron(stdscr, COLOR_PAIR(e->col) | A_BOLD);
         mvprintw(row, l + 2, "P%-2d", e->id);
-        wattroff(stdscr, COLOR_PAIR(CP_UI_LABEL) | A_BOLD);
+        wattroff(stdscr, COLOR_PAIR(e->col) | A_BOLD);
 
         int hp      = e->health;
         int bar_max = 10;
@@ -387,7 +387,7 @@ void ui_draw_server(int rows)
         wattroff(stdscr, COLOR_PAIR(hp_pair) | A_BOLD);
         wattron(stdscr, COLOR_PAIR(CP_UI_BDR));
         for (int b = filled; b < bar_max; b++) mvaddwstr(row, l + 6 + b, L"░");
-        mvprintw(row, l + 17, "%-3d", 10);
+        mvprintw(row, l + 17, "%-3d", e->kills);
         wattroff(stdscr, COLOR_PAIR(CP_UI_BDR));
 
         drawn++;

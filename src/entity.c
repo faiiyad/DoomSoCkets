@@ -324,7 +324,7 @@ int col_from_char(char c)
     }
 }
 
-void entity_upsert(int id, char col, double x, double y, double angle, int health)
+void entity_upsert(int id, char col, double x, double y, double angle, int health, int kills)
 {
     for (int i = 0; i < num_entities; i++) {
         if (entities[i].id == id) {
@@ -332,6 +332,7 @@ void entity_upsert(int id, char col, double x, double y, double angle, int healt
             entities[i].y      = y;
             entities[i].angle  = angle;
             entities[i].health = health;
+            entities[i].kills  = kills;
             return;
         }
     }
@@ -342,7 +343,18 @@ void entity_upsert(int id, char col, double x, double y, double angle, int healt
     entities[num_entities].y      = y;
     entities[num_entities].angle  = angle;
     entities[num_entities].health = health;
+    entities[num_entities].kills  = kills;
     num_entities++;
+}
+
+void entity_upsert_kill(int killer_id, int victim_id)
+{
+    for (int i = 0; i < num_entities; i++) {
+        if (entities[i].id == killer_id) {
+            entities[i].kills += 1;
+            break;
+        }
+    }
 }
 
 
