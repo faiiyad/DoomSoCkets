@@ -203,8 +203,13 @@ static void on_server_kill(int killer_id, int victim_id)
     entity_upsert_kill(killer_id, victim_id);
 }
 
-static void on_server_win(int killer_id, int victim_id){
+static void on_server_win(double win_x, double win_y){
     show_end_screen(&player, entities, num_entities);
+    player.cur_gun = 0;
+    player.unlocked_guns = 0;
+    player.kills = 0;
+    player.x = win_x;
+    player.y = win_y;
 
 }
 
