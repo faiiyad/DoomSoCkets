@@ -196,7 +196,9 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
         server_log("CLI: id %d => x=%.2f y=%.2f angle=%.2f damage=%d",
                    clients[idx].entity.id, x, y, angle, damage);
             for (nfds_t i = 1; i < *nfds; i++) {
-                if (i == idx) continue;
+                if (clients[i].entity.id == clients[idx].entity.id) continue;
+                if (clients[i].entity.health <= 0) continue;
+                if (clients[i].entity.x < -90) continue; 
                 int hit;
                 cast_ray_to_entity(x, y, angle, &clients[i].entity, 0.5, &hit);
                 if (hit) {

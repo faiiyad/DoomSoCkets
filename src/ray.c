@@ -44,7 +44,8 @@ double cast_ray_to_entity(double px, double py, double angle,
     double dy = e->y - py;
     double dist = sqrt(dx*dx + dy*dy);
     double ray_angle = atan2(dy, dx);
-    double angle_diff = fmod(ray_angle - angle + M_PI, 2*M_PI) - M_PI;
+    double diff = ray_angle - angle;
+    double angle_diff = atan2(sin(diff), cos(diff));
 
     if (fabs(angle_diff) >= atan2(hitbox / 2.0, dist)) {
         *hit = 0;
