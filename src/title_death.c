@@ -326,7 +326,7 @@ void show_death_screen(Player *player)
 
     int ch = 0;
     static int jaw_tick = 0;
-    struct timespec ts = { 0, 50000000L };  // 50ms = ~20fps
+    struct timespec ts = { 0, 16000000L };  // 50ms = ~20fps
     int toggle = 0;
     trigger_hit_indicator();
     while (ch != '\n' && ch != '\r' && ch != KEY_ENTER) {

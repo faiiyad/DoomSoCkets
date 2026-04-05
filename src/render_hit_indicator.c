@@ -107,3 +107,4 @@ void draw_hit_indicator_loop(int rows, int cols)
         }
     }
 }
+

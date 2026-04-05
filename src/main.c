@@ -92,6 +92,8 @@ static void init_colors(void)
         { TITLE3,      202,          -1  },
         { TITLE4,      208,          -1  },
         { TITLEBG,     0,            -1  },
+        { TITLERED,    52,           -1  },
+        { TITLERED2,   167,          -1  },
 
         // ── entity — red
         { CP_ENTITY_R,  160,       -1  },
@@ -242,7 +244,7 @@ int main(void)
 
     
 
-    // show_title_screen();
+    show_title_screen();
     
     // flushinp(); typedef struct {
 
