@@ -96,8 +96,8 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
                 int killer_id, victim_id;
                 if (sscanf(line, "KILL %d %d", &killer_id, &victim_id) == 2)
                     on_kill(killer_id, victim_id);
-            } else if (sscanf(line, "%d %c %lf %lf %lf %d",
-                        &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
+            } else if (sscanf(line, "%d %c %lf %lf %lf %d %d",
+                        &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health, &u.kills) == 7) {
                 on_update(u);
             }
             line = newline + 1;
@@ -131,8 +131,9 @@ void client_recv_initial(Player *p, void (*on_update)(ClientUpdate))
     while ((newline = strchr(line, '\n')) != NULL) {
         *newline = '\0';
         ClientUpdate u;
-        if (sscanf(line, "%d %c %lf %lf %lf %d",
-                   &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
+        // printf("initial data: %s\n", line);
+        if (sscanf(line, "%d %c %lf %lf %lf %d %d",
+                   &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health, &u.kills) == 7) {
             if (first) {
                 // own_id = u.id;  // first line is always yourself
                 p->id = u.id;
@@ -141,6 +142,7 @@ void client_recv_initial(Player *p, void (*on_update)(ClientUpdate))
                 p->angle = u.angle;
                 p->health = u.health;
                 p->col = col_from_char(u.col);
+                p->kills = u.kills;
                 first = 0;
             } else {
                 on_update(u);

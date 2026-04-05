@@ -5,8 +5,8 @@
 #define INITIAL_CLIENTS 1
 
 #define ENTITY_SCAN_FMT  "%lf %lf %lf %d"
-#define ENTITY_FMT     "%d %c %.2f %.2f %.2f %d\n"
-#define ENTITY_FMT_ARGS(e) (e)->id, (e)->col, (e)->x, (e)->y, (e)->angle, (e)->health 
+#define ENTITY_FMT     "%d %c %.2f %.2f %.2f %d %d\n"
+#define ENTITY_FMT_ARGS(e) (e)->id, (e)->col, (e)->x, (e)->y, (e)->angle, (e)->health, (e)->kills
 
 extern int num_clients;
 

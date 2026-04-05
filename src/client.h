@@ -19,6 +19,7 @@ typedef struct {
     char   col;
     double x, y, angle;
     int    health;
+    int    kills;
 } ClientUpdate;
 
 void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int), void (*on_kill)(int, int));

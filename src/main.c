@@ -165,7 +165,7 @@ static void on_server_update(ClientUpdate u)
         trigger_hit_indicator();
         return;
     }
-    entity_upsert(u.id, u.col, u.x, u.y, u.angle, u.health);
+    entity_upsert(u.id, u.col, u.x, u.y, u.angle, u.health, u.kills);
 }
 
 static void on_server_remove(int id)
@@ -180,6 +180,9 @@ static void on_server_kill(int killer_id, int victim_id)
         ui_log_event("I KILLED");
         int krab = (player.cur_gun != 4);
         trigger_face_glow(krab);
+        player.unlocked_guns = player.unlocked_guns + 1;
+        if (player.unlocked_guns > GUN_COUNT) player.unlocked_guns = GUN_COUNT;
+        player.cur_gun = player.unlocked_guns - 1;
 
     } else if (victim_id == player.id) {
         ui_log_event("I DIED");
