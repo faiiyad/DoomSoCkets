@@ -345,6 +345,16 @@ void entity_upsert(int id, char col, double x, double y, double angle, int healt
     num_entities++;
 }
 
+void entity_upsert_kill(int killer_id, int victim_id)
+{
+    for (int i = 0; i < num_entities; i++) {
+        if (entities[i].id == killer_id) {
+            entities[i].kills += 1;
+            break;
+        }
+    }
+}
+
 
 void entity_remove(int id)
 {

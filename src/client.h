@@ -21,7 +21,7 @@ typedef struct {
     int    health;
 } ClientUpdate;
 
-void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int));
+void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int), void (*on_kill)(int, int));
 void client_recv_initial(Player *player, void (*on_update)(ClientUpdate));
 
 #endif

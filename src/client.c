@@ -64,7 +64,7 @@ void client_disconnect(void)
     pfds = NULL;
 }
 
-void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int))
+void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int), void (*on_kill)(int, int))
 {
     if (sock_fd == -1) return;
 
@@ -93,17 +93,11 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
                 if (sscanf(line, "REMOVE %d", &id) == 1)
                     on_remove(id);
             } else if (strncmp(line, "KILL", 4) == 0) {
-                // Server confirmed we got a kill — server is authoritative
-                kill_count++;
+                int killer_id, victim_id;
+                if (sscanf(line, "KILL %d %d", &killer_id, &victim_id) == 2)
+                    on_kill(killer_id, victim_id);
             } else if (sscanf(line, "%d %c %lf %lf %lf %d",
                         &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health) == 6) {
-                // if (u.id == own_id) {
-                //     if (u.health < own_health)
-                //         hit_flag = 1;
-                //     own_health = u.health;
-                // } else {
-                //     on_update(u);
-                // }
                 on_update(u);
             }
             line = newline + 1;

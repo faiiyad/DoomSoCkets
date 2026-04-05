@@ -113,7 +113,7 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
     (*clients)[client_idx].entity.angle = 0.0;
     (*clients)[client_idx].entity.health = 100;
     (*clients)[client_idx].entity.col    = ENTITY_COLOURS[next_colour_idx];
-    (*clients)[client_idx].kills         = 0;  // initialise kill count
+    (*clients)[client_idx].entity.kills         = 0;  // initialise kill count
     next_colour_idx = (next_colour_idx + 1) % 3;
 
     (*nfds)++;
@@ -172,6 +172,20 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
                                clients[idx].entity.id, clients[i].entity.id,
                                clients[i].entity.health);
                     broadcast_entity(&clients[i].entity, clients, *nfds, -1);
+
+                    if (clients[i].entity.health <= 0) {
+                        char kill_msg[32];
+                        int kill_len = snprintf(kill_msg, sizeof(kill_msg), "KILL %d %d\n",
+                                                clients[idx].entity.id, clients[i].entity.id);
+                        for (nfds_t j = 1; j < *nfds; j++) {
+                            if (write(clients[j].fd, kill_msg, kill_len) == -1)
+                                server_log("write failed: %s", strerror(errno));
+                        }
+                        clients[idx].entity.kills += 1;
+                        server_log("SRV: id %d killed id %d (total kills: %d)",
+                                clients[idx].entity.id, clients[i].entity.id,
+                                clients[idx].entity.kills);
+                    }
                 }
             }
         } else {

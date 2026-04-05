@@ -159,37 +159,11 @@ static void death(Player *player){
 
 static void on_server_update(ClientUpdate u)
 {
-    // hook into your entity system here
-    // printf("entity %d => %.2f %.2f %.2f hp=%d\n",
-        //    u.id, u.x, u.y, u.angle, u.health);
-    // FILE *log = fopen("client.log", "a");
-    // fprintf(log, "got id=%d col=%c x=%.2f y=%.2f health=%d\n",
-    //         u.id, u.col, u.x, u.y, u.health);
-    // fclose(log);
-    // printf("got id=%d me=%d\n",
-    //         u.id, player.id);
     if (u.id == player.id){
         ui_log_event("I GOT HIT");
         player.health = u.health;
         trigger_hit_indicator();
-        if (player.health <= 0){
-            death(&player);
-        }
-        // perror("IGOTHIT");
         return;
-    }
-    if (u.health <= 0){
-        ui_log_event("ENTITYDED");
-        int krab = (player.cur_gun != 4);
-        trigger_face_glow(krab);
-
-        player.kills += 1;
-        player.unlocked_guns = player.unlocked_guns + 1;
-        if (player.unlocked_guns > GUN_COUNT) player.unlocked_guns = GUN_COUNT;
-        player.cur_gun = player.unlocked_guns - 1;
-
-        ui_log_event("New Gun");
-        // perror("ENTITYDIED");
     }
     entity_upsert(u.id, u.col, u.x, u.y, u.angle, u.health);
 }
@@ -197,6 +171,24 @@ static void on_server_update(ClientUpdate u)
 static void on_server_remove(int id)
 {
     entity_remove(id);
+}
+
+static void on_server_kill(int killer_id, int victim_id)
+{
+    if (killer_id == player.id) {
+        player.kills += 1;
+        ui_log_event("I KILLED");
+        int krab = (player.cur_gun != 4);
+        trigger_face_glow(krab);
+
+    } else if (victim_id == player.id) {
+        ui_log_event("I DIED");
+        if (player.health <= 0){
+            death(&player);
+        }
+
+    }
+    entity_upsert_kill(killer_id, victim_id);
 }
 
 
@@ -236,7 +228,7 @@ int main(void)
     struct timespec ts = { 0, 16000000L };  // ~60 fps
 
     while (1) {
-        client_recv_updates(on_server_update, on_server_remove);
+        client_recv_updates(on_server_update, on_server_remove, on_server_kill);
         int ch = getch();
 
         if ((ch == 'c' || ch == 'C') && !client_is_connected()) {
