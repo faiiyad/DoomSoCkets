@@ -13,10 +13,6 @@
 static struct pollfd *pfds    = NULL;
 static int            sock_fd = -1;
 
-static int own_id     = -1;
-static int own_health = 100;
-static int hit_flag   = 0;
-static int kill_count = 0;
 
 
 int client_connect(const char *host, int port)
@@ -64,7 +60,7 @@ void client_disconnect(void)
     pfds = NULL;
 }
 
-void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int), void (*on_kill)(int, int))
+void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int), void (*on_kill)(int, int), void (*on_win)(int, int))
 {
     if (sock_fd == -1) return;
 
@@ -95,8 +91,14 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
             } else if (strncmp(line, "KILL", 4) == 0) {
                 int killer_id, victim_id;
                 if (sscanf(line, "KILL %d %d", &killer_id, &victim_id) == 2)
-                    on_kill(killer_id, victim_id);
-            } else if (sscanf(line, "%d %c %lf %lf %lf %d %d",
+                    on_kill(killer_id, victim_id);}
+            else if (strncmp(line, "WIN", 3) == 0){
+                int killer_id, victim_id;
+                if (sscanf(line, "WIN %d %d", &killer_id, &victim_id) == 2)
+                    on_win(killer_id, victim_id);
+                
+            }
+            else if (sscanf(line, "%d %c %lf %lf %lf %d %d",
                         &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health, &u.kills) == 7) {
                 on_update(u);
             }

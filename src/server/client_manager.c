@@ -185,6 +185,16 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
                         server_log("SRV: id %d killed id %d (total kills: %d)",
                                 clients[idx].entity.id, clients[i].entity.id,
                                 clients[idx].entity.kills);
+                        if (clients[idx].entity.kills >= 10) {
+                            char win_msg[32];
+                            int win_len = snprintf(win_msg, sizeof(win_msg), "WIN %d %d\n",
+                                                clients[idx].entity.id, clients[i].entity.id);
+                            for (nfds_t j = 1; j < *nfds; j++) {
+                                if (write(clients[j].fd, win_msg, win_len) == -1)
+                                    server_log("write failed: %s", strerror(errno));
+                            }
+                            server_log("SRV: id %d wins!", clients[idx].entity.id);
+                        }
                     }
                 }
             }
