@@ -81,8 +81,8 @@ static const char *SKELETON_MIRROR_ART[] = {
 
 static int cmp_kills(const void *a, const void *b)
 {
-    // return ((Entity *)b)->kills - ((Entity *)a)->kills;
-    return 1;
+    return ((Entity *)b)->kills - ((Entity *)a)->kills;
+    // return 1;
 }
 
 static void draw_skeleton(int rows, int cols)
@@ -216,7 +216,7 @@ static void draw_podium(int y0, int cols, Entity *sorted, int n)
 void show_end_screen(Player *p, Entity *entities, int num_entities)
 {
     Entity sorted[MAX_ENTITIES];
-    Entity player_entity = { .id = 0, .col = p->col, .kills = 0 };
+    Entity player_entity = { .id = 0, .col = p->col, .kills = p->kills };
 
     int count = (num_entities+1 < MAX_ENTITIES) ? num_entities+1 : MAX_ENTITIES;
     memcpy(sorted, entities, sizeof(Entity) * count);

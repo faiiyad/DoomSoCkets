@@ -3,6 +3,7 @@
 
 #include "player.h"
 
+
 int  client_connect(const char *host, int port);
 int client_get_own_id(void);
 
@@ -22,7 +23,7 @@ typedef struct {
     int    kills;
 } ClientUpdate;
 
-void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int), void (*on_kill)(int, int));
+void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int), void (*on_kill)(int, int), void (*on_win)(int, int));
 void client_recv_initial(Player *player, void (*on_update)(ClientUpdate));
 
 #endif

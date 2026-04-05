@@ -194,6 +194,30 @@ static void on_server_kill(int killer_id, int victim_id)
     entity_upsert_kill(killer_id, victim_id);
 }
 
+static void on_server_win(int killer_id, int victim_id){
+    if (killer_id == player.id) {
+        player.kills += 1;
+        ui_log_event("I KILLED");
+        int krab = (player.cur_gun != 4);
+        trigger_face_glow(krab);
+        player.unlocked_guns = player.unlocked_guns + 1;
+        if (player.unlocked_guns > GUN_COUNT) player.unlocked_guns = GUN_COUNT;
+        player.cur_gun = player.unlocked_guns - 1;
+
+    } else if (victim_id == player.id) {
+        ui_log_event("I DIED");
+        if (player.health <= 0){
+            death(&player);
+        }
+
+    }
+    entity_upsert_kill(killer_id, victim_id);
+    show_end_screen(&player, entities, num_entities);
+
+}
+
+
+
 
 int main(void)
 {
@@ -231,7 +255,7 @@ int main(void)
     struct timespec ts = { 0, 16000000L };  // ~60 fps
 
     while (1) {
-        client_recv_updates(on_server_update, on_server_remove, on_server_kill);
+        client_recv_updates(on_server_update, on_server_remove, on_server_kill, on_server_win);
         int ch = getch();
 
         if ((ch == 'c' || ch == 'C') && !client_is_connected()) {
@@ -259,14 +283,12 @@ int main(void)
             int krab = (player.cur_gun != 4);
             trigger_face_glow(krab);
         }
-
-        
-
-
         
         if (ch == '8'){
             show_end_screen(&player, entities, num_entities);
         }
+
+
         
         if (ch == 'k' || ch == 'K') {
             if (player.cur_gun == 4){
@@ -314,7 +336,7 @@ int main(void)
         if (ch == ' ' && gun_frame == 0) {
             gun_frame = 1;
             gun_timer = 10;
-            client_send_position(player.x, player.y, player.angle, 10);
+            client_send_position(player.x, player.y, player.angle, guns[player.cur_gun].dmg);
         }
         if (gun_timer > 0) {
             gun_timer--;
