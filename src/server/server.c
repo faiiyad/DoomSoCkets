@@ -5,11 +5,20 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <poll.h>
-
+#include <signal.h>
 #include "network.h"
 #include "server_socket.h"
 #include "client_manager.h"
 #include "server_ui.h"
+
+
+static volatile int resize_flag = 0;
+
+static void handle_resize(int sig)
+{
+    (void)sig;
+    resize_flag = 1;
+}
 
 int main(void)
 {
@@ -24,9 +33,16 @@ int main(void)
     draw_server_ui(clients, nfds);
 
     int running = 1;
+    signal(SIGWINCH, handle_resize);
     while (running) {
+        if (resize_flag) {
+            resize_flag = 0;
+            server_ui_handle_resize();
+        }
+
         int poll_count = poll(pfds, nfds, 100);
         if (poll_count == -1) {
+            if (errno == EINTR) continue;  // signal interrupted, just loop
             server_log("poll error: %s", strerror(errno));
             break;
         }

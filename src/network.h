@@ -10,6 +10,8 @@
 
 extern int num_clients;
 
+extern double spawn[3][2];
+
 int send_player_data(double x, double y, double angle, double id);
 
 #endif

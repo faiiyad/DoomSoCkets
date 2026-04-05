@@ -6,10 +6,18 @@
 #include "map.h"
 #include "ray.h"
 
+
+
 typedef struct {
     int    fd;
     Entity entity;
 } Client;
+
+typedef struct {
+    double x;
+    double y;
+} Spawn;
+
 
 void remove_client(nfds_t idx, struct pollfd *pfds, Client *clients,
                    nfds_t *nfds);

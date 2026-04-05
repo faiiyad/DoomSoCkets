@@ -12,6 +12,7 @@ void init_server_ui(void);
 void shutdown_server_ui(void);
 void server_log(const char *fmt, ...);
 void draw_server_ui(Client *clients, nfds_t nfds);
+void server_ui_handle_resize(void);
 int  server_ui_get_input(void);
 
 #endif

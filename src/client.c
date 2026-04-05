@@ -60,7 +60,9 @@ void client_disconnect(void)
     pfds = NULL;
 }
 
-void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int), void (*on_kill)(int, int), void (*on_win)(int, int))
+void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int), 
+                         void (*on_kill)(int, int), void (*on_win)(int, int),
+                         void (*on_respawn)(int, double, double))
 {
     if (sock_fd == -1) return;
 
@@ -97,6 +99,12 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
                 if (sscanf(line, "WIN %d %d", &killer_id, &victim_id) == 2)
                     on_win(killer_id, victim_id);
                 
+            }
+            else if(strncmp(line, "RESPAWN", 7) == 0) {
+                int respawn_id;
+                double new_x, new_y;
+                if (sscanf(line, "RESPAWN %d %lf %lf", &respawn_id, &new_x, &new_y) == 3)
+                    on_respawn(respawn_id, new_x, new_y);
             }
             else if (sscanf(line, "%d %c %lf %lf %lf %d %d",
                         &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health, &u.kills) == 7) {
