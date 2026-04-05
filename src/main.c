@@ -204,24 +204,6 @@ static void on_server_kill(int killer_id, int victim_id)
 }
 
 static void on_server_win(int killer_id, int victim_id){
-    if (killer_id == player.id) {
-        player.kills += 1;
-        ui_log_event("I KILLED");
-        int krab = (player.cur_gun != 4);
-        trigger_face_glow(krab);
-        player.unlocked_guns = player.unlocked_guns + 1;
-        if (player.unlocked_guns > GUN_COUNT) player.unlocked_guns = GUN_COUNT;
-        player.cur_gun = player.unlocked_guns - 1;
-
-    } 
-    //     else if (victim_id == player.id) {
-    //     ui_log_event("I DIED");
-    //     if (player.health <= 0){
-    //         death(&player);
-    //     }
-
-    // }
-    entity_upsert_kill(killer_id, victim_id);
     show_end_screen(&player, entities, num_entities);
 
 }
