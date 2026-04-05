@@ -118,8 +118,6 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
     update_capacity(pfds, clients, capacity, *nfds);
 
     Spawn r_spawn = random_spawn();
-    double x = r_spawn.x;
-    double y = r_spawn.y;
 
     int client_idx = *nfds;
     (*pfds)[client_idx].fd       = new_socket;
@@ -128,12 +126,14 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
 
     (*clients)[client_idx].fd           = new_socket;
     (*clients)[client_idx].entity.id    = next_entity_id++;
-    (*clients)[client_idx].entity.x     = x;
-    (*clients)[client_idx].entity.y     = y;
+    (*clients)[client_idx].entity.x     = r_spawn.x;
+    (*clients)[client_idx].entity.y     = r_spawn.y;
+    // (*clients)[client_idx].entity.x     = 6.5;
+    // (*clients)[client_idx].entity.y     = 3.5;
     (*clients)[client_idx].entity.angle = 0.0;
     (*clients)[client_idx].entity.health = 100;
     (*clients)[client_idx].entity.col    = ENTITY_COLOURS[next_colour_idx];
-    (*clients)[client_idx].entity.kills         = 0;  
+    (*clients)[client_idx].entity.kills         = 8;  
     next_colour_idx = (next_colour_idx + 1) % 3;
 
     (*nfds)++;
@@ -178,20 +178,19 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
             broadcast_entity(&clients[idx].entity, clients, *nfds, clients[idx].fd);
 
             Spawn r_spawn = random_spawn();
-            double x = r_spawn.x;
-            double y = r_spawn.y;
             clients[idx].entity.health = 100;
-            clients[idx].entity.x = x;
-            clients[idx].entity.y = y;
-            server_log("set respawn at %.2f, %.2f", clients[idx].entity.x, clients[idx].entity.y);
+            // clients[idx].entity.x = 6.5;;
+            // clients[idx].entity.y = 3.5;
+            server_log("set respawn at %.2f, %.2f", r_spawn.x, r_spawn.y);
             char respawn_msg[32];
             int respawn_len = snprintf(respawn_msg, sizeof(respawn_msg), "RESPAWN %d %.2f %.2f\n",
-                    clients[idx].entity.id, clients[idx].entity.x, clients[idx].entity.y);
+                    clients[idx].entity.id, r_spawn.x, r_spawn.y);
             for (nfds_t j = 1; j < *nfds; j++) {
                             if (write(clients[j].fd, respawn_msg, respawn_len) == -1)
                                 server_log("write failed: %s", strerror(errno));
                         }
             server_log("entity id %d respawned", clients[idx].entity.id);
+
             return 0;
         }
         
@@ -224,14 +223,35 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
                                 clients[idx].entity.id, clients[i].entity.id,
                                 clients[idx].entity.kills);
                         if (clients[idx].entity.kills >= 10) {
+
                             char win_msg[32];
                             int win_len = snprintf(win_msg, sizeof(win_msg), "WIN %d %d\n",
-                                                clients[idx].entity.id, clients[i].entity.id);
+                                                -100, -100);
                             for (nfds_t j = 1; j < *nfds; j++) {
+                                clients[j].entity.x = -100;
+                                clients[j].entity.y = -100;
+                                broadcast_entity(&clients[j].entity, clients, *nfds, clients[j].fd);
                                 if (write(clients[j].fd, win_msg, win_len) == -1)
-                                    server_log("write failed: %s", strerror(errno));
+                                    server_log("write failed: %s", strerror(errno));                                
                             }
                             server_log("SRV: id %d wins!", clients[idx].entity.id);
+                            for (nfds_t j = 1; j < *nfds; j++) {
+                                clients[j].entity.kills = 0;
+                                Spawn r_spawn = random_spawn();
+                                clients[j].entity.x = r_spawn.x;
+                                clients[j].entity.y = r_spawn.y;
+                                // clients[j].entity.x = 6.5;
+                                // clients[j].entity.y = 3.5;
+                                clients[j].entity.health = 100;
+
+                                char respawn_msg[32];
+                                int respawn_len = snprintf(respawn_msg, sizeof(respawn_msg), "RESPAWN %d %.2f %.2f\n",
+                                                        clients[j].entity.id, clients[j].entity.x, clients[j].entity.y);
+                                for (nfds_t k = 1; k < *nfds; k++) {
+                                    if (write(clients[k].fd, respawn_msg, respawn_len) == -1)
+                                        server_log("write failed: %s", strerror(errno));
+                                }
+                            }
                         }
                     }
                 }
