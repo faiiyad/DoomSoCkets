@@ -154,7 +154,7 @@ static void death(Player *player){
     client_send_position(player->x, player->y, player->angle, 0);
     show_death_screen(player);
     player->health = 100;
-    client_send_position(player->x, player->y, player->angle, 0);
+    // client_send_position(player->x, player->y, player->angle, 0);
 
 }
 
@@ -213,13 +213,14 @@ static void on_server_win(int killer_id, int victim_id){
         if (player.unlocked_guns > GUN_COUNT) player.unlocked_guns = GUN_COUNT;
         player.cur_gun = player.unlocked_guns - 1;
 
-    } else if (victim_id == player.id) {
-        ui_log_event("I DIED");
-        if (player.health <= 0){
-            death(&player);
-        }
+    } 
+    //     else if (victim_id == player.id) {
+    //     ui_log_event("I DIED");
+    //     if (player.health <= 0){
+    //         death(&player);
+    //     }
 
-    }
+    // }
     entity_upsert_kill(killer_id, victim_id);
     show_end_screen(&player, entities, num_entities);
 
@@ -282,9 +283,7 @@ int main(void)
 
 
         // PLACEHOLDER FOR TESTING
-        if (ch == '5'){
-            death(&player);
-        }
+        
         // placeholder for testing
         if (ch == '6'){
             trigger_hit_indicator();

@@ -173,6 +173,9 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
         clients[idx].entity.angle = angle;
 
         if (x < -50 && y < -50) {
+            clients[idx].entity.x = -100;
+            clients[idx].entity.y = -100;
+            broadcast_entity(&clients[idx].entity, clients, *nfds, clients[idx].fd);
 
             Spawn r_spawn = random_spawn();
             double x = r_spawn.x;
