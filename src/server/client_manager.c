@@ -133,7 +133,7 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
     (*clients)[client_idx].entity.angle = 0.0;
     (*clients)[client_idx].entity.health = 100;
     (*clients)[client_idx].entity.col    = ENTITY_COLOURS[next_colour_idx];
-    (*clients)[client_idx].entity.kills         = 8;  
+    (*clients)[client_idx].entity.kills         = 0;  
     next_colour_idx = (next_colour_idx + 1) % 3;
 
     (*nfds)++;
