@@ -193,6 +193,7 @@ static void on_server_kill(int killer_id, int victim_id)
     snprintf(buf, sizeof(buf), "P%d killed P%d", killer_id, victim_id);
     ui_log_event(buf);
     if (killer_id == player.id) {
+        player.kills += 1;
         int krab = (player.cur_gun != 4);
         trigger_face_glow(krab);
         player.unlocked_guns = player.unlocked_guns + 1;
