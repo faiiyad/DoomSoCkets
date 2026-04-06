@@ -1,11 +1,9 @@
 #include <ncurses.h>
-#include <math.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
 #include "title.h"
 #include "defs.h"
-#include "player.h"
 #include "render.h"
 
 
@@ -288,7 +286,7 @@ void draw_died(int rows, int cols)
     int scale_x = 2;
 
     int drawn_h = DIED_LINES / scale_y;
-    int drawn_w = DIED_WIDTH / scale_x;
+    // int drawn_w = DIED_WIDTH / scale_x;
 
     // align vertically with skull
     int skull_drawn_h = SKULL_LINES / scale_y;
@@ -319,7 +317,7 @@ void draw_died(int rows, int cols)
 }
 
 
-void show_death_screen(Player *player)
+void show_death_screen()
 {
     nodelay(stdscr, TRUE);  // non-blocking input
     curs_set(0);
@@ -366,8 +364,8 @@ void show_death_screen(Player *player)
         draw_died(rows, cols);
 
         // find bottom of jaw
-        int scale_y = 2;
-        int jaw_bottom = (rows - JAW_LINES / scale_y) / 2 + (SKULL_LINES / scale_y / 2)  - 10 + JAW_LINES / scale_y + 7;
+        // int scale_y = 2;
+        // int jaw_bottom = (rows - JAW_LINES / scale_y) / 2 + (SKULL_LINES / scale_y / 2)  - 10 + JAW_LINES / scale_y + 7;
 
 
         attron(COLOR_PAIR(TITLE3) | A_BOLD);

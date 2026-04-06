@@ -2,7 +2,7 @@ CC      = gcc
 CFLAGS  = -Wall -Wextra -O2 -Isrc
 LDFLAGS = -lncursesw -lm
 VPATH   = src:src/server
-TARGET  = raycaster
+TARGET  = doomsockets
 SERVER  = server
 
 SRCS        = main.c map.c ray.c gun.c render.c ui.c title.c entity.c client.c client_socket.c title_death.c render_hit_indicator.c render_kill_indicator.c title_end.c

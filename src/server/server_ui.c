@@ -8,6 +8,7 @@
 #include <math.h>
 
 #include "server_ui.h"
+#include "map.h"
 
 static char server_log_lines[SERVER_LOG_LINES][SERVER_LOG_LINE_LENGTH];
 static int  server_log_head = -1;

@@ -27,7 +27,7 @@ void entities_init(double spawn_x, double spawn_y);
 void entities_update(Player *p, int input);
 void entities_draw(Player *p, double *z_buf, int rows, int cols);
 void entity_upsert(int id, char col, double x, double y, double angle, int health, int kills);
-void entity_upsert_kill(int killer_id, int victim_id);
+void entity_upsert_kill(int killer_id);
 void entity_remove(int id);
 
 #endif

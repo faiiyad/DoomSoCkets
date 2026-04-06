@@ -6,7 +6,6 @@
 #include "network.h"
 #include "client_socket.h"
 #include "client.h"
-#include "player.h"
 #include "entity.h"
 #include "defs.h"
 

@@ -1,7 +1,6 @@
 #define _XOPEN_SOURCE_EXTENDED
 #include <ncurses.h>
 #include <wchar.h>
-#include <math.h>
 #include <stdlib.h>
 #include "render.h"
 #include "defs.h"
@@ -10,6 +9,9 @@
 #include "gun.h"
 #include "entity.h"
 #include "ui.h"
+
+#define N_SHADES 10
+static const char *SHADES = " .:-+*=#%@";
 
 // z_buffer, stores distance for each column for entities to check against when drawing
 static double *z_buf = NULL;

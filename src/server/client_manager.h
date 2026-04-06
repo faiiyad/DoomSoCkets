@@ -3,10 +3,6 @@
 
 #include <poll.h>
 #include "entity.h"
-#include "map.h"
-#include "ray.h"
-
-
 
 typedef struct {
     int    fd;

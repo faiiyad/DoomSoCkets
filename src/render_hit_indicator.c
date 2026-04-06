@@ -1,9 +1,7 @@
 #define _XOPEN_SOURCE_EXTENDED
 #include <ncurses.h>
 #include <wchar.h>
-#include <math.h>
 #include <string.h>
-#include <stdio.h>
 #include "defs.h"
 #include "render.h"
 

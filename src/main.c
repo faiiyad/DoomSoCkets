@@ -3,14 +3,11 @@
 #include <stdlib.h>
 #include <time.h>
 #include <locale.h>
-#include <math.h>
 #include "defs.h"
 #include "map.h"
-#include "player.h"
 #include "gun.h"
 #include "render.h"
 #include "title.h"
-#include "entity.h"
 #include "network.h"
 #include "client.h"
 #include "ui.h"
@@ -154,7 +151,7 @@ static void death(Player *player){
     player->x = -100;
     player->y = -100;
     client_send_position(player->x, player->y, player->angle, 0);
-    show_death_screen(player);
+    show_death_screen();
     player->health = 100;
     // client_send_position(player->x, player->y, player->angle, 0);
 
@@ -202,7 +199,10 @@ static void on_server_kill(int killer_id, int victim_id)
         }
 
     }
-    entity_upsert_kill(killer_id, victim_id);
+    entity_upsert_kill(killer_id);
+    char buf[64];
+    snprintf(buf, sizeof(buf), "P%d killed P%d", killer_id, victim_id);
+    ui_log_event(buf);
 }
 
 static void on_server_win(double win_x, double win_y){
@@ -249,7 +249,7 @@ int main(void)
     // flushinp(); typedef struct {
 
     int show_map = 1;
-    int hit_flash = 0; // count down frames to show hit indicator
+    // int hit_flash = 0; // count down frames to show hit indicator
     int toggle_dash = 0;
 
     struct timespec ts = { 0, 16000000L };  // ~60 fps
