@@ -8,6 +8,7 @@
 #include "client.h"
 #include "entity.h"
 #include "defs.h"
+#include "client_fn.h"
 
 static struct pollfd *pfds    = NULL;
 static int            sock_fd = -1;
@@ -59,9 +60,7 @@ void client_disconnect(void)
     pfds = NULL;
 }
 
-void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int), 
-                         void (*on_kill)(int, int), void (*on_win)(double, double),
-                         void (*on_respawn)(int, double, double))
+void client_recv_updates(Player *player)
 {
     if (sock_fd == -1) return;
 
@@ -88,26 +87,26 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
             ClientUpdate u;
             if (strncmp(line, "REMOVE", 6) == 0) {
                 if (sscanf(line, "REMOVE %d", &id) == 1)
-                    on_remove(id);
+                    on_server_remove(id);
             } else if (strncmp(line, "KILL", 4) == 0) {
                 int killer_id, victim_id;
                 if (sscanf(line, "KILL %d %d", &killer_id, &victim_id) == 2)
-                    on_kill(killer_id, victim_id);}
+                    on_server_kill(killer_id, victim_id, player);}
             else if (strncmp(line, "WIN", 3) == 0){
                 int killer_id, victim_id;
                 if (sscanf(line, "WIN %d %d", &killer_id, &victim_id) == 2)
-                    on_win(killer_id, victim_id);
+                    on_server_win(killer_id, victim_id, player);
                 
             }
             else if(strncmp(line, "RESPAWN", 7) == 0) {
                 int respawn_id;
                 double new_x, new_y;
                 if (sscanf(line, "RESPAWN %d %lf %lf", &respawn_id, &new_x, &new_y) == 3)
-                    on_respawn(respawn_id, new_x, new_y);
+                    on_server_respawn(respawn_id, new_x, new_y, player);
             }
             else if (sscanf(line, "%d %c %lf %lf %lf %d %d",
                         &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health, &u.kills) == 7) {
-                on_update(u);
+                on_server_update(u, player);
             }
             line = newline + 1;
         }
@@ -122,7 +121,7 @@ void client_recv_updates(void (*on_update)(ClientUpdate), void (*on_remove)(int)
 // static int own_id = -1;
 
 // in client_recv_initial, the FIRST line is always your own entity
-void client_recv_initial(Player *p, void (*on_update)(ClientUpdate))
+void client_recv_initial(Player *p)
 {
     if (sock_fd == -1) return;
 
@@ -154,7 +153,7 @@ void client_recv_initial(Player *p, void (*on_update)(ClientUpdate))
                 p->kills = u.kills;
                 first = 0;
             } else {
-                on_update(u);
+                on_server_update(u, p);
             }
         }
         line = newline + 1;
