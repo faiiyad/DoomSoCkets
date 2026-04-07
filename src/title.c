@@ -38,37 +38,34 @@ static const char *TITLE_ART[] = {
     "            @@@@    @@@@     @@@@    @@  @     @@@@      @       @@@@"
 };
 
-/* Parallel color array — same indexing as TITLE_ART.
- * Each string is a uniform fill of the row's gradient color.
- * Length only needs to match the art row; loop stops at art NUL. */
 static const char *TITLE_CLR[] = {
-    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", /* 0  blue */
-    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", /* 1  blue */
-    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", /* 2  blue */
-    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", /* 3  blue */
-    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", /* 4  blue */
-    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", /* 5  blue */
-    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", /* 6  blue */
-    "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", /* 7  dark red */
-    "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", /* 8  dark red */
-    "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", /* 9  dark red */
-    "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", /* 10 dark red */
-    "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", /* 11 dark red */
-    "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", /* 12 dark red */
-    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", /* 13 orange */
-    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", /* 14 orange */
-    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", /* 15 orange */
-    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", /* 16 orange */
-    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", /* 17 orange */
-    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", /* 18 orange */
-    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", /* 19 yellow */
-    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", /* 20 yellow */
-    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", /* 21 yellow */
-    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", /* 22 yellow */
-    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", /* 23 yellow */
-    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", /* 24 yellow */
-    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", /* 25 yellow */
-    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", /* 26 yellow */
+    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", /* blue */
+    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 
+    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 
+    "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 
+    "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", /* dark red */
+    "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", 
+    "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", 
+    "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", 
+    "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", 
+    "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", 
+    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", /* orange */
+    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", 
+    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", 
+    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", 
+    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", 
+    "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", 
+    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", /* yellow */
+    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", 
+    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", 
+    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", 
+    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", 
+    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", 
+    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", 
+    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", 
 };
 
 #define TITLE_LINES 27
@@ -121,7 +118,7 @@ void draw_heartbeat_loop(int rows, int cols)
             else if (d_edge <= 5) ch = (r % 2 == 0) ? '.' : ',';
             else                  ch = '.';
 
-            // static const int title_colors[] = { TITLE1, TITLE2, TITLE3, TITLE4 };
+            
             int pair = (d_edge <= depth / 3) ? TITLERED2 : TITLERED;
             // int pair = title_colors[(d_edge + tick / 5) % 4];
 
@@ -156,7 +153,7 @@ void show_title_screen(void)
         erase();
 
 
-        /* ── dark background ─────────────────────────────────── */
+        /*  dark background  */
         attron(COLOR_PAIR(CP_FLOOR));
         for (int y = 0; y < rows; y++)
             mvhline(y, 0, ' ', cols);
@@ -164,7 +161,7 @@ void show_title_screen(void)
 
         draw_heartbeat_loop(rows, cols);
 
-        /* ── title art — character-by-character color lookup ─── */
+        /*  title art  */
         int art_start = (rows - TITLE_LINES) / 2 - 3;
         if (art_start < 1) art_start = 1;
 
@@ -183,8 +180,6 @@ void show_title_screen(void)
             }
         }
 
-
-        /* ── subtitle ────────────────────────────────────────── */
         int sub_y = art_start + TITLE_LINES + 1;
         int sub_x = (cols - 47) / 2;
         attron(COLOR_PAIR(CP_WALL4) | A_BOLD);
@@ -212,7 +207,7 @@ void show_title_screen(void)
     cbreak();
     nodelay(stdscr, TRUE);
 
-    /* ── NUKE transition ─────────────────────────────────────── */
+    /*  nuke transition  */
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 
@@ -228,7 +223,7 @@ void show_title_screen(void)
     static Particle parts[MAX_PARTS];
 
     float cx = cols / 2.0f;
-    float cy = rows * 0.9f; /* explosion starts near ground */
+    float cy = rows * 0.9f; 
 
     static const char sparks[] = "*oO.+#@%$&!";
     static const int  pairs[]  = {
@@ -239,7 +234,6 @@ void show_title_screen(void)
 
     srand((unsigned)time(NULL));
 
-    /* ── initial upward blast ───────────────────────── */
     for (int i = 0; i < MAX_PARTS; i++) {
         float angle = ((float)rand() / RAND_MAX) * 3.14159f;
         float speed = 1.0f + ((float)rand() / RAND_MAX) * 5.0f;
@@ -261,7 +255,6 @@ void show_title_screen(void)
 
     for (int frame = 0; frame < total_frames; frame++) {
 
-        /* ── background phases ───────────────────── */
         int bg_pair;
         char bg_ch;
 
@@ -284,7 +277,6 @@ void show_title_screen(void)
             mvhline(y, 0, bg_ch, cols);
         attroff(COLOR_PAIR(bg_pair) | A_BOLD);
 
-        /* ── chaotic shockwave ───────────────────── */
         if (frame >= 2 && frame < 18) {
             float base_r = (frame - 2) * (cols / 2.0f / 16.0f);
 
@@ -307,7 +299,6 @@ void show_title_screen(void)
             attroff(COLOR_PAIR(sw_pair) | A_BOLD);
         }
 
-        /* ── ground dust ring ───────────────────── */
         if (frame >= 4 && frame < 40) {
             float radius = (frame - 4) * (cols / 2.5f / 36.0f);
 
@@ -340,7 +331,6 @@ void show_title_screen(void)
             }
         }
 
-        /* ── turbulent stem (FIXED) ─────────────── */
         if (frame >= 1) {
             float rise = (frame - 5) * 0.6f;
 
@@ -364,7 +354,7 @@ void show_title_screen(void)
                             (frame < 22) ? CP_WALL4 :
                             (frame < 35) ? CP_WALL1 :
                             (frame < 50) ? HAND_CLR :
-                            (rand()%2 ? CP_FLOOR : CP_GUN);   /* grey ash */
+                            (rand()%2 ? CP_FLOOR : CP_GUN);  
 
                         attron(COLOR_PAIR(pair));
 
@@ -379,7 +369,6 @@ void show_title_screen(void)
             }
         }
 
-        /* ── mushroom cloud ───────────────────── */
         if (frame >= 6) {
             float rise = (frame - 6) * 0.6f;
 
@@ -410,7 +399,6 @@ void show_title_screen(void)
             }
         }
 
-        /* ── particles ───────────────────────── */
         for (int i = 0; i < MAX_PARTS; i++) {
             if (parts[i].life <= 0) continue;
 
@@ -437,7 +425,6 @@ void show_title_screen(void)
             attroff(COLOR_PAIR(parts[i].pair) | attr);
         }
 
-        /* ── screen shake ───────────────────── */
         if (frame < 10) {
             int sx = (rand() % 5) - 2;
             int sy = (rand() % 3) - 1;

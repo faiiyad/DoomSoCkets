@@ -128,8 +128,6 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
     (*clients)[client_idx].entity.id    = next_entity_id++;
     (*clients)[client_idx].entity.x     = r_spawn.x;
     (*clients)[client_idx].entity.y     = r_spawn.y;
-    // (*clients)[client_idx].entity.x     = 6.5;
-    // (*clients)[client_idx].entity.y     = 3.5;
     (*clients)[client_idx].entity.angle = 0.0;
     (*clients)[client_idx].entity.health = 100;
     (*clients)[client_idx].entity.col    = ENTITY_COLOURS[next_colour_idx];
@@ -137,9 +135,6 @@ void add_client(int new_socket, struct pollfd **pfds, Client **clients,
     next_colour_idx = (next_colour_idx + 1) % 3;
 
     (*nfds)++;
-
-    // // Send itself to the new client
-    // send_one_entity(new_socket, &(*clients)[client_idx].entity);
 
     // Send existing entities to the new client with the new client first in the batch
     send_entities_batch(new_socket, *clients, *nfds, new_socket);
@@ -179,8 +174,6 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
 
             Spawn r_spawn = random_spawn();
             clients[idx].entity.health = 100;
-            // clients[idx].entity.x = 6.5;;
-            // clients[idx].entity.y = 3.5;
             server_log("set respawn at %.2f, %.2f", r_spawn.x, r_spawn.y);
             char respawn_msg[32];
             int respawn_len = snprintf(respawn_msg, sizeof(respawn_msg), "RESPAWN %d %.2f %.2f\n",
@@ -240,8 +233,6 @@ int handle_client_input(nfds_t idx, struct pollfd *pfds, Client *clients,
                                 Spawn r_spawn = random_spawn();
                                 clients[j].entity.x = r_spawn.x;
                                 clients[j].entity.y = r_spawn.y;
-                                // clients[j].entity.x = 6.5;
-                                // clients[j].entity.y = 3.5;
                                 clients[j].entity.health = 100;
 
                                 char respawn_msg[32];

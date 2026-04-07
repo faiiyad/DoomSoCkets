@@ -3,22 +3,22 @@
 
 #include "player.h"
 
-// stats bar — top left, horizontal
+// stats bar at top left
 void ui_draw_hud      (Player *p);
 
-// key bindings — bottom left, vertical
+// key bindings at bottom left
 void ui_draw_controls (int rows);
 
-// server/entity panel — left, between HUD and keys
+// server/entity panel at left, between HUD and keys
 void ui_draw_server   (int rows);
 
-// event log — bottom right, below minimap
+// event log at bottom right, below the minimap
 void ui_draw_eventlog (int rows, int cols);
 
-// push a message into the event log — call from anywhere
+// event log
 void ui_log_event     (const char *msg);
 
-// minimap — top right
+// minimap at top right
 void ui_draw_minimap  (Player *p, int rows, int cols);
 
 #endif
