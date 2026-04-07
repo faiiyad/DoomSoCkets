@@ -144,13 +144,14 @@ void client_recv_initial(Player *p)
                    &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health, &u.kills) == 7) {
             if (first) {
                 // own_id = u.id;  // first line is always yourself
-                p->id = u.id;
-                p->x = u.x;
-                p->y = u.y;
-                p->angle = u.angle;
-                p->health = u.health;
-                p->col = col_from_char(u.col);
-                p->kills = u.kills;
+                // p->id = u.id;
+                // p->x = u.x;
+                // p->y = u.y;
+                // p->angle = u.angle;
+                // p->health = u.health;
+                // p->col = col_from_char(u.col);
+                // p->kills = u.kills;
+                on_server_initial(u, p);
                 first = 0;
             } else {
                 on_server_update(u, p);

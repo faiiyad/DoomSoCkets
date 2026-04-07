@@ -269,6 +269,8 @@ void show_end_screen(Player *p, Entity *entities, int num_entities)
         if (ch == ERR) ch = 0;
     }
 
+    ui_log_event("Game Restarted");
+
     cbreak();
     nodelay(stdscr, TRUE);
     erase();
