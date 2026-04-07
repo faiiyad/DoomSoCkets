@@ -154,9 +154,8 @@ static const char *DIED_ART[] = {
 
 void draw_skull(int rows, int cols, int toggle)
 {
-    // draw every Nth row and scale x
-    int scale_y = 2;  // skip every other row
-    int scale_x = 2;  // sample every other col
+    int scale_y = 2;
+    int scale_x = 2;
 
     int drawn_h = SKULL_LINES / scale_y;
     int drawn_w = SKULL_WIDTH / scale_x;
@@ -319,12 +318,12 @@ void draw_died(int rows, int cols)
 
 void show_death_screen()
 {
-    nodelay(stdscr, TRUE);  // non-blocking input
+    nodelay(stdscr, TRUE);
     curs_set(0);
 
     int ch = 0;
     static int jaw_tick = 0;
-    struct timespec ts = { 0, 16000000L };  // 50ms = ~20fps
+    struct timespec ts = { 0, 16000000L };  // 50ms = 20fps
     int toggle = 0;
     trigger_hit_indicator();
     while (ch != '\n' && ch != '\r' && ch != KEY_ENTER) {
@@ -376,7 +375,7 @@ void show_death_screen()
 
         refresh();
 
-        nanosleep(&ts, NULL);  // consistent frame time
+        nanosleep(&ts, NULL);
 
         ch = getch();
         if (ch == ERR) ch = 0;

@@ -206,7 +206,7 @@ void show_title_screen(void)
     cbreak();
     nodelay(stdscr, TRUE);
 
-    /*  nuke transition  */
+    // nuke transition
     int rows, cols;
     getmaxyx(stdscr, rows, cols);
 

@@ -9,7 +9,7 @@ static int hit_timer = 0;
 
 void trigger_hit_indicator(void)
 {   
-    hit_timer = 12;  // frames to show
+    hit_timer = 12;
 }
 
 void draw_hit_indicator(int rows, int cols)
@@ -17,14 +17,13 @@ void draw_hit_indicator(int rows, int cols)
     if (hit_timer <= 0) return;
 
     float intensity = (float)hit_timer / 12.0f;
-    int depth = (int)(8 * intensity);  // how far inward the splatter goes
+    // how far inward the splatter goes
+    int depth = (int)(8 * intensity); 
 
-    // seed with a stable value so pattern doesn't flicker each frame
     unsigned int seed = 42;
 
     for (int y = 0; y < rows; y++) {
         for (int x = 0; x < cols; x++) {
-            // distance from each edge
             int d_top    = y;
             int d_bottom = rows - y;
             int d_left   = x;
@@ -35,7 +34,6 @@ void draw_hit_indicator(int rows, int cols)
 
             if (d_edge >= depth) continue;
 
-            // pseudo-random splatter — stable per cell
             seed = seed * 1664525u + (unsigned)(y * 1000 + x);
             int r = seed % 100;
 
@@ -66,9 +64,8 @@ void draw_hit_indicator_loop(int rows, int cols)
     static int tick = 0;
     tick++;
 
-    // oscillate depth in and out using sin
     float intensity = 0.5f + 0.5f * sinf(tick * 0.15f);
-    int depth = 4 + (int)(2 * intensity);  // oscillates between 4 and 10
+    int depth = 4 + (int)(2 * intensity);
 
     unsigned int seed = 42;
 

@@ -10,13 +10,6 @@
 #include "entity.h"
 #include "gun.h"
 
-/* ══════════════════════════════════════════════════════════════════════════
-   SHARED BORDER PRIMITIVES
-   All panel drawing goes through these four functions.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-// Fill l..r with ═, then stamp left and right corner chars over it.
-// Used for top/bottom borders and dividers.
 static void border_hline(int y, int l, int r,
                           const wchar_t *lc, const wchar_t *rc)
 {
@@ -27,8 +20,6 @@ static void border_hline(int y, int l, int r,
     wattroff(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
 }
 
-// Same as border_hline but stamps a centered title in CP_MAP_P over the fill.
-// Pass NULL title for a plain ═ line.
 static void border_hline_title(int y, int l, int r,
                                 const wchar_t *lc, const wchar_t *rc,
                                 const char *title)
@@ -43,7 +34,7 @@ static void border_hline_title(int y, int l, int r,
     wattroff(stdscr, COLOR_PAIR(CP_MAP_P) | A_BOLD);
 }
 
-// ║ borders on left and right, spaces in between.
+
 static void border_row(int y, int l, int r)
 {
     wattron(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
@@ -53,14 +44,11 @@ static void border_row(int y, int l, int r)
     for (int i = l + 1; i < r; i++) mvaddch(y, i, ' ');
 }
 
-// Convenience macros for the three common border line types
+
 #define panel_top(y,l,r,title) border_hline_title(y, l, r, L"╔", L"╗", title)
 #define panel_bot(y,l,r)       border_hline(y, l, r, L"╚", L"╝")
 #define panel_div(y,l,r)       border_hline(y, l, r, L"╠", L"╣")
 
-/* ══════════════════════════════════════════════════════════════════════════
-   MINIMAP
-   ══════════════════════════════════════════════════════════════════════════ */
 
 static void draw_map_border(int ox, int oy, Player *p)
 {
@@ -89,7 +77,6 @@ static void draw_map_border(int ox, int oy, Player *p)
     }
     wattroff(stdscr, COLOR_PAIR(CP_UI_BDR));
 
-    // bottom with coordinate leg
     wattron(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
     for (int i = left; i <= right; i++) mvaddwstr(bot, i, L"═");
     mvaddwstr(bot, left,     L"╚");
@@ -173,10 +160,6 @@ void ui_draw_minimap(Player *p, int rows, int cols)
     draw_map_player(p,  ox, 3, rows, cols);
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   HUD — horizontal stats bar, top of screen
-   ══════════════════════════════════════════════════════════════════════════ */
-
 #define HUD_L_SPACE  2
 #define HUD_T_SPACE  1
 #define P_INNER      4
@@ -201,7 +184,6 @@ void ui_draw_hud(Player *p)
     if (hp < 0)      hp = 0;
     if (hp > max_hp) hp = max_hp;
 
-    // top border — full ═ fill, then joints, then section titles on top
     border_hline_title(HUD_T_SPACE, PLAYER_L, KIL_R, L"╔", L"╗", NULL);
     wattron(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
     mvaddwstr(HUD_T_SPACE, PLAYER_R, L"╦");
@@ -212,7 +194,6 @@ void ui_draw_hud(Player *p)
     border_hline_title(HUD_T_SPACE, GUN_L, GUN_R, L"╦", L"╦", "[GUN]");
     border_hline_title(HUD_T_SPACE, KIL_L, KIL_R, L"╦", L"╗", "[KILLS]");
 
-    // content row — outer borders then internal joints
     border_row(HUD_T_SPACE + 1, PLAYER_L, KIL_R);
     wattron(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
     mvaddwstr(HUD_T_SPACE + 1, PLAYER_R, L"║");
@@ -221,32 +202,28 @@ void ui_draw_hud(Player *p)
     wattroff(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
 
     // P label
-    {
-        int lcol = PLAYER_L + 1 + (P_INNER - 2) / 2;
-        wattron(stdscr, COLOR_PAIR(p->col) | A_BOLD);
-        mvprintw(HUD_T_SPACE + 1, lcol, "P%d", p->id);
-        wattroff(stdscr, COLOR_PAIR(p->col) | A_BOLD);
-    }
+    int lcol = PLAYER_L + 1 + (P_INNER - 2) / 2;
+    wattron(stdscr, COLOR_PAIR(p->col) | A_BOLD);
+    mvprintw(HUD_T_SPACE + 1, lcol, "P%d", p->id);
+    wattroff(stdscr, COLOR_PAIR(p->col) | A_BOLD);
 
     // HP bar
-    {
-        int filled   = (BAR_W * hp) / max_hp;
-        int bar_pair = (hp > max_hp*2/3) ? CP_UI_GOOD
-                     : (hp > max_hp/3)   ? CP_UI_WARN
-                     : CP_UI_BAD;
-        int col = HP_L + 1;
-        mvaddch(HUD_T_SPACE + 1, col++, '[');
-        wattron(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
-        for (int i = 0; i < filled;  i++) mvaddwstr(HUD_T_SPACE + 1, col++, L"█");
-        wattroff(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
-        wattron(stdscr, COLOR_PAIR(CP_UI_BDR));
-        for (int i = filled; i < BAR_W; i++) mvaddwstr(HUD_T_SPACE + 1, col++, L"░");
-        wattroff(stdscr, COLOR_PAIR(CP_UI_BDR));
-        mvaddch(HUD_T_SPACE + 1, col++, ']');
-        wattron(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
-        mvprintw(HUD_T_SPACE + 1, col, " %d", hp);
-        wattroff(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
-    }
+    int filled   = (BAR_W * hp) / max_hp;
+    int bar_pair = (hp > max_hp*2/3) ? CP_UI_GOOD
+                    : (hp > max_hp/3)   ? CP_UI_WARN
+                    : CP_UI_BAD;
+    int col = HP_L + 1;
+    mvaddch(HUD_T_SPACE + 1, col++, '[');
+    wattron(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
+    for (int i = 0; i < filled;  i++) mvaddwstr(HUD_T_SPACE + 1, col++, L"█");
+    wattroff(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
+    wattron(stdscr, COLOR_PAIR(CP_UI_BDR));
+    for (int i = filled; i < BAR_W; i++) mvaddwstr(HUD_T_SPACE + 1, col++, L"░");
+    wattroff(stdscr, COLOR_PAIR(CP_UI_BDR));
+    mvaddch(HUD_T_SPACE + 1, col++, ']');
+    wattron(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
+    mvprintw(HUD_T_SPACE + 1, col, " %d", hp);
+    wattroff(stdscr, COLOR_PAIR(bar_pair) | A_BOLD);
 
     // GUN cell
     wattron(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
@@ -255,16 +232,13 @@ void ui_draw_hud(Player *p)
     wattroff(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
 
     // KILLS cell
-    {
-        char kbuf[8];
-        snprintf(kbuf, sizeof(kbuf), "%d", p->kills);
-        int kcol = KIL_L + 1 + (KIL_INNER - (int)strlen(kbuf)) / 2;
-        wattron(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
-        mvprintw(HUD_T_SPACE + 1, kcol, "%s", kbuf);
-        wattroff(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
-    }
+    char kbuf[8];
+    snprintf(kbuf, sizeof(kbuf), "%d", p->kills);
+    int kcol = KIL_L + 1 + (KIL_INNER - (int)strlen(kbuf)) / 2;
+    wattron(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
+    mvprintw(HUD_T_SPACE + 1, kcol, "%s", kbuf);
+    wattroff(stdscr, COLOR_PAIR(CP_UI_TEXT) | A_BOLD);
 
-    // bottom border — same pattern as top
     border_hline(HUD_T_SPACE + 2, PLAYER_L, KIL_R, L"╚", L"╝");
     wattron(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
     mvaddwstr(HUD_T_SPACE + 2, PLAYER_R, L"╩");
@@ -272,10 +246,6 @@ void ui_draw_hud(Player *p)
     mvaddwstr(HUD_T_SPACE + 2, GUN_R,    L"╩");
     wattroff(stdscr, COLOR_PAIR(CP_UI_BDR) | A_BOLD);
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   CONTROLS — vertical panel, bottom-left
-   ══════════════════════════════════════════════════════════════════════════ */
 
 #define KEY_INNER    12
 #define KEY_L_SPACE   2
@@ -315,10 +285,6 @@ void ui_draw_controls(int rows)
 
     panel_bot(top + KEY_NBINDS + 1, left, right);
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   SERVER PANEL — left side, between HUD and keys
-   ══════════════════════════════════════════════════════════════════════════ */
 
 #define SRV_INNER  20
 #define SRV_LEFT   KEY_L_SPACE
@@ -398,10 +364,6 @@ void ui_draw_server(int rows)
 
     panel_bot(bot, l, r);
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   EVENT LOG — bottom-right, below minimap
-   ══════════════════════════════════════════════════════════════════════════ */
 
 #define LOG_MAX     32
 #define LOG_INNER   (MAP_W * 2 + 2)/2

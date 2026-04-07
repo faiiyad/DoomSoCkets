@@ -143,14 +143,6 @@ void client_recv_initial(Player *p)
         if (sscanf(line, "%d %c %lf %lf %lf %d %d",
                    &u.id, &u.col, &u.x, &u.y, &u.angle, &u.health, &u.kills) == 7) {
             if (first) {
-                // own_id = u.id;  // first line is always yourself
-                // p->id = u.id;
-                // p->x = u.x;
-                // p->y = u.y;
-                // p->angle = u.angle;
-                // p->health = u.health;
-                // p->col = col_from_char(u.col);
-                // p->kills = u.kills;
                 on_server_initial(u, p);
                 first = 0;
             } else {
@@ -161,6 +153,7 @@ void client_recv_initial(Player *p)
     }
 }
 
+// OLD
 // int client_get_own_id(void)     { return own_id;     }
 // int client_get_own_health(void) { return own_health; }
 // int client_pop_hit(void)        { int v = hit_flag; hit_flag = 0; return v; }

@@ -39,34 +39,33 @@ static void init_colors(void)
         init_pair(CP_WALL_S1 + i, WALL_COLOR_BASE + N_WALL_SHADES + i, -1);
     }
 
-    // { pair id, fg, bg }  — use -1 for terminal default bg
+    // { pair id, fg, bg }
     static const short PAL[][3] = {
-        // TODO: need to get rid but used by title rn
+        // used by title
         { CP_WALL4,    226,          -1  }, 
         { CP_HUD,      COLOR_BLACK,  COLOR_WHITE },
-        // ── 3D view (not used but here just in case) ───────────────────
+        // 3D view (not used but here just in case)
         { CP_WALL1,    94,           -1  },
-        { CP_XWALL,    58,           -1  },  // olive — dark side face
+        { CP_XWALL,    58,           -1  },
         //
         { CP_FLOOR,    240,          -1  },
-        { CP_CEIL,     17,           -1  },  // dark navy
+        { CP_CEIL,     17,           -1  },
 
-        //22
-        // ── minimap radar ─────────────────────────────────────────────────
-        { CP_MAP_P,     124,         232 },  // red on near-black
-        { CP_MAP_EMPTY, 232,         232 },  // near-black solid floor
-        { CP_WALL_M,   82,          -1  },  // mid green solid
+        //minimap radar
+        { CP_MAP_P,     124,         232 },
+        { CP_MAP_EMPTY, 232,         232 },
+        { CP_WALL_M,   82,          -1  },
         //82, 34, 40, 28
 
-        // ── UI widget colors ───────────────────────────────────────────────
-        { CP_UI_BDR,   64,          -1  },  // olive fg, dark green bg
-        { CP_UI_GOOD,  46,           -1  },  // good/connected/healthy
-        { CP_UI_WARN,  226,          -1  },  // warning/medium status
-        { CP_UI_BAD,   124,          -1  },  // bad/offline/danger
-        { CP_UI_LABEL, 81,           -1  },  // cyan label text
-        { CP_UI_TEXT,  250,          -1  },  // neutral light grey
+        // UI widget
+        { CP_UI_BDR,   64,          -1  },
+        { CP_UI_GOOD,  46,           -1  },
+        { CP_UI_WARN,  226,          -1  },
+        { CP_UI_BAD,   124,          -1  },
+        { CP_UI_LABEL, 81,           -1  },
+        { CP_UI_TEXT,  250,          -1  },
 
-        // ── gun ───────────────────────────────────────────────────────────
+        // gun 
         { CP_GUN,      238,          -1  },
         { CP_FLASH,    226,          -1  },
         { HAND_CLR,    124,          -1  },
@@ -75,12 +74,12 @@ static void init_colors(void)
         { MUZ_1,       255,          -1  },
         { MUZ_2,       217,          -1  },
         { MUZ_3,       88,           -1  },
-        { GUN_ACC,     51,          -1  },  // aqua
-        { GUN_BODY,    64,           -1  },  // olive green  — barrel
-        { GUN_TRIM,    22,           -1  },  // dark green   — frame
-        { GUN_DIRT,    58,           -1  },  // khaki        — worn detail
+        { GUN_ACC,     51,          -1  },
+        { GUN_BODY,    64,           -1  },
+        { GUN_TRIM,    22,           -1  },
+        { GUN_DIRT,    58,           -1  },
 
-        // ── title ─────────────────────────────────────────────────────────
+        // title
         { TITLE1,      93,           -1  },
         { TITLE2,      90,           -1  },
         { TITLE3,      202,          -1  },
@@ -89,41 +88,41 @@ static void init_colors(void)
         { TITLERED,    52,           -1  },
         { TITLERED2,   167,          -1  },
 
-        // ── entity — red
+        // entity red
         { CP_ENTITY_R,  160,       -1  },
         { CP_ENTITY_R1,  160,       160  },
         { CP_ENTITY_R2,  124,       124  },
         { CP_ENTITY_R3,  88,         88  },
  
-        // ── entity — yellow
+        // entity yellow
         { CP_ENTITY_Y,  226,       -1  },
         { CP_ENTITY_Y1,  226,       226  },
         { CP_ENTITY_Y2,  220,       220  },
         { CP_ENTITY_Y3,  214,       214  },
  
-        // ── entity — blue
+        // entity blue
         { CP_ENTITY_B,   39,         -1  },
         { CP_ENTITY_B1,  39,         39  },
         { CP_ENTITY_B2,  27,         27  },
         { CP_ENTITY_B3,  21,         21  },
  
-        // ── entity — shared
+        // entity shared
         { CP_ENTITY_W,   255,       255  },  // white eye
 
 
-        // death skull - white skull, red eyes
+        // death skull, white skull, red eyes
         {CP_SKULL_W, 255, -1},
         {CP_SKULL_R, 124, -1},
 
-        // blood for hit indicators.
+        // blood for hit indicators
         {CP_BLOOD_1, 124, -1},
         {CP_BLOOD_2, 160, -1},
 
         // KILLSSSS
-        { CP_FACE_1, 226, -1 },   // bright yellow
-        { CP_FACE_2, 220, -1 },   // yellow-orange
-        { CP_FACE_3, 214, -1 },   // orange
-        { CP_FACE_4, 208, -1 }   // dim orange
+        { CP_FACE_1, 226, -1 },
+        { CP_FACE_2, 220, -1 },
+        { CP_FACE_3, 214, -1 },
+        { CP_FACE_4, 208, -1 }
 
 
     };
@@ -173,10 +172,9 @@ int main(void)
 
     show_title_screen();
     
-    // flushinp(); typedef struct {
+    // flushinp();
 
     int show_map = 1;
-    // int hit_flash = 0; // count down frames to show hit indicator
     int toggle_dash = 0;
 
     struct timespec ts = { 0, 16000000L };  // ~60 fps
@@ -197,21 +195,19 @@ int main(void)
         if (ch == 'm' || ch == 'M') show_map = !show_map;
 
 
-        // PLACEHOLDER FOR TESTING
-        
-        // placeholder for testing
-        if (ch == '6'){
-            trigger_hit_indicator();
-        }
+        // TESTING STUFF
+        // if (ch == '6'){
+        //     trigger_hit_indicator();
+        // }
 
-        if (ch == '7'){
-            int krab = (player.cur_gun != 4);
-            trigger_face_glow(krab);
-        }
+        // if (ch == '7'){
+        //     int krab = (player.cur_gun != 4);
+        //     trigger_face_glow(krab);
+        // }
         
-        if (ch == '8'){
-            show_end_screen(&player, entities, num_entities);
-        }
+        // if (ch == '8'){
+        //     show_end_screen(&player, entities, num_entities);
+        // }
         
         if (ch == '\t'){
             toggle_dash = !toggle_dash;
@@ -257,9 +253,6 @@ int main(void)
 
 
         // DASH
-
-
-
         if ((toggle_dash && ch == KEY_UP)) {
             nx += cos(player.angle) * MOVE_SPD * DASH_BALANCE;
             ny += sin(player.angle) * MOVE_SPD * DASH_BALANCE;
@@ -304,14 +297,11 @@ int main(void)
             gun_timer--;
             if (gun_timer == 0) gun_frame = 0;
         }
-        // double guns
         if (ch == 'e' || ch == 'E'){
             player.cur_gun = (player.cur_gun + 1) % player.unlocked_guns;
         }
 
-        
-
-        entities_update(&player, ch);
+        // entities_update(&player, ch);
 
         double margin = 0.2;
         if (!map_solid((int)(nx + margin), (int)(player.y)) &&

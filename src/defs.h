@@ -1,7 +1,8 @@
 #ifndef DEFS_H
 #define DEFS_H
 #include <math.h>
-// ── game constants ────────────────────────────────────────────────────────
+
+// game constants 
 #define MAP_W     16
 #define MAP_H     16
 #define FOV       (M_PI / 4.0)
@@ -10,18 +11,19 @@
 #define MAX_DEPTH 35.0
 #define DASH_BALANCE 1
 #define SPIN_BALANCE 2
-// ── color pair IDs ────────────────────────────────────────────────────────
+
+// color pair IDs
 #define N_WALL_SHADES 8
 #define WALL_COLOR_BASE 180
 typedef enum {
-    // 3D view-old
+    // 3D view
     CP_WALL1 = 1,
     CP_XWALL,
 
-    // 3D view — floor and ceiling
+    // 3D view floor and ceiling
     CP_FLOOR,
     CP_CEIL,
-    // 3D view — front face shades
+    // 3D view front face shades
     CP_WALL_F1,   // brightest
     CP_WALL_F2,
     CP_WALL_F3,
@@ -30,7 +32,7 @@ typedef enum {
     CP_WALL_F6,
     CP_WALL_F7,
     CP_WALL_F8,   // darkest
-    // 3D view — side face shades (darker than front)
+    // 3D view side face shades (darker than front)
     CP_WALL_S1,
     CP_WALL_S2,
     CP_WALL_S3,
@@ -114,6 +116,6 @@ typedef enum {
     CP_FACE_3,
     CP_FACE_4,
 
-    CP_COUNT   // total — used to size the table
+    CP_COUNT   // total, used to size the table
 } ColorPair;
 #endif

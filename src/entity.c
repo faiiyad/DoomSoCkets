@@ -9,15 +9,6 @@
 Entity entities[MAX_ENTITIES];
 int   num_entities = 0;
 
-// ── imp art 10 wide x 16 tall ─────────────────────────────────────────────
-// Rows 0-3:  head (rounded silhouette)
-// Row  4:    neck
-// Rows 5-9:  torso / shoulders
-// Rows 10-15: legs
-// At SPR_SCALE=0.50, rows=40:
-//   1:1 detail at dist ~1.25, solid blob fallback below dist ~13
-
-// ── FRONT ─────────────────────────────────────────────────────────────────
 
 static const char *sprite_front[SPR_H] = {
     " DDRRRRRRRRDD ",
@@ -133,68 +124,65 @@ const char **sprite_dir[5] = {
     (const char **)sprite_back,
 };
 
-// ── scale constants ────────────────────────────────────────────────────────
-// walls:   wall_h = rows * 0.50 / dist
-// entities: spr_h  = rows * 0.50 / dist  (imp is roughly wall height)
-// 1:1 detail at dist = rows * SPR_SCALE / SPR_H = 40 * 0.50 / 16 = 1.25
 #define SPR_SCALE    0.50
-#define CHAR_ASPECT  0.65  // terminal chars ~1.5x taller than wide
+#define CHAR_ASPECT  0.65
 
-void entities_init(double spawn_x, double spawn_y)
-{
-    memset(entities, 0, sizeof(entities));
-    entities[0].id     = 3;
-    entities[0].x      = spawn_x;
-    entities[0].y      = spawn_y;
-    entities[0].angle  = 0.0;
-    entities[0].health = 10;
-    entities[0].col    = CP_ENTITY_R;
-    num_entities       = 1;
-}
+// TESTING STUFF
+// void entities_init(double spawn_x, double spawn_y)
+// {
+//     memset(entities, 0, sizeof(entities));
+//     entities[0].id     = 3;
+//     entities[0].x      = spawn_x;
+//     entities[0].y      = spawn_y;
+//     entities[0].angle  = 0.0;
+//     entities[0].health = 10;
+//     entities[0].col    = CP_ENTITY_R;
+//     num_entities       = 1;
+// }
 
-void entities_update(Player *p, int input)
-{
-    (void)p;
-    for (int i = 0; i < num_entities; i++) {
-        Entity *e = &entities[i];
+// void entities_update(Player *p, int input)
+// {
+//     (void)p;
+//     for (int i = 0; i < num_entities; i++) {
+//         Entity *e = &entities[i];
 
-        double spd = 0.08;
-        double rot = 0.52;
+//         double spd = 0.08;
+//         double rot = 0.52;
 
-        if (input == 'f' || input == 'F') {
-            e->angle -= rot;
-            if (e->angle < 0) e->angle += 2*M_PI;
-        }
-        if (input == 'h' || input == 'H') {
-            e->angle += rot;
-            if (e->angle >= 2*M_PI) e->angle -= 2*M_PI;
-        }
-        if (input == 'g' || input == 'G') {
-            double nx = e->x + cos(e->angle) * spd;
-            double ny = e->y + sin(e->angle) * spd;
-            if (!map_solid((int)nx,   (int)e->y)) e->x = nx;
-            if (!map_solid((int)e->x, (int)ny))   e->y = ny;
-        }
-        if (input == 'b' || input == 'B') {
-            double nx = e->x - cos(e->angle) * spd;
-            double ny = e->y - sin(e->angle) * spd;
-            if (!map_solid((int)nx,   (int)e->y)) e->x = nx;
-            if (!map_solid((int)e->x, (int)ny))   e->y = ny;
-        }
-        if (input == 'v' || input == 'V') {
-            double nx = e->x + cos(e->angle - M_PI/2) * spd;
-            double ny = e->y + sin(e->angle - M_PI/2) * spd;
-            if (!map_solid((int)nx,   (int)e->y)) e->x = nx;
-            if (!map_solid((int)e->x, (int)ny))   e->y = ny;
-        }
-        if (input == 'n' || input == 'N') {
-            double nx = e->x + cos(e->angle + M_PI/2) * spd;
-            double ny = e->y + sin(e->angle + M_PI/2) * spd;
-            if (!map_solid((int)nx,   (int)e->y)) e->x = nx;
-            if (!map_solid((int)e->x, (int)ny))   e->y = ny;
-        }
-    }
-}
+//         if (input == 'f' || input == 'F') {
+//             e->angle -= rot;
+//             if (e->angle < 0) e->angle += 2*M_PI;
+//         }
+//         if (input == 'h' || input == 'H') {
+//             e->angle += rot;
+//             if (e->angle >= 2*M_PI) e->angle -= 2*M_PI;
+//         }
+//         if (input == 'g' || input == 'G') {
+//             double nx = e->x + cos(e->angle) * spd;
+//             double ny = e->y + sin(e->angle) * spd;
+//             if (!map_solid((int)nx,   (int)e->y)) e->x = nx;
+//             if (!map_solid((int)e->x, (int)ny))   e->y = ny;
+//         }
+//         if (input == 'b' || input == 'B') {
+//             double nx = e->x - cos(e->angle) * spd;
+//             double ny = e->y - sin(e->angle) * spd;
+//             if (!map_solid((int)nx,   (int)e->y)) e->x = nx;
+//             if (!map_solid((int)e->x, (int)ny))   e->y = ny;
+//         }
+//         if (input == 'v' || input == 'V') {
+//             double nx = e->x + cos(e->angle - M_PI/2) * spd;
+//             double ny = e->y + sin(e->angle - M_PI/2) * spd;
+//             if (!map_solid((int)nx,   (int)e->y)) e->x = nx;
+//             if (!map_solid((int)e->x, (int)ny))   e->y = ny;
+//         }
+//         if (input == 'n' || input == 'N') {
+//             double nx = e->x + cos(e->angle + M_PI/2) * spd;
+//             double ny = e->y + sin(e->angle + M_PI/2) * spd;
+//             if (!map_solid((int)nx,   (int)e->y)) e->x = nx;
+//             if (!map_solid((int)e->x, (int)ny))   e->y = ny;
+//         }
+//     }
+// }
 
 #define SOLID_FALLBACK_H 8
 

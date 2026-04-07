@@ -23,8 +23,8 @@ extern const char **sprite_dir[5];
 
 int col_from_char(char c);
 int entity_color(Entity *e, char c);
-void entities_init(double spawn_x, double spawn_y);
-void entities_update(Player *p, int input);
+// void entities_init(double spawn_x, double spawn_y);
+// void entities_update(Player *p, int input);
 void entities_draw(Player *p, double *z_buf, int rows, int cols);
 void entity_upsert(int id, char col, double x, double y, double angle, int health, int kills, int *isnew);
 void entity_upsert_kill(int killer_id);
