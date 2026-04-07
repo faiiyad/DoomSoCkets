@@ -177,7 +177,7 @@ int main(void)
     int show_map = 1;
     int toggle_dash = 0;
 
-    struct timespec ts = { 0, 16000000L };  // ~60 fps
+    struct timespec ts = { 0, 16000000L };  // 60 fps
 
     while (1) {
         client_recv_updates(&player);

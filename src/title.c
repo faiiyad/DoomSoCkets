@@ -152,7 +152,7 @@ void show_title_screen(void)
         erase();
 
 
-        /*  dark background  */
+        // dark background  
         attron(COLOR_PAIR(CP_FLOOR));
         for (int y = 0; y < rows; y++)
             mvhline(y, 0, ' ', cols);
@@ -160,7 +160,7 @@ void show_title_screen(void)
 
         draw_heartbeat_loop(rows, cols);
 
-        /*  title art  */
+        //  title art  
         int art_start = (rows - TITLE_LINES) / 2 - 3;
         if (art_start < 1) art_start = 1;
 

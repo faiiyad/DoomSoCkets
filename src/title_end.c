@@ -165,7 +165,7 @@ static void draw_podium(int y0, int cols, Entity *sorted, int n)
         int ped_top = floor_y - ped_h[s];
         int sy      = ped_top - SPR_H;
 
-        // ── spinning sprite
+        // spinning sprite
         double rel = spin_angle[s];
         int sector = (int)(rel / (M_PI / 4) + 0.5) % 8;
         int dir, mirror;
@@ -194,13 +194,13 @@ static void draw_podium(int y0, int cols, Entity *sorted, int n)
             }
         }
 
-        // ── pedestal 
+        // pedestal 
         attron(COLOR_PAIR(CP_UI_BDR) | A_BOLD);
         for (int r = 0; r < ped_h[s]; r++)
             mvhline(ped_top + r, sx - 2, ACS_CKBOARD, SPR_W + 4);
         attroff(COLOR_PAIR(CP_UI_BDR) | A_BOLD);
 
-        // ── labels 
+        // labels 
         attron(COLOR_PAIR(pair) | A_BOLD);
         // mvprintw(floor_y + 1, SPR_W/2 + sx - 4 , "ID:    %d", sorted[pi].id);
         mvprintw(floor_y , SPR_W/2 + sx - 4, "KILLS: %d", sorted[pi].kills);
@@ -208,7 +208,7 @@ static void draw_podium(int y0, int cols, Entity *sorted, int n)
     }
 }
 
-// ── public entry point ─────────────────────────────────────────────────────
+// public entry point 
 void show_end_screen(Player *p, Entity *entities, int num_entities)
 {
     Entity sorted[MAX_ENTITIES];

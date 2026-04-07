@@ -81,9 +81,6 @@ static void draw_walls(Player *p, int rows, int cols)
 
         int cpair = (side == 1) ? CP_WALL_S1 + col_idx : CP_WALL_F1 + col_idx;
 
-        // No colour shading on walls below
-        // cpair = (side == 1) ? CP_XWALL : CP_WALL1;
-
         attron(COLOR_PAIR(cpair));
         for (int y = top; y < bottom; y++) {
             if (y >= 0 && y < rows)

@@ -78,25 +78,25 @@ typedef enum {
     TITLERED,
     TITLERED2,
 
-    // entity — red
+    // entity red
     CP_ENTITY_R,
     CP_ENTITY_R1,
     CP_ENTITY_R2,
     CP_ENTITY_R3,
 
-    // entity — yellow
+    // entity yellow
     CP_ENTITY_Y,
     CP_ENTITY_Y1,
     CP_ENTITY_Y2,
     CP_ENTITY_Y3,
 
-    // entity — blue
+    // entity blue
     CP_ENTITY_B,
     CP_ENTITY_B1,
     CP_ENTITY_B2,
     CP_ENTITY_B3,
 
-    // entity — shared
+    // entity shared
     CP_ENTITY_W, //eyes
 
     // LEGACY BUT TITLE USES
