@@ -3,8 +3,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+
 #include "client_manager.h"
 #include "network.h"
+#include "ray.h"
 
 
 void server_log(const char *fmt, ...);

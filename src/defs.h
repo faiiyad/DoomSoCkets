@@ -8,8 +8,8 @@
 #define MOVE_SPD  0.08
 #define ROT_SPD   0.155
 #define MAX_DEPTH 35.0
-#define DASH_BALANCE 0.5
-#define SPIN_BALANCE 20
+#define DASH_BALANCE 1
+#define SPIN_BALANCE 2
 // ── color pair IDs ────────────────────────────────────────────────────────
 #define N_WALL_SHADES 8
 #define WALL_COLOR_BASE 180

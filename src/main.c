@@ -3,17 +3,14 @@
 #include <stdlib.h>
 #include <time.h>
 #include <locale.h>
-#include <math.h>
 #include "defs.h"
 #include "map.h"
-#include "player.h"
 #include "gun.h"
 #include "render.h"
 #include "title.h"
-#include "entity.h"
 #include "network.h"
+#include "client_fn.h"
 #include "client.h"
-#include "ui.h"
 
 static Player player;
 
@@ -21,9 +18,6 @@ static void init_colors(void)
 {
     start_color();
     use_default_colors();
-
-    // SOME SYSTEMS CANT CHANGE COLOUR
-    // SO NEED TO CHECK  can_change_color()  but works my machine
 
     for (int i = 0; i < N_WALL_SHADES; i++) {
         float t = 0.5f + 0.8f * (1.0f - (float)i / (N_WALL_SHADES - 1));
@@ -150,73 +144,6 @@ void apply_player_color(int col) {
     init_pair(CP_UI_LABEL, fg, -1);
 }
 
-static void death(Player *player){
-    player->x = -100;
-    player->y = -100;
-    client_send_position(player->x, player->y, player->angle, 0);
-    show_death_screen(player);
-    player->health = 100;
-    // client_send_position(player->x, player->y, player->angle, 0);
-
-}
-
-static void on_server_respawn(int respawn_id, double new_x, double new_y){
-    if (respawn_id == player.id){
-        player.x = new_x;
-        player.y = new_y;
-    }
-    client_send_position(player.x, player.y, player.angle, 0);
-}
-
-static void on_server_update(ClientUpdate u)
-{
-    if (u.id == player.id){
-        ui_log_event("I GOT HIT");
-        player.health = u.health;
-        trigger_hit_indicator();
-        return;
-    }
-    entity_upsert(u.id, u.col, u.x, u.y, u.angle, u.health, u.kills);
-}
-
-static void on_server_remove(int id)
-{
-    entity_remove(id);
-}
-
-static void on_server_kill(int killer_id, int victim_id)
-{
-    if (killer_id == player.id) {
-        player.kills += 1;
-        ui_log_event("I KILLED");
-        int krab = (player.cur_gun != 4);
-        trigger_face_glow(krab);
-        player.unlocked_guns = player.unlocked_guns + 1;
-        if (player.unlocked_guns > GUN_COUNT) player.unlocked_guns = GUN_COUNT;
-        player.cur_gun = player.unlocked_guns - 1;
-
-    } else if (victim_id == player.id) {
-        ui_log_event("I DIED");
-        if (player.health <= 0){
-            death(&player);
-        }
-
-    }
-    entity_upsert_kill(killer_id, victim_id);
-}
-
-static void on_server_win(double win_x, double win_y){
-    show_end_screen(&player, entities, num_entities);
-    player.cur_gun = 0;
-    player.unlocked_guns = 1;
-    player.kills = 0;
-    player.x = win_x;
-    player.y = win_y;
-
-}
-
-
-
 
 int main(void)
 {
@@ -249,19 +176,18 @@ int main(void)
     // flushinp(); typedef struct {
 
     int show_map = 1;
-    int hit_flash = 0; // count down frames to show hit indicator
+    // int hit_flash = 0; // count down frames to show hit indicator
     int toggle_dash = 0;
 
     struct timespec ts = { 0, 16000000L };  // ~60 fps
 
     while (1) {
-        client_recv_updates(on_server_update, on_server_remove, on_server_kill, on_server_win,
-                            on_server_respawn);
+        client_recv_updates(&player);
         int ch = getch();
 
         if ((ch == 'c' || ch == 'C') && !client_is_connected()) {
             client_connect("127.0.0.1", NETWORK_PORT);
-            client_recv_initial(&player, on_server_update);
+            client_recv_initial(&player);
             if(client_is_connected()){
                 apply_player_color(player.col);
             }

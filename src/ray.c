@@ -1,7 +1,5 @@
-#include <math.h>
 #include "ray.h"
 #include "map.h"
-#include "entity.h"
 
 double cast_ray(double px, double py, double angle,
                 int *side, int *wtype)

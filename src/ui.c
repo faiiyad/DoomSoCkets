@@ -1,7 +1,6 @@
 #define _XOPEN_SOURCE_EXTENDED
 #include <ncurses.h>
 #include <wchar.h>
-#include <math.h>
 #include <string.h>
 #include <stdio.h>
 #include "client.h"
@@ -10,7 +9,6 @@
 #include "map.h"
 #include "entity.h"
 #include "gun.h"
-#include "client.h"
 
 /* ══════════════════════════════════════════════════════════════════════════
    SHARED BORDER PRIMITIVES

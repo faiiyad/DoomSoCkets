@@ -5,7 +5,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include "network.h"
+
 #include "client_socket.h"
 #include "ui.h"
 

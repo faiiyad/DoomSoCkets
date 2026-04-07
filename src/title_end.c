@@ -1,15 +1,12 @@
 #define _XOPEN_SOURCE_EXTENDED
 #include <ncurses.h>
 #include <wchar.h>
-#include <math.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
 #include "title.h"
 #include "defs.h"
-#include "player.h"
 #include "render.h"
-#include "entity.h"
 #include "ui.h"
 
 // ── GAME OVER title art ────────────────────────────────────────────────────
@@ -38,7 +35,7 @@ static const char *SKELETON_ART[] = {
     "             :!~::!H!<   ~.U$X!?R$$$$$$$$MM!      ",
     "             ~!~!!!!~~ .:XW$$$U!!?$$$$$$RMM!      ",
     "               !:~~~ .:!M\"T#$$$$WX??#MRRMMM!      ",
-    "               ~?WuxiW*`   `\"#$$$$8!!!!??!!!      ",
+    "               ~?WuxiW*`   `\"#$$$$8!!!!?""?!!!      ",
     "             :X- M$$$$       `\"T#$T~!8$WUXU~      ",
     "            :%`  ~#$$$m:        ~!~ ?$$$$$$       ",
     "          :!`.-   ~T$$$$8xx.  .xWW- ~\"\"##*\"       ",
@@ -61,7 +58,7 @@ static const char *SKELETON_MIRROR_ART[] = {
     "     !MM$$$$$$$$R?!X$U.~   <!H!::~!:             ",
     "     !MMR$$$$$$?!!U$$$WX:. ~~!!!!~!~             ",
     "     !MMMRRM#??XW$$$$#T\"M!:. ~~~:!               ",
-    "     !!!??!!!!8$$$$#\"`   `*WixuW?~               ",
+    "     !!!?""?!!!!8$$$$#\"`   `*WixuW?~               ",
     "     ~UXUW$8!~T$#T\"`       $$$$M -X:             ",
     "       $$$$$$? ~!~        :m$$$#~  `%:           ",
     "       \"*##\"\"~ -WWx.  .xx8$$$$T~   -.`!:         ",
@@ -271,6 +268,8 @@ void show_end_screen(Player *p, Entity *entities, int num_entities)
         ch = getch();
         if (ch == ERR) ch = 0;
     }
+
+    ui_log_event("Game Restarted");
 
     cbreak();
     nodelay(stdscr, TRUE);

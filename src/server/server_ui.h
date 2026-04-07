@@ -3,7 +3,6 @@
 
 #include <poll.h>
 #include "client_manager.h"
-#include "map.h"
 
 #define SERVER_LOG_LINES 16
 #define SERVER_LOG_LINE_LENGTH 256
